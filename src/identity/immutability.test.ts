@@ -1,0 +1,56 @@
+import { expect, test } from "bun:test";
+
+import {
+  LEGACY_SUITE_CATALOG_REVISION,
+  LEGACY_SUITE_CONSUMER_IDS,
+  LEGACY_SUITE_LINK_PRODUCTS,
+  LEGACY_SUITE_PRODUCT_IDS,
+  PREVIOUS_SUITE_CATALOG_REVISION,
+  SUITE_CATALOG_REVISIONS,
+  SUITE_COMMUNITY_APPLICATION_STATUSES,
+  SUITE_CONSUMER_IDS,
+  SUITE_CURRENT_FEATURE_IDS,
+  SUITE_ENVIRONMENTS,
+  SUITE_FEATURE_IDS,
+  SUITE_INVOICE_STATUSES,
+  SUITE_ISSUABLE_ENVIRONMENTS,
+  SUITE_LEGACY_FEATURE_IDS,
+  SUITE_LINK_PRODUCTS,
+  SUITE_PLAN_IDS,
+  SUITE_PRODUCTS,
+  SUITE_SUBSCRIPTION_STATUSES,
+} from "./index";
+import { SUITE_RETURN_TARGETS } from "./return-targets";
+
+const exportedPolicyArrays = [
+  SUITE_CATALOG_REVISIONS,
+  SUITE_PLAN_IDS,
+  SUITE_CURRENT_FEATURE_IDS,
+  SUITE_LEGACY_FEATURE_IDS,
+  SUITE_FEATURE_IDS,
+  SUITE_CONSUMER_IDS,
+  LEGACY_SUITE_CONSUMER_IDS,
+  SUITE_LINK_PRODUCTS,
+  LEGACY_SUITE_LINK_PRODUCTS,
+  SUITE_PRODUCTS,
+  LEGACY_SUITE_PRODUCT_IDS,
+  SUITE_ENVIRONMENTS,
+  SUITE_ISSUABLE_ENVIRONMENTS,
+  SUITE_COMMUNITY_APPLICATION_STATUSES,
+  SUITE_SUBSCRIPTION_STATUSES,
+  SUITE_INVOICE_STATUSES,
+  SUITE_RETURN_TARGETS,
+] as const;
+
+test("exported identity policy arrays cannot mutate canonical state", () => {
+  expect(LEGACY_SUITE_CATALOG_REVISION).toBe("cclrte-suite-v1");
+  expect(PREVIOUS_SUITE_CATALOG_REVISION).toBe("cclrte-suite-v2");
+  expect(SUITE_LEGACY_FEATURE_IDS.length).toBeGreaterThan(0);
+
+  for (const policy of exportedPolicyArrays) {
+    const first = policy[0];
+    expect(Object.isFrozen(policy)).toBe(true);
+    expect(Reflect.set(policy, "0", "attacker")).toBe(false);
+    expect(policy[0]).toBe(first);
+  }
+});

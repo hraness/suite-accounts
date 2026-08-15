@@ -1,0 +1,232 @@
+{
+  "name": "@hraness/suite-accounts",
+  "version": "0.1.0",
+  "description": "Validated client and protocol boundaries for Hraness Accounts.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "./dist/auth-client.js",
+    "./dist/react.js",
+    "./src/profile-form.css"
+  ],
+  "packageManager": "bun@1.3.14",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hraness/suite-accounts.git"
+  },
+  "homepage": "https://github.com/hraness/suite-accounts#readme",
+  "bugs": {
+    "url": "https://github.com/hraness/suite-accounts/issues"
+  },
+  "keywords": [
+    "accounts",
+    "authentication",
+    "oauth",
+    "oidc",
+    "pkce",
+    "typescript"
+  ],
+  "exports": {
+    ".": {
+      "bun": "./dist/index.js",
+      "types": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./auth-client": {
+      "bun": "./dist/auth-client.js",
+      "types": "./src/auth-client.ts",
+      "import": "./dist/auth-client.js",
+      "default": "./dist/auth-client.js"
+    },
+    "./auth-proxy": {
+      "bun": "./dist/auth-proxy.js",
+      "types": "./src/auth-proxy.ts",
+      "import": "./dist/auth-proxy.js",
+      "default": "./dist/auth-proxy.js"
+    },
+    "./bearer-verifier": {
+      "bun": "./dist/bearer-verifier.js",
+      "types": "./src/bearer-verifier.ts",
+      "import": "./dist/bearer-verifier.js",
+      "default": "./dist/bearer-verifier.js"
+    },
+    "./browser-session": {
+      "bun": "./dist/browser-session.js",
+      "types": "./src/browser-session.ts",
+      "import": "./dist/browser-session.js",
+      "default": "./dist/browser-session.js"
+    },
+    "./client-configuration": {
+      "bun": "./dist/client-configuration.js",
+      "types": "./src/client-configuration.ts",
+      "import": "./dist/client-configuration.js",
+      "default": "./dist/client-configuration.js"
+    },
+    "./convex-browser-auth": {
+      "bun": "./dist/convex-browser-auth.js",
+      "types": "./src/convex-browser-auth.ts",
+      "import": "./dist/convex-browser-auth.js",
+      "default": "./dist/convex-browser-auth.js"
+    },
+    "./convex-browser-auth-browser": {
+      "bun": "./dist/convex-browser-auth-browser.js",
+      "types": "./src/convex-browser-auth-browser.ts",
+      "import": "./dist/convex-browser-auth-browser.js",
+      "default": "./dist/convex-browser-auth-browser.js"
+    },
+    "./convex-browser-auth-server": {
+      "bun": "./dist/convex-browser-auth-server.js",
+      "types": "./src/convex-browser-auth-server.ts",
+      "import": "./dist/convex-browser-auth-server.js",
+      "default": "./dist/convex-browser-auth-server.js"
+    },
+    "./entitlements": {
+      "bun": "./dist/entitlements.js",
+      "types": "./src/entitlements.ts",
+      "import": "./dist/entitlements.js",
+      "default": "./dist/entitlements.js"
+    },
+    "./identity": {
+      "bun": "./dist/identity/index.js",
+      "types": "./src/identity/index.ts",
+      "import": "./dist/identity/index.js",
+      "default": "./dist/identity/index.js"
+    },
+    "./identity/functions": {
+      "bun": "./dist/identity/functions.js",
+      "types": "./src/identity/functions.ts",
+      "import": "./dist/identity/functions.js",
+      "default": "./dist/identity/functions.js"
+    },
+    "./identity/return-targets": {
+      "bun": "./dist/identity/return-targets.js",
+      "types": "./src/identity/return-targets.ts",
+      "import": "./dist/identity/return-targets.js",
+      "default": "./dist/identity/return-targets.js"
+    },
+    "./oidc-rp": {
+      "bun": "./dist/oidc-rp.js",
+      "types": "./src/oidc-rp.ts",
+      "import": "./dist/oidc-rp.js",
+      "default": "./dist/oidc-rp.js"
+    },
+    "./oidc-session-policy": {
+      "bun": "./dist/oidc-session-policy.js",
+      "types": "./src/oidc-session-policy.ts",
+      "import": "./dist/oidc-session-policy.js",
+      "default": "./dist/oidc-session-policy.js"
+    },
+    "./oidc-surface-server": {
+      "bun": "./dist/oidc-surface-server.js",
+      "types": "./src/oidc-surface-server.ts",
+      "import": "./dist/oidc-surface-server.js",
+      "default": "./dist/oidc-surface-server.js"
+    },
+    "./profile": {
+      "bun": "./dist/profile.js",
+      "types": "./src/profile.ts",
+      "import": "./dist/profile.js",
+      "default": "./dist/profile.js"
+    },
+    "./profile-form": {
+      "bun": "./dist/profile-form.js",
+      "types": "./src/profile-form.tsx",
+      "import": "./dist/profile-form.js",
+      "default": "./dist/profile-form.js"
+    },
+    "./profile-form.css": "./src/profile-form.css",
+    "./public-config": {
+      "bun": "./dist/public-config.js",
+      "types": "./src/public-config.ts",
+      "import": "./dist/public-config.js",
+      "default": "./dist/public-config.js"
+    },
+    "./react": {
+      "bun": "./dist/react.js",
+      "types": "./src/react.tsx",
+      "import": "./dist/react.js",
+      "default": "./dist/react.js"
+    },
+    "./receipt-verifier": {
+      "bun": "./dist/receipt-verifier.js",
+      "types": "./src/receipt-verifier.ts",
+      "import": "./dist/receipt-verifier.js",
+      "default": "./dist/receipt-verifier.js"
+    },
+    "./registry": {
+      "bun": "./dist/registry.js",
+      "types": "./src/registry.ts",
+      "import": "./dist/registry.js",
+      "default": "./dist/registry.js"
+    },
+    "./urls": {
+      "bun": "./dist/urls.js",
+      "types": "./src/urls.ts",
+      "import": "./dist/urls.js",
+      "default": "./dist/urls.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "files": [
+    "dist",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/profile-form.css",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!src/**/*.property.test.ts",
+    "!src/test-support.ts",
+    "portfolio-inventory.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "bun run ./scripts/build.ts",
+    "lint": "eslint src scripts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test ./src",
+    "test:property": "bun test ./src/*.property.test.ts ./src/identity/*.property.test.ts",
+    "test:package": "bun run ./scripts/package-smoke.ts",
+    "check:portfolio-inventory": "bun run ./scripts/check-portfolio-inventory.ts",
+    "check:private-boundary": "bun run ./scripts/check-private-boundary.ts",
+    "check": "bun run check:portfolio-inventory && bun run lint && bun run typecheck && bun run test && bun run build && bun run check:private-boundary && bun run test:package",
+    "prepack": "bun run check"
+  },
+  "dependencies": {
+    "@convex-dev/better-auth": "0.12.5",
+    "@hraness/result": "github:hraness/result#v0.2.1",
+    "better-auth": "1.6.25",
+    "convex": "1.44.0",
+    "jose": "6.2.4"
+  },
+  "peerDependencies": {
+    "react": ">=18.3.1 <20",
+    "react-dom": ">=18.3.1 <20"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.2",
+    "fast-check": "^4.8.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.53.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

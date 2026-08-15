@@ -1,0 +1,66 @@
+.suite-profile-form {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+.suite-profile-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.suite-profile-field > span:first-child {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.suite-profile-field :where(input, textarea) {
+  background: var(--suite-profile-input-background, transparent);
+  border: 1px solid var(--suite-profile-line, currentColor);
+  border-radius: 0.35rem;
+  color: inherit;
+  font: inherit;
+  line-height: 1.4;
+  min-width: 0;
+  padding: 0.7rem 0.75rem;
+  width: 100%;
+}
+
+.suite-profile-field textarea {
+  resize: vertical;
+}
+
+.suite-profile-field :where(input, textarea):focus-visible,
+.suite-profile-form > button:focus-visible {
+  outline: 2px solid var(--suite-profile-focus, currentColor);
+  outline-offset: 2px;
+}
+
+.suite-profile-field input[readonly] {
+  color: var(--suite-profile-muted, currentColor);
+  cursor: default;
+  opacity: 0.72;
+}
+
+.suite-profile-form > button {
+  background: var(--suite-profile-button-background, currentColor);
+  border: 1px solid var(--suite-profile-button-background, currentColor);
+  border-radius: 999px;
+  color: var(--suite-profile-button-foreground, Canvas);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  justify-self: start;
+  padding: 0.65rem 1rem;
+}
+
+.suite-profile-form > button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.suite-profile-error {
+  color: var(--suite-profile-error, #a83232);
+  font-size: 0.9rem;
+  margin: 0;
+}

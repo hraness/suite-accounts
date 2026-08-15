@@ -1,0 +1,31 @@
+{
+  "contract": "hraness.portfolio-inventory/v1",
+  "formatVersion": 1,
+  "repository": "hraness/suite-accounts",
+  "components": [
+    {
+      "kind": "package",
+      "name": "@hraness/suite-accounts",
+      "path": ".",
+      "visibility": "public",
+      "version": "0.1.0"
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "@hraness/suite-accounts",
+      "scope": "runtime",
+      "specifier": "github:hraness/result#v0.2.1",
+      "to": "@hraness/result"
+    }
+  ],
+  "deployments": [],
+  "brands": [],
+  "publications": [
+    {
+      "component": "@hraness/suite-accounts",
+      "packageName": "@hraness/suite-accounts",
+      "repository": "hraness/suite-accounts"
+    }
+  ]
+}
