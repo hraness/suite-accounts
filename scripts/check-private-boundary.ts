@@ -28,12 +28,12 @@ const forbiddenText = [
   privateName,
   privateName.toLowerCase(),
   retiredPreviewKey,
-  `${"workspace"}:`,
-  `${"catalog"}:`,
   ["VERCEL", "OWNER", "ID"].join("_"),
   ["VERCEL", "PROJECT", "ID"].join("_"),
   ["BEGIN", "PRIVATE", "KEY"].join(" "),
 ];
+// Match dependency-like literals without rejecting public KB metadata or ordinary prose.
+const privateDependencyProtocol = /["'`](?:workspace|catalog):[^"'`\s]*["'`]/u;
 
 async function files(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -67,6 +67,9 @@ for (const path of await files(repository)) {
     if (value.includes(marker)) {
       failures.push(`${relativePath} contains a private marker.`);
     }
+  }
+  if (privateDependencyProtocol.test(value)) {
+    failures.push(`${relativePath} contains a private dependency protocol.`);
   }
   if (/gh[opsu]_[A-Za-z0-9]{20,}|sk_(?:live|test)_[A-Za-z0-9]{16,}/u.test(value)) {
     failures.push(`${relativePath} contains a credential-shaped value.`);
