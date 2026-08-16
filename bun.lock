@@ -6,7 +6,7 @@
       "name": "@hraness/suite-accounts",
       "dependencies": {
         "@convex-dev/better-auth": "0.12.5",
-        "@hraness/result": "github:hraness/result#v0.2.1",
+        "@hraness/result": "github:hraness/result#17b311c0b31cf456777efc7d7f5fa1f1cafefe74",
         "better-auth": "1.6.25",
         "convex": "1.44.0",
         "jose": "6.2.4",

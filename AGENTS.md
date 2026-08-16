@@ -14,6 +14,7 @@
 # Guidelines
 
 - Use Bun 1.3.14. Keep the package source-first, ESM-only, and independently buildable without workspace protocols or private packages.
+- Pin the Result runtime to its exact immutable `v0.2.1` commit. Bun 1.3.14 cannot freshly resolve duplicate nested and direct references to the same Git tag, so package smoke must cover a consumer that also pins the public Result tag.
 - Keep Accounts as the sole account, client-registration, identity-link, and entitlement authority. A consumer can bind only its registered origin, client ID, callback, and auth mode.
 - Keep issuer, JWKS, resource, protocol version, wire version, client-ID format, algorithms, and security checks derived from closed package data. Never accept them from callers or discovery.
 - Preserve authorization code with S256 PKCE, exact state and nonce, issuer and audience checks, encrypted HttpOnly token custody, refresh rotation, receipt validation, replay ordering, and entitlement freshness.

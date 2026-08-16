@@ -85,9 +85,16 @@ async function verifyReactLane(
   await mkdir(consumer);
   await writeFile(
     join(consumer, "package.json"),
-    JSON.stringify({ private: true, type: "module" }),
+    JSON.stringify({
+      dependencies: {
+        "@hraness/result": "github:hraness/result#v0.2.1",
+        [packageName]: archive,
+      },
+      private: true,
+      type: "module",
+    }),
   );
-  await run([process.execPath, "add", archive, "--ignore-scripts"], consumer);
+  await run([process.execPath, "install", "--ignore-scripts"], consumer);
   await run([
     process.execPath,
     "add",

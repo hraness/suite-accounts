@@ -8,14 +8,14 @@
       "name": "@hraness/suite-accounts",
       "path": ".",
       "visibility": "public",
-      "version": "0.1.1"
+      "version": "0.1.2"
     }
   ],
   "dependencies": [
     {
       "from": "@hraness/suite-accounts",
       "scope": "runtime",
-      "specifier": "github:hraness/result#v0.2.1",
+      "specifier": "github:hraness/result#17b311c0b31cf456777efc7d7f5fa1f1cafefe74",
       "to": "@hraness/result"
     }
   ],
