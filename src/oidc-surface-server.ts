@@ -6,7 +6,7 @@ import {
   type SuiteOidcServerVerifiedEmail,
 } from "./oidc-rp.js";
 import {
-  getSuiteAccountsConsumerEnvironment,
+  getSuiteAccountsCurrentConsumerEnvironment,
   isSuiteAccountsLinkedOidcConsumerId,
   type SuiteAccountsOidcConsumerId,
   type SuiteAccountsRemoteEnvironment,
@@ -24,8 +24,10 @@ export function suiteEnvironmentForConsumerOrigin(
   siteUrl: string | undefined,
 ): SuiteAccountsRemoteEnvironment | null {
   if (siteUrl === undefined) return null;
-  return getSuiteAccountsConsumerEnvironment(consumer, "production")?.siteUrl
-      === siteUrl
+  return getSuiteAccountsCurrentConsumerEnvironment(
+    consumer,
+    "production",
+  )?.siteUrl === siteUrl
     ? "production"
     : null;
 }

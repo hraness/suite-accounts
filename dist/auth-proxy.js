@@ -161,6 +161,11 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     id: "sup"
   }
 });
+var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
+  sponge: {
+    production: unsupported("https://sponge.computer")
+  }
+});
 var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 function suiteAccountsConsumerRequiresEmailOtp(consumer) {
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
@@ -189,6 +194,10 @@ function getSuiteAccountsConsumer(consumer) {
 function getSuiteAccountsConsumerEnvironment(consumer, environment) {
   const registration = getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;
+}
+function getSuiteAccountsCurrentConsumerEnvironment(consumer, environment) {
+  const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer];
+  return override?.[environment] ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
 }
 function getSuiteAccountsDeployment(environment) {
   return SUITE_ACCOUNTS_DEPLOYMENTS[environment];
@@ -254,7 +263,7 @@ function parseOrigin(value, field) {
 function readyRemoteConfig(consumer, siteUrl, convexUrl, convexSiteUrl) {
   const registration = getSuiteAccountsConsumer(consumer);
   const environment = "production";
-  const consumerEnvironment = getSuiteAccountsConsumerEnvironment(consumer, environment);
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   const deployment = getSuiteAccountsDeployment(environment);
   if (consumerEnvironment?.siteUrl === siteUrl && deployment.convexUrl === convexUrl && deployment.convexSiteUrl === convexSiteUrl) {
     return deepFreeze({

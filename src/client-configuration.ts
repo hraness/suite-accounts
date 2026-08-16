@@ -2,15 +2,15 @@ import { err, isRecord, ok, type Result } from "@hraness/result";
 
 import { deepFreeze } from "./immutable.js";
 import {
+  getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumer,
-  getSuiteAccountsConsumerEnvironment,
   isSuiteAccountsConsumerId,
   type SuiteAccountsAuthConfiguration,
   type SuiteAccountsConsumerId,
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
 import {
-  suiteAccountsOidcClientRegistration,
+  suiteAccountsCurrentOidcClientRegistration,
   suiteAccountsOidcProviderConfiguration,
   type SuiteAccountsOidcProviderConfiguration,
 } from "./urls.js";
@@ -133,7 +133,10 @@ export function createSuiteAccountsClientConfiguration(
   const consumer = binding.consumer;
   const environment = binding.environment;
   const registration = getSuiteAccountsConsumer(consumer);
-  const deployed = getSuiteAccountsConsumerEnvironment(consumer, environment);
+  const deployed = getSuiteAccountsCurrentConsumerEnvironment(
+    consumer,
+    environment,
+  );
   if (deployed === null || binding.origin !== deployed.siteUrl) {
     return err("invalid-origin");
   }
@@ -141,7 +144,10 @@ export function createSuiteAccountsClientConfiguration(
     return err("invalid-auth-mode");
   }
 
-  const oauth = suiteAccountsOidcClientRegistration(consumer, environment);
+  const oauth = suiteAccountsCurrentOidcClientRegistration(
+    consumer,
+    environment,
+  );
   const expectedClientId = oauth?.clientId ?? null;
   const expectedCallbackUrl = oauth?.callbackUrl ?? null;
   if (binding.clientId !== expectedClientId) {

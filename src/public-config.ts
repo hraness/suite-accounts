@@ -2,8 +2,8 @@ import { parseConvexDeployment } from "./convex-url.js";
 import { deepFreeze } from "./immutable.js";
 
 import {
+  getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumer,
-  getSuiteAccountsConsumerEnvironment,
   getSuiteAccountsDeployment,
   type SuiteAccountsConsumerId,
   type SuiteAccountsEnvironment,
@@ -103,7 +103,7 @@ function readyRemoteConfig(
 ): ReadySuiteAccountsPublicConfig | null {
   const registration = getSuiteAccountsConsumer(consumer);
   const environment = "production" as const;
-  const consumerEnvironment = getSuiteAccountsConsumerEnvironment(
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
     consumer,
     environment,
   );

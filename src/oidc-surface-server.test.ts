@@ -31,6 +31,14 @@ describe("shared Suite OIDC surface server", () => {
       "act60",
       "https://preview.act60.me",
     )).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin(
+      "sponge",
+      "https://sponge.computer",
+    )).toBe("production");
+    expect(suiteEnvironmentForConsumerOrigin(
+      "sponge",
+      "https://spongesearch.com",
+    )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin("oprte", undefined)).toBeNull();
   });
 

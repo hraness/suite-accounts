@@ -161,6 +161,11 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     id: "sup"
   }
 });
+var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
+  sponge: {
+    production: unsupported("https://sponge.computer")
+  }
+});
 var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 function suiteAccountsConsumerRequiresEmailOtp(consumer) {
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
@@ -190,6 +195,10 @@ function getSuiteAccountsConsumerEnvironment(consumer, environment) {
   const registration = getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;
 }
+function getSuiteAccountsCurrentConsumerEnvironment(consumer, environment) {
+  const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer];
+  return override?.[environment] ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
+}
 function getSuiteAccountsDeployment(environment) {
   return SUITE_ACCOUNTS_DEPLOYMENTS[environment];
 }
@@ -214,6 +223,17 @@ function suiteAccountsOidcClientRegistration(consumer, environment) {
   if (!isSuiteAccountsConsumerId(consumer) || !isSuiteAccountsOAuthConsumerId(consumer))
     return null;
   const consumerEnvironment = getSuiteAccountsConsumerEnvironment(consumer, environment);
+  if (consumerEnvironment === null)
+    return null;
+  return deepFreeze({
+    callbackUrl: new URL("/api/suite-auth/callback", consumerEnvironment.siteUrl).href,
+    clientId: `hraness:${consumer}:${environment}:v1`
+  });
+}
+function suiteAccountsCurrentOidcClientRegistration(consumer, environment) {
+  if (!isSuiteAccountsConsumerId(consumer) || !isSuiteAccountsOAuthConsumerId(consumer))
+    return null;
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   if (consumerEnvironment === null)
     return null;
   return deepFreeze({
@@ -303,14 +323,14 @@ function createSuiteAccountsClientConfiguration(input) {
   const consumer = binding.consumer;
   const environment = binding.environment;
   const registration = getSuiteAccountsConsumer(consumer);
-  const deployed = getSuiteAccountsConsumerEnvironment(consumer, environment);
+  const deployed = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   if (deployed === null || binding.origin !== deployed.siteUrl) {
     return err2("invalid-origin");
   }
   if (binding.authMode !== registration.auth.kind) {
     return err2("invalid-auth-mode");
   }
-  const oauth = suiteAccountsOidcClientRegistration(consumer, environment);
+  const oauth = suiteAccountsCurrentOidcClientRegistration(consumer, environment);
   const expectedClientId = oauth?.clientId ?? null;
   const expectedCallbackUrl = oauth?.callbackUrl ?? null;
   if (binding.clientId !== expectedClientId) {

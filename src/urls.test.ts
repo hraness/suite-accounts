@@ -7,6 +7,7 @@ import {
 import {
   suiteAccountsBillingReturnUrl,
   suiteAccountsCentralUrl,
+  suiteAccountsCurrentOidcClientRegistration,
   suiteAccountsOidcClientRegistration,
   suiteAccountsOidcClientRequiresEmailOtp,
   suiteAccountsOidcProviderConfiguration,
@@ -79,6 +80,18 @@ describe("suite Accounts URLs", () => {
     ).toEqual({
       callbackUrl: "https://oprte.com/api/suite-auth/callback",
       clientId: "hraness:oprte:production:v1",
+    });
+    expect(
+      suiteAccountsOidcClientRegistration("sponge", "production"),
+    ).toEqual({
+      callbackUrl: "https://spongesearch.com/api/suite-auth/callback",
+      clientId: "hraness:sponge:production:v1",
+    });
+    expect(
+      suiteAccountsCurrentOidcClientRegistration("sponge", "production"),
+    ).toEqual({
+      callbackUrl: "https://sponge.computer/api/suite-auth/callback",
+      clientId: "hraness:sponge:production:v1",
     });
   });
 

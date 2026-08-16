@@ -5,6 +5,7 @@ import {
   SUITE_ACCOUNTS_DEPLOYMENTS,
   SUITE_CONSUMER_IDS,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
+  getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumerEnvironment,
   isSuiteAccountsOAuthConsumerId,
   isSuiteAccountsOidcConsumerId,
@@ -104,6 +105,15 @@ describe("suite Accounts auth-mode registry", () => {
       },
       id: "sponge",
     });
+    expect(getSuiteAccountsCurrentConsumerEnvironment(
+      "sponge",
+      "production",
+    )).toEqual({
+      billingReturn: { kind: "unsupported" },
+      siteUrl: "https://sponge.computer",
+    });
+    expect(getSuiteAccountsConsumerEnvironment("sponge", "production"))
+      .toMatchObject({ siteUrl: "https://spongesearch.com" });
     expect("rsrch" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
     expect(suiteAccountsConsumerRequiresEmailOtp("sponge")).toBe(true);
   });

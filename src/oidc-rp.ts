@@ -35,7 +35,7 @@ import {
   type VerifiedSuiteEntitlements,
 } from "./entitlements.js";
 import {
-  getSuiteAccountsConsumerEnvironment,
+  getSuiteAccountsCurrentConsumerEnvironment,
   isSuiteAccountsLinkedOidcConsumerId,
   suiteAccountsConsumerRequiresEmailOtp,
   type SuiteAccountsLinkedOidcConsumerId,
@@ -43,7 +43,7 @@ import {
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
 import {
-  suiteAccountsOidcClientRegistration,
+  suiteAccountsCurrentOidcClientRegistration,
   suiteAccountsOidcProviderConfiguration,
   type SuiteAccountsOidcProviderConfiguration,
 } from "./urls.js";
@@ -1261,7 +1261,7 @@ export function createSuiteOidcRelyingParty(
   if (!/^[a-z0-9][a-z0-9._-]{0,31}$/u.test(receiptKeyVersion)) {
     throw new Error("The suite receipt key version was invalid.");
   }
-  const registration = suiteAccountsOidcClientRegistration(
+  const registration = suiteAccountsCurrentOidcClientRegistration(
     consumer,
     environment,
   );
@@ -1270,7 +1270,7 @@ export function createSuiteOidcRelyingParty(
       "The suite consumer has no OIDC client in this environment.",
     );
   }
-  const consumerEnvironment = getSuiteAccountsConsumerEnvironment(
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
     consumer,
     environment,
   );

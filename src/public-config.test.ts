@@ -7,7 +7,7 @@ import {
 import {
   SUITE_CONSUMER_IDS,
   getSuiteAccountsConsumer,
-  getSuiteAccountsConsumerEnvironment,
+  getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsDeployment,
 } from "./registry";
 
@@ -25,7 +25,7 @@ describe("suite Accounts public configuration", () => {
 
   test("accepts only each consumer's exact production triple", () => {
     for (const consumer of SUITE_CONSUMER_IDS) {
-      const consumerEnvironment = getSuiteAccountsConsumerEnvironment(
+      const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
         consumer,
         "production",
       );

@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.1.2"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.1.3"
   }
 }
 ```

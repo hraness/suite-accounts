@@ -1,4 +1,5 @@
 import {
+  getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumerEnvironment,
   getSuiteAccountsDeployment,
   isSuiteAccountsConsumerId,
@@ -72,6 +73,29 @@ export function suiteAccountsOidcClientRegistration(
   ) return null;
   const consumerEnvironment = getSuiteAccountsConsumerEnvironment(
     consumer, environment,
+  );
+  if (consumerEnvironment === null) return null;
+  return deepFreeze({
+    callbackUrl: new URL(
+      "/api/suite-auth/callback",
+      consumerEnvironment.siteUrl,
+    ).href,
+    clientId: `hraness:${consumer}:${environment}:v1`,
+  });
+}
+
+/** Active registration, including reviewed origin migrations after v1. */
+export function suiteAccountsCurrentOidcClientRegistration(
+  consumer: unknown,
+  environment: SuiteAccountsRemoteEnvironment,
+): SuiteAccountsOidcClientRegistration | null {
+  if (
+    !isSuiteAccountsConsumerId(consumer)
+    || !isSuiteAccountsOAuthConsumerId(consumer)
+  ) return null;
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
+    consumer,
+    environment,
   );
   if (consumerEnvironment === null) return null;
   return deepFreeze({

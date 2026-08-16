@@ -161,6 +161,11 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     id: "sup"
   }
 });
+var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
+  sponge: {
+    production: unsupported("https://sponge.computer")
+  }
+});
 var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 function suiteAccountsConsumerRequiresEmailOtp(consumer) {
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
@@ -190,6 +195,10 @@ function getSuiteAccountsConsumerEnvironment(consumer, environment) {
   const registration = getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;
 }
+function getSuiteAccountsCurrentConsumerEnvironment(consumer, environment) {
+  const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer];
+  return override?.[environment] ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
+}
 function getSuiteAccountsDeployment(environment) {
   return SUITE_ACCOUNTS_DEPLOYMENTS[environment];
 }
@@ -200,6 +209,7 @@ export {
   isSuiteAccountsLinkedOidcConsumerId,
   isSuiteAccountsConsumerId,
   getSuiteAccountsDeployment,
+  getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumerEnvironment,
   getSuiteAccountsConsumer,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
@@ -207,5 +217,6 @@ export {
   SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS,
   SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS,
   SUITE_ACCOUNTS_DEPLOYMENTS,
+  SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES,
   SUITE_ACCOUNTS_CONSUMERS
 };

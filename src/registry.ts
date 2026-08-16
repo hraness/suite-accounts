@@ -210,6 +210,20 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
   Record<SuiteAccountsConsumerId, SuiteAccountsConsumerRegistration>
 >);
 
+/**
+ * Current production-origin changes layered over the immutable released-v1
+ * registry. Compatibility readers can keep using `SUITE_ACCOUNTS_CONSUMERS`;
+ * active browser and authority boundaries resolve through this map.
+ */
+export const SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
+  sponge: {
+    production: unsupported("https://sponge.computer"),
+  },
+} as const satisfies Partial<Readonly<Record<
+  SuiteAccountsConsumerId,
+  SuiteAccountsConsumerEnvironments
+>>>);
+
 export type SuiteAccountsOidcConsumerId = {
   [Consumer in SuiteAccountsConsumerId]:
     (typeof SUITE_ACCOUNTS_CONSUMERS)[Consumer]["auth"]["kind"] extends "oidc-rp"
@@ -307,6 +321,16 @@ export function getSuiteAccountsConsumerEnvironment(
   const registration: SuiteAccountsConsumerRegistration =
     getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;
+}
+
+export function getSuiteAccountsCurrentConsumerEnvironment(
+  consumer: SuiteAccountsConsumerId,
+  environment: SuiteAccountsRemoteEnvironment,
+): SuiteAccountsConsumerEnvironment | null {
+  const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer as
+    keyof typeof SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES];
+  return override?.[environment]
+    ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
 }
 
 export function getSuiteAccountsDeployment(
