@@ -1,5 +1,5 @@
 // src/identity/links.ts
-import { err as err5, ok as ok5 } from "@hraness/result";
+import { ok as ok5 } from "@hraness/result";
 
 // src/immutable.ts
 function deepFreeze(value) {
@@ -184,7 +184,6 @@ function parseSuiteUsername(value) {
 // src/identity/principals.ts
 var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
-  "mgrte",
   "oprte",
   "crclte",
   "pub"
@@ -242,7 +241,6 @@ function parseIssuerSubject(value) {
 function parseSuiteProduct(value) {
   switch (value) {
     case "soundfish":
-    case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":
@@ -352,8 +350,6 @@ function parseSuiteLinkProduct(value) {
     case "crclte":
     case "pub":
       return ok5(parsed.value);
-    case "mgrte":
-      return err5("invalid-product");
   }
 }
 function safeInteger(value) {

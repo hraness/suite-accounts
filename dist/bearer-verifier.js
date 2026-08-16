@@ -403,7 +403,6 @@ function parseSuiteUsername(value) {
 // src/identity/principals.ts
 var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
-  "mgrte",
   "oprte",
   "crclte",
   "pub"
@@ -461,7 +460,6 @@ function parseIssuerSubject(value) {
 function parseSuiteProduct(value) {
   switch (value) {
     case "soundfish":
-    case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":

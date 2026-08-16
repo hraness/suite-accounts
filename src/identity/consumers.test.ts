@@ -31,7 +31,7 @@ describe("suite consumers", () => {
       "codingchart",
       "cncntrte",
       "cptvte",
-      "dgnrte",
+      "unknown-product",
       "fbrcte",
       "hrnss",
       "intmte",
@@ -56,7 +56,7 @@ describe("suite consumers", () => {
     expect(SUITE_PRODUCTS).not.toContain("accounts");
     expect(SUITE_PRODUCTS).not.toContain("graphics");
     expect(SUITE_CONSUMER_IDS).not.toContain("itrte");
-    expect(SUITE_CONSUMER_IDS).not.toContain("mgrte");
+    expect(SUITE_CONSUMER_IDS).not.toContain("unknown-product");
     expect(SUITE_CONSUMER_IDS).not.toContain("pub");
     expect(SUITE_CONSUMER_IDS).not.toContain("crclte");
     expect(parseSuiteConsumerId("crclte")).toEqual({

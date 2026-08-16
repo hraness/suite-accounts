@@ -139,7 +139,7 @@ function generateSuiteInvoiceRef(randomUuid = () => crypto.randomUUID()) {
   return parsed.value;
 }
 // src/identity/links.ts
-import { err as err6, ok as ok6 } from "@hraness/result";
+import { ok as ok6 } from "@hraness/result";
 
 // src/identity/principals.ts
 import { err as err5, isRecord, ok as ok5 } from "@hraness/result";
@@ -216,7 +216,6 @@ function parseSuiteUsername(value) {
 // src/identity/principals.ts
 var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
-  "mgrte",
   "oprte",
   "crclte",
   "pub"
@@ -274,7 +273,6 @@ function parseIssuerSubject(value) {
 function parseSuiteProduct(value) {
   switch (value) {
     case "soundfish":
-    case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":
@@ -384,8 +382,6 @@ function parseSuiteLinkProduct(value) {
     case "crclte":
     case "pub":
       return ok6(parsed.value);
-    case "mgrte":
-      return err6("invalid-product");
   }
 }
 function safeInteger(value) {
@@ -479,7 +475,7 @@ function validateSuiteEntitlementReceipt(input, now) {
   return input.expiresAtMs <= now ? "expired" : null;
 }
 // src/identity/profiles.ts
-import { err as err7, isRecord as isRecord2, ok as ok7 } from "@hraness/result";
+import { err as err6, isRecord as isRecord2, ok as ok7 } from "@hraness/result";
 var SUITE_PROFILE_NAME_MAX_LENGTH = 120;
 var SUITE_PROFILE_BIO_MAX_LENGTH = 1000;
 var SUITE_PROFILE_URL_MAX_LENGTH = 2048;
@@ -521,40 +517,40 @@ function hasInvalidBioControl(value) {
 }
 function normalizedName(value) {
   if (typeof value !== "string") {
-    return err7({ field: "name", reason: "required" });
+    return err6({ field: "name", reason: "required" });
   }
   if (hasInvalidSingleLineControl(value)) {
-    return err7({ field: "name", reason: "invalid" });
+    return err6({ field: "name", reason: "invalid" });
   }
   const name = value.trim().replace(/\s+/gu, " ");
   if (name.length === 0) {
-    return err7({ field: "name", reason: "required" });
+    return err6({ field: "name", reason: "required" });
   }
-  return name.length <= SUITE_PROFILE_NAME_MAX_LENGTH ? ok7(name) : err7({ field: "name", reason: "too_long" });
+  return name.length <= SUITE_PROFILE_NAME_MAX_LENGTH ? ok7(name) : err6({ field: "name", reason: "too_long" });
 }
 function normalizedProfileViewName(value) {
   if (typeof value !== "string") {
-    return err7({ field: "name", reason: "invalid" });
+    return err6({ field: "name", reason: "invalid" });
   }
   if (hasInvalidSingleLineControl(value)) {
-    return err7({ field: "name", reason: "invalid" });
+    return err6({ field: "name", reason: "invalid" });
   }
   const name = value.trim().replace(/\s+/gu, " ");
-  return name.length <= SUITE_PROFILE_NAME_MAX_LENGTH ? ok7(name) : err7({ field: "name", reason: "too_long" });
+  return name.length <= SUITE_PROFILE_NAME_MAX_LENGTH ? ok7(name) : err6({ field: "name", reason: "too_long" });
 }
 function normalizedBio(value) {
   if (typeof value !== "string") {
-    return err7({ field: "bio", reason: "invalid" });
+    return err6({ field: "bio", reason: "invalid" });
   }
   const normalizedNewlines = value.replaceAll(`\r
 `, `
 `).replaceAll("\r", `
 `);
   if (hasInvalidBioControl(normalizedNewlines)) {
-    return err7({ field: "bio", reason: "invalid" });
+    return err6({ field: "bio", reason: "invalid" });
   }
   const bio = normalizedNewlines.trim();
-  return bio.length <= SUITE_PROFILE_BIO_MAX_LENGTH ? ok7(bio) : err7({ field: "bio", reason: "too_long" });
+  return bio.length <= SUITE_PROFILE_BIO_MAX_LENGTH ? ok7(bio) : err6({ field: "bio", reason: "too_long" });
 }
 function parsedHttpsUrl(value, options) {
   if (value.length === 0 || value.length > SUITE_PROFILE_URL_MAX_LENGTH || hasInvalidSingleLineControl(value) || value.trim() !== value) {
@@ -664,7 +660,7 @@ function normalizeSuiteProfileLink(key, value) {
   if (value === null)
     return ok7(null);
   if (typeof value !== "string") {
-    return err7({ field: key, reason: "invalid" });
+    return err6({ field: key, reason: "invalid" });
   }
   const trimmed = value.trim();
   if (trimmed.length === 0)
@@ -685,11 +681,11 @@ function normalizeSuiteProfileLink(key, value) {
         return normalizedWebsite(trimmed);
     }
   })();
-  return normalized === null ? err7({ field: key, reason: "invalid" }) : ok7(normalized);
+  return normalized === null ? err6({ field: key, reason: "invalid" }) : ok7(normalized);
 }
 function parsedLinks(value, canonicalOnly) {
   if (!isRecord2(value) || !exactKeys(value, PROFILE_LINK_KEYS)) {
-    return err7({ field: "profile", reason: "invalid" });
+    return err6({ field: "profile", reason: "invalid" });
   }
   const links = {
     bluesky: null,
@@ -704,7 +700,7 @@ function parsedLinks(value, canonicalOnly) {
     if (!parsed.ok)
       return parsed;
     if (canonicalOnly && parsed.value !== value[key]) {
-      return err7({ field: key, reason: "invalid" });
+      return err6({ field: key, reason: "invalid" });
     }
     links[key] = parsed.value;
   }
@@ -718,7 +714,7 @@ function parsedEmail(value) {
 }
 function parseSuiteProfileUpdateRequest(value) {
   if (!isRecord2(value) || !exactKeys(value, ["bio", "expectedRevision", "links", "name"])) {
-    return err7({ field: "profile", reason: "invalid" });
+    return err6({ field: "profile", reason: "invalid" });
   }
   const name = normalizedName(value["name"]);
   if (!name.ok)
@@ -731,7 +727,7 @@ function parseSuiteProfileUpdateRequest(value) {
     return links;
   const expectedRevision = nonnegativeInteger(value["expectedRevision"]);
   if (expectedRevision === null) {
-    return err7({ field: "expectedRevision", reason: "invalid" });
+    return err6({ field: "expectedRevision", reason: "invalid" });
   }
   return ok7({
     bio: bio.value,
@@ -742,7 +738,7 @@ function parseSuiteProfileUpdateRequest(value) {
 }
 function parseSuiteProfileView(value) {
   if (!isRecord2(value) || !exactKeys(value, ["bio", "email", "links", "name", "revision"])) {
-    return err7({ field: "profile", reason: "invalid" });
+    return err6({ field: "profile", reason: "invalid" });
   }
   const name = normalizedProfileViewName(value["name"]);
   const bio = normalizedBio(value["bio"]);
@@ -756,12 +752,12 @@ function parseSuiteProfileView(value) {
   if (!links.ok)
     return links;
   if (email === null)
-    return err7({ field: "email", reason: "invalid" });
+    return err6({ field: "email", reason: "invalid" });
   if (revision === null) {
-    return err7({ field: "expectedRevision", reason: "invalid" });
+    return err6({ field: "expectedRevision", reason: "invalid" });
   }
   if (name.value !== value["name"] || bio.value !== value["bio"]) {
-    return err7({ field: "profile", reason: "invalid" });
+    return err6({ field: "profile", reason: "invalid" });
   }
   return ok7({
     bio: bio.value,
@@ -783,12 +779,12 @@ function parsedApplication(value) {
     "submittedAtMs",
     "updatedAtMs"
   ]) || value["community"] !== "oh-computer" || !isApplicationStatus(value["status"])) {
-    return err7({ field: "application", reason: "invalid" });
+    return err6({ field: "application", reason: "invalid" });
   }
   const submittedAtMs = nonnegativeInteger(value["submittedAtMs"]);
   const updatedAtMs = nonnegativeInteger(value["updatedAtMs"]);
   if (submittedAtMs === null || updatedAtMs === null || updatedAtMs < submittedAtMs) {
-    return err7({ field: "application", reason: "invalid" });
+    return err6({ field: "application", reason: "invalid" });
   }
   return ok7({
     community: "oh-computer",
@@ -799,7 +795,7 @@ function parsedApplication(value) {
 }
 function parseSuiteCommunityProfileView(value) {
   if (!isRecord2(value) || !exactKeys(value, ["application", "profile"])) {
-    return err7({ field: "profile", reason: "invalid" });
+    return err6({ field: "profile", reason: "invalid" });
   }
   const application = parsedApplication(value["application"]);
   if (!application.ok)
@@ -808,7 +804,7 @@ function parseSuiteCommunityProfileView(value) {
   return profile.ok ? ok7({ application: application.value, profile: profile.value }) : profile;
 }
 // src/identity/views.ts
-import { err as err8, isRecord as isRecord3, ok as ok8 } from "@hraness/result";
+import { err as err7, isRecord as isRecord3, ok as ok8 } from "@hraness/result";
 var SUITE_SUBSCRIPTION_STATUSES = deepFreeze([
   "incomplete",
   "trialing",
@@ -854,12 +850,12 @@ function isOneOf(values, value) {
 }
 function parseSuiteSubscriptionView(value) {
   if (!isRecord3(value))
-    return err8("invalid-subscription-view");
+    return err7("invalid-subscription-view");
   const plan = parseSuitePlanId(value["plan"]);
   const catalogRevision = parseSuiteCatalogRevision(value["catalogRevision"]);
   const currentPeriodEndMs = parseOptionalTimestamp(value["currentPeriodEndMs"]);
   if (!plan.ok || !catalogRevision.ok || !isOneOf(SUITE_SUBSCRIPTION_STATUSES, value["status"]) || typeof value["cancelAtPeriodEnd"] !== "boolean" || currentPeriodEndMs === undefined) {
-    return err8("invalid-subscription-view");
+    return err7("invalid-subscription-view");
   }
   return ok8({
     cancelAtPeriodEnd: value["cancelAtPeriodEnd"],
@@ -871,7 +867,7 @@ function parseSuiteSubscriptionView(value) {
 }
 function parseSuiteInvoiceView(value) {
   if (!isRecord3(value) || !isOneOf(SUITE_INVOICE_STATUSES, value["status"]) || value["currency"] !== "usd") {
-    return err8("invalid-invoice-view");
+    return err7("invalid-invoice-view");
   }
   const amountDueCents = parseNonnegativeInteger(value["amountDueCents"]);
   const amountPaidCents = parseNonnegativeInteger(value["amountPaidCents"]);
@@ -879,7 +875,7 @@ function parseSuiteInvoiceView(value) {
   const number = value["number"] === null ? null : typeof value["number"] === "string" && value["number"].length >= 1 && value["number"].length <= 80 && value["number"].trim() === value["number"] ? value["number"] : undefined;
   const invoiceRef = value["invoiceRef"] === null ? ok8(null) : parseSuiteInvoiceRef(value["invoiceRef"]);
   if (amountDueCents === null || amountPaidCents === null || createdAtMs === null || number === undefined || !invoiceRef.ok) {
-    return err8("invalid-invoice-view");
+    return err7("invalid-invoice-view");
   }
   return ok8({
     amountDueCents,
@@ -905,7 +901,7 @@ function parseFeatures(value) {
 }
 function parseSuiteAccountView(value) {
   if (!isRecord3(value))
-    return err8("invalid-account-view");
+    return err7("invalid-account-view");
   const accountId = parseSuiteAccountId(value["accountId"]);
   const email = parseEmail(value["email"]);
   const name = parseOptionalName(value["name"]);
@@ -914,19 +910,19 @@ function parseSuiteAccountView(value) {
   const plan = value["plan"] === null ? ok8(null) : parseSuitePlanId(value["plan"]);
   const features = parseFeatures(value["features"]);
   if (!accountId.ok || value["catalogRevision"] !== SUITE_CATALOG_REVISION || email === null || name === undefined || !username.ok || !subscription.ok || !plan.ok || features === null || !Array.isArray(value["invoices"]) || value["invoices"].length > 100 || plan.value !== (subscription.value?.plan ?? null)) {
-    return err8("invalid-account-view");
+    return err7("invalid-account-view");
   }
   const statusCanGrant = subscription.value !== null && (subscription.value.status === "active" || subscription.value.status === "trialing");
   const planFeatures = subscription.value === null ? [] : featuresForSuitePlan(subscription.value.plan);
   const exactPositiveGrant = statusCanGrant && features.length === planFeatures.length && features.every((feature, index) => feature === planFeatures[index]);
   if (features.length > 0 && !exactPositiveGrant) {
-    return err8("invalid-account-view");
+    return err7("invalid-account-view");
   }
   const invoices = [];
   for (const entry of value["invoices"]) {
     const invoice = parseSuiteInvoiceView(entry);
     if (!invoice.ok)
-      return err8("invalid-account-view");
+      return err7("invalid-account-view");
     invoices.push(invoice.value);
   }
   return ok8({

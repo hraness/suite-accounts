@@ -406,7 +406,6 @@ function parseSuiteUsername(value) {
 // src/identity/principals.ts
 var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
-  "mgrte",
   "oprte",
   "crclte",
   "pub"
@@ -464,7 +463,6 @@ function parseIssuerSubject(value) {
 function parseSuiteProduct(value) {
   switch (value) {
     case "soundfish":
-    case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":
@@ -672,7 +670,7 @@ function suiteTokenGrantsFeature(result, feature) {
 }
 
 // src/identity/links.ts
-import { err as err6, ok as ok6 } from "@hraness/result";
+import { ok as ok6 } from "@hraness/result";
 var IDENTITY_LINK_PROOF_VERSION = "suite-product-link-proof-v1";
 var IDENTITY_LINK_RECEIPT_VERSION = "suite-link-receipt-v1";
 var SUITE_ENTITLEMENTS_CLAIM_VERSION2 = "suite-entitlements-v1";
@@ -699,8 +697,6 @@ function parseSuiteLinkProduct(value) {
     case "crclte":
     case "pub":
       return ok6(parsed.value);
-    case "mgrte":
-      return err6("invalid-product");
   }
 }
 function safeInteger(value) {

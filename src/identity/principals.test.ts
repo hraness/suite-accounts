@@ -68,7 +68,6 @@ describe("suite principals", () => {
     >();
     expect(SUITE_PRODUCTS).toEqual([
       "soundfish",
-      "mgrte",
       "oprte",
       "crclte",
       "pub",

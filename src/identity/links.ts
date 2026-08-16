@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@hraness/result";
+import { ok, type Result } from "@hraness/result";
 import { deepFreeze } from "../immutable.js";
 
 import {
@@ -58,8 +58,6 @@ export function parseSuiteLinkProduct(
     case "crclte":
     case "pub":
       return ok(parsed.value);
-    case "mgrte":
-      return err("invalid-product");
   }
 }
 

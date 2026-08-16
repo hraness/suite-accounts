@@ -12,7 +12,6 @@ import {
 
 export const SUITE_PRODUCTS = deepFreeze([
   "soundfish",
-  "mgrte",
   "oprte",
   // Compatibility-only readers for retired publication principal evidence.
   "crclte",
@@ -136,7 +135,6 @@ export function parseSuiteProduct(
 ): Result<SuiteProduct, "invalid-product"> {
   switch (value) {
     case "soundfish":
-    case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":
