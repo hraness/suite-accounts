@@ -57,8 +57,8 @@ describe("shared Suite OIDC surface server", () => {
       NEXT_PUBLIC_SITE_URL: "https://act60.me",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).not.toBeNull();
-    expect(createSurfaceSuiteRelyingParty("gnrte", {
-      NEXT_PUBLIC_SITE_URL: "https://gnrte.com",
+    expect(createSurfaceSuiteRelyingParty("soundfish", {
+      NEXT_PUBLIC_SITE_URL: "https://example.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("act60", {

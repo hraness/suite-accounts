@@ -30,13 +30,11 @@ export const SUITE_ENTITLEMENT_RECEIPT_MAX_TTL_MS = 5 * 60_000;
 export const IDENTITY_LINK_CLOCK_SKEW_MS = 30_000;
 
 export const SUITE_LINK_PRODUCTS = deepFreeze([
-  "gnrte",
   "soundfish",
   "oprte",
   // Compatibility-only readers for already-issued publication receipts and links.
   "crclte",
   "pub",
-  "sup",
 ] as const satisfies readonly SuiteProduct[]);
 export const LEGACY_SUITE_LINK_PRODUCTS = deepFreeze([
   "kitchen",
@@ -55,12 +53,10 @@ export function parseSuiteLinkProduct(
   const parsed = parseSuiteProduct(value);
   if (!parsed.ok) return parsed;
   switch (parsed.value) {
-    case "gnrte":
     case "soundfish":
     case "oprte":
     case "crclte":
     case "pub":
-    case "sup":
       return ok(parsed.value);
     case "mgrte":
       return err("invalid-product");

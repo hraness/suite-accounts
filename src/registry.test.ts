@@ -37,7 +37,7 @@ describe("suite Accounts auth-mode registry", () => {
     const oidcConsumers = SUITE_CONSUMER_IDS.filter(
       isSuiteAccountsOidcConsumerId,
     );
-    expect(oidcConsumers).toHaveLength(8);
+    expect(oidcConsumers).toHaveLength(6);
     for (const consumer of oidcConsumers) {
       expect(SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toEqual({
         basePath: "/api/suite-auth",
@@ -51,7 +51,7 @@ describe("suite Accounts auth-mode registry", () => {
     const oauthConsumers = SUITE_CONSUMER_IDS.filter(
       isSuiteAccountsOAuthConsumerId,
     );
-    expect(oauthConsumers).toHaveLength(8);
+    expect(oauthConsumers).toHaveLength(6);
     for (const consumer of oauthConsumers) {
       expect("cookies" in SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toBe(false);
       expect(isSuiteAccountsOAuthConsumerId(consumer)).toBe(true);
@@ -62,12 +62,10 @@ describe("suite Accounts auth-mode registry", () => {
     expectTypeOf<SuiteAccountsOidcConsumerId>().toEqualTypeOf<
       | "act60"
       | "elders"
-      | "gnrte"
       | "soundfish"
       | "oh-computer"
       | "oprte"
       | "sponge"
-      | "sup"
     >();
     expectTypeOf<SuiteAccountsOAuthConsumerId>().toEqualTypeOf<
       SuiteAccountsOidcConsumerId
@@ -132,7 +130,7 @@ describe("suite Accounts auth-mode registry", () => {
     });
     expect(suiteAccountsConsumerRequiresEmailOtp("elders")).toBe(true);
     expect("ask-town" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
-    expect(suiteAccountsConsumerRequiresEmailOtp("sup")).toBe(true);
+    expect(suiteAccountsConsumerRequiresEmailOtp("soundfish")).toBe(true);
     expect(new Set<string>(SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS)).toEqual(
       new Set(Object.values(SUITE_ACCOUNTS_CONSUMERS)
         .filter(consumer => consumer.auth.kind === "oidc-rp")

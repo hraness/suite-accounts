@@ -83,10 +83,10 @@ describe("isolated suite Accounts React provider", () => {
       ...config,
       authBasePath: "/api/suite-auth",
       authMode: "oidc-rp",
-      canonicalProductOrigin: "https://gnrte.com",
-      consumer: "gnrte",
-      siteUrl: "https://gnrte.com",
-      surfaceOrigin: "https://gnrte.com",
+      canonicalProductOrigin: "https://sound.fish",
+      consumer: "soundfish",
+      siteUrl: "https://sound.fish",
+      surfaceOrigin: "https://sound.fish",
     } as const satisfies ReadySuiteAccountsPublicConfig;
     let observed: ReturnType<typeof useSuiteAccountsClient> | undefined;
     function Probe() {

@@ -67,28 +67,18 @@ describe("suite principals", () => {
       "kitchen"
     >();
     expect(SUITE_PRODUCTS).toEqual([
-      "gnrte",
       "soundfish",
       "mgrte",
       "oprte",
       "crclte",
       "pub",
-      "sup",
     ]);
-    expect(parseSuiteProduct("gnrte")).toEqual({
-      ok: true,
-      value: "gnrte",
-    });
     for (const retired of ["itrte", "transmute", "studio", "graphics"]) {
       expect(parseSuiteProduct(retired)).toEqual({
         error: "invalid-product",
         ok: false,
       });
     }
-    expect(parseSuiteProduct("sup")).toEqual({
-      ok: true,
-      value: "sup",
-    });
     expect(parseSuiteProduct("soundfish")).toEqual({
       ok: true,
       value: "soundfish",

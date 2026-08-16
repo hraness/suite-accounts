@@ -26,13 +26,13 @@ const proof = {
   issuedAtMs,
   keyVersion: "v1",
   localSubject: "local-user-1",
-  product: "gnrte",
+  product: "soundfish",
 } as const satisfies ProductLinkProof;
 
 describe("suite identity-link contract", () => {
   test("canonicalizes product proof and receipt messages exactly", () => {
     expect(productLinkProofMessage(proof)).toBe(
-      '["suite-product-link-proof-v1","gnrte","production",'
+      '["suite-product-link-proof-v1","soundfish","production",'
         + '"local-user-1","0123456789abcdefghijkl",1800000000000,'
         + '1800000300000,"v1"]',
     );
@@ -40,7 +40,7 @@ describe("suite identity-link contract", () => {
       ...proof,
       suiteAccountId: "acct_0123456789abcdef0123456789abcdef",
     })).toBe(
-      '["suite-link-receipt-v1","gnrte","production","local-user-1",'
+      '["suite-link-receipt-v1","soundfish","production","local-user-1",'
         + '"acct_0123456789abcdef0123456789abcdef",'
         + '"0123456789abcdefghijkl",'
         + '1800000000000,1800000300000,"v1"]',
@@ -115,7 +115,7 @@ describe("suite entitlement projection receipt contract", () => {
     expiresAtMs: issuedAtMs + SUITE_ENTITLEMENT_RECEIPT_MAX_TTL_MS,
     issuedAtMs,
     keyVersion: "v1",
-    product: "gnrte",
+    product: "soundfish",
     signature: "B".repeat(43),
     suiteAccountId: "acct_0123456789abcdef0123456789abcdef",
     version: SUITE_ENTITLEMENT_RECEIPT_VERSION,
@@ -123,7 +123,7 @@ describe("suite entitlement projection receipt contract", () => {
 
   test("canonicalizes the complete signed projection without object-key ambiguity", () => {
     expect(suiteEntitlementReceiptMessage(receipt)).toBe(
-      '["suite-entitlement-receipt-v1","gnrte","production",'
+      '["suite-entitlement-receipt-v1","soundfish","production",'
         + '"acct_0123456789abcdef0123456789abcdef","v1",'
         + '1800000000000,1800000300000,"suite-entitlements-v1",'
         + '"cclrte-suite-v3",1799999940000,1800000900000,7,'

@@ -22,7 +22,7 @@ const keyring = parseSuiteReceiptKeyring(JSON.stringify({
   keys: [{
     environment: "production",
     keyVersion: "v1",
-    product: "gnrte",
+    product: "soundfish",
     secret,
   }],
   version: 1,
@@ -114,7 +114,7 @@ describe("suite receipt server helpers", () => {
       keys: [{
         environment: "production",
         keyVersion: "v1",
-        product: "gnrte",
+        product: "soundfish",
         secret: "short",
       }],
       version: 1,
@@ -127,35 +127,35 @@ describe("suite receipt server helpers", () => {
         {
           environment: "production",
           keyVersion: "v1",
-          product: "gnrte",
+          product: "soundfish",
           secret,
         },
         {
           environment: "production",
           keyVersion: "v2",
-          product: "gnrte",
+          product: "soundfish",
           secret: `${secret}-rotated`,
         },
         {
           environment: "staging",
           keyVersion: "v1",
-          product: "gnrte",
+          product: "soundfish",
           secret: `${secret}-staging`,
         },
         {
           environment: "production",
           keyVersion: "v1",
-          product: "soundfish",
-          secret: `${secret}-soundfish`,
+          product: "oprte",
+          secret: `${secret}-oprte`,
         },
       ],
       version: 1,
-    }, "gnrte", "v2");
+    }, "soundfish", "v2");
 
     expect(selected?.key).toMatchObject({
       environment: "production",
       keyVersion: "v2",
-      product: "gnrte",
+      product: "soundfish",
     });
     expect(selected?.keyring.keys.map(key => key.keyVersion)).toEqual([
       "v1",
@@ -167,7 +167,7 @@ describe("suite receipt server helpers", () => {
     expect(Reflect.set(selected.keyring.keys, "0", null)).toBe(false);
     expect(selectSuiteReceiptConfiguration(
       selected?.keyring,
-      "gnrte",
+      "soundfish",
       "missing",
     )).toBeNull();
     expect(selectSuiteReceiptConfiguration({
@@ -179,10 +179,10 @@ describe("suite receipt server helpers", () => {
         },
       ],
       version: 1,
-    }, "gnrte", "v1")?.key).toMatchObject({
+    }, "soundfish", "v1")?.key).toMatchObject({
       environment: "production",
       keyVersion: "v1",
-      product: "gnrte",
+      product: "soundfish",
     });
   });
 
@@ -194,12 +194,12 @@ describe("suite receipt server helpers", () => {
       issuedAtMs: nowMs,
       keyVersion: "v1",
       localSubject: "local-user-17",
-      product: "gnrte",
+      product: "soundfish",
     };
     expect(await signSuiteProductLinkProof(proof, keyring, nowMs))
       .toMatch(/^[A-Za-z0-9_-]{43}$/u);
     expect(await signSuiteProductLinkProof(
-      { ...proof, product: "soundfish" },
+      { ...proof, product: "oprte" },
       keyring,
       nowMs,
     )).toBeNull();
@@ -213,7 +213,7 @@ describe("suite receipt server helpers", () => {
       issuedAtMs: nowMs,
       keyVersion: "v1",
       localSubject: "local-user-17",
-      product: "gnrte",
+      product: "soundfish",
       suiteAccountId: "acct_018f1f7a7a367ccdbd5d706d4dc5c018",
     } as const;
     const link: SuiteLinkReceipt = {
@@ -242,7 +242,7 @@ describe("suite receipt server helpers", () => {
       expiresAtMs: nowMs + 4 * 60_000,
       issuedAtMs: nowMs,
       keyVersion: "v1",
-      product: "gnrte",
+      product: "soundfish",
       suiteAccountId: "acct_018f1f7a7a367ccdbd5d706d4dc5c018",
     } as const;
     const entitlement: SuiteEntitlementReceipt = {

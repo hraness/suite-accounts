@@ -17,7 +17,7 @@ import { suiteAccountsOidcProviderConfiguration } from "./urls";
 const nowMs = 1_800_000_300_000;
 const nowSeconds = Math.floor(nowMs / 1_000);
 const accountId = "acct_018f1f7a7a367ccdbd5d706d4dc5c018";
-const clientId = "hraness:gnrte:production:v1";
+const clientId = "hraness:soundfish:production:v1";
 const provider = suiteAccountsOidcProviderConfiguration("production");
 
 function requestUrl(input: RequestInfo | URL): string {
@@ -28,7 +28,7 @@ function requestUrl(input: RequestInfo | URL): string {
       : input.url;
 }
 
-async function signingFixture(kid = "accounts-es256-gnrte-1") {
+async function signingFixture(kid = "accounts-es256-soundfish-1") {
   const { privateKey, publicKey } = await generateKeyPair("ES256");
   const publicJwk = await exportJWK(publicKey);
   const jwk: JWK = {
@@ -126,7 +126,7 @@ describe("suite bearer verifier", () => {
     const signing = await signingFixture();
     const requests: Array<Readonly<{ init?: RequestInit; url: string }>> = [];
     const verifier = createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       fetch: jwksFetch(signing.jwks, requests),
       now: () => nowMs,
@@ -180,7 +180,7 @@ describe("suite bearer verifier", () => {
     const signing = await signingFixture();
     const attacker = await signingFixture();
     const verifier = createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       fetch: jwksFetch(signing.jwks, []),
       now: () => nowMs,
@@ -284,7 +284,7 @@ describe("suite bearer verifier", () => {
         })),
     ]) {
       const verifier = createSuiteBearerVerifier({
-        consumer: "gnrte",
+        consumer: "soundfish",
         environment: "production",
         fetch: fetchImplementation,
         now: () => nowMs,
@@ -295,7 +295,7 @@ describe("suite bearer verifier", () => {
       });
     }
     const verifier = createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       fetch: jwksFetch(signing.jwks, []),
       now: () => nowMs,
@@ -329,7 +329,7 @@ describe("suite bearer verifier", () => {
     for (const malformedKey of malformedKeys) {
       let requests = 0;
       const verifier = createSuiteBearerVerifier({
-        consumer: "gnrte",
+        consumer: "soundfish",
         environment: "production",
         fetch: () => {
           requests += 1;
@@ -350,8 +350,8 @@ describe("suite bearer verifier", () => {
   });
 
   test("keeps a warm key after an unknown-kid refresh fails", async () => {
-    const first = await signingFixture("accounts-es256-gnrte-old");
-    const rotated = await signingFixture("accounts-es256-gnrte-new");
+    const first = await signingFixture("accounts-es256-soundfish-old");
+    const rotated = await signingFixture("accounts-es256-soundfish-new");
     const firstToken = await first.token();
     const rotatedToken = await rotated.token();
     let clock = nowMs;
@@ -359,7 +359,7 @@ describe("suite bearer verifier", () => {
     let unavailable = false;
     let requests = 0;
     const verifier = createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       fetch: () => {
         requests += 1;
@@ -396,13 +396,13 @@ describe("suite bearer verifier", () => {
   });
 
   test("bounds unknown-key refreshes while still accepting key rotation", async () => {
-    const first = await signingFixture("accounts-es256-gnrte-old");
-    const rotated = await signingFixture("accounts-es256-gnrte-new");
+    const first = await signingFixture("accounts-es256-soundfish-old");
+    const rotated = await signingFixture("accounts-es256-soundfish-new");
     let clock = nowMs;
     const requests: Array<Readonly<{ init?: RequestInit; url: string }>> = [];
     let currentJwks: unknown = first.jwks;
     const verifier = createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       fetch: (input, init) => {
         requests.push({
@@ -448,17 +448,17 @@ describe("suite bearer verifier", () => {
 
   test("fails closed on invalid verifier timing configuration", () => {
     expect(() => createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       fetchTimeoutMs: 99,
     })).toThrow("100–30000ms");
     expect(() => createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       jwksCacheTtlMs: 999,
     })).toThrow("1000–86400000ms");
     expect(() => createSuiteBearerVerifier({
-      consumer: "gnrte",
+      consumer: "soundfish",
       environment: "production",
       jwksRefreshCooldownMs: 999,
     })).toThrow("1000–300000ms");

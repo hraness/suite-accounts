@@ -16,7 +16,7 @@ import {
   suiteAccountsOidcProviderConfiguration,
 } from "./urls";
 
-test("the complete released v1 static registry remains byte-compatible", () => {
+test("the complete active v1 protocol registry remains byte-stable", () => {
   const snapshot = JSON.stringify({
     central: (["account", "home", "login"] as const).map(destination =>
       suiteAccountsCentralUrl("production", destination)
@@ -36,6 +36,6 @@ test("the complete released v1 static registry remains byte-compatible", () => {
     ]),
   });
   expect(createHash("sha256").update(snapshot).digest("hex")).toBe(
-    "432b89d89e2b7fbdcac56917d54d316b696a220a754743b89bc7fb4b9623c81b",
+    "ae246aaa489e65500ca17d97f6aece9f24da05330d8f4f110bd8670a6c85f675",
   );
 });

@@ -11,14 +11,12 @@ import {
 } from "./usernames.js";
 
 export const SUITE_PRODUCTS = deepFreeze([
-  "gnrte",
   "soundfish",
   "mgrte",
   "oprte",
   // Compatibility-only readers for retired publication principal evidence.
   "crclte",
   "pub",
-  "sup",
 ] as const);
 export const LEGACY_SUITE_PRODUCT_IDS = deepFreeze(["kitchen"] as const);
 export const SUITE_ENVIRONMENTS = deepFreeze([
@@ -137,13 +135,11 @@ export function parseSuiteProduct(
   value: unknown,
 ): Result<SuiteProduct, "invalid-product"> {
   switch (value) {
-    case "gnrte":
     case "soundfish":
     case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":
-    case "sup":
       return ok(value);
     // `kitchen` was the public product ID before the OPRTE rename. Parse it
     // only at foreign/stored boundaries and immediately return the canonical

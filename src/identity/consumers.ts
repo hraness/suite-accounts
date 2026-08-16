@@ -12,13 +12,11 @@ export const SUITE_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
   "elders",
-  "gnrte",
   "soundfish",
   "oh-computer",
   "draw-money",
   "oprte",
   "sponge",
-  "sup",
 ] as const);
 /**
  * Retired client identities accepted only while parsing bounded pre-OPRTE
@@ -40,13 +38,11 @@ export function parseSuiteConsumerId(
     case "accounts":
     case "act60":
     case "elders":
-    case "gnrte":
     case "soundfish":
     case "oh-computer":
     case "draw-money":
     case "oprte":
     case "sponge":
-    case "sup":
       return ok(value);
     case "kitchen":
       return ok("oprte");

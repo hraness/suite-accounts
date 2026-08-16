@@ -24,7 +24,7 @@ describe("suite billing return targets", () => {
   });
 
   test("does not authorize every auth consumer as a billing redirect", () => {
-    expect(SUITE_CONSUMER_IDS).toContain("sup");
+    expect(SUITE_CONSUMER_IDS).toContain("sponge");
     for (const retired of ["transmute", "transmute-cli", "studio", "graphics"]) {
       expect(SUITE_CONSUMER_IDS).not.toContain(retired);
       expect(parseSuiteReturnTarget(retired)).toEqual({

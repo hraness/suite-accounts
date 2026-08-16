@@ -11,7 +11,7 @@ const nowMs = 1_800_000_300_000;
 
 function payload(overrides: Record<string, unknown> = {}) {
   return {
-    aud: ["gnrte-production"],
+    aud: ["soundfish-production"],
     exp: 1_800_000_900,
     iat: 1_800_000_000,
     iss: "https://account.hraness.com",
@@ -26,7 +26,7 @@ function payload(overrides: Record<string, unknown> = {}) {
 }
 
 const options = {
-  expectedAudience: "gnrte-production",
+  expectedAudience: "soundfish-production",
   expectedIssuer: "https://account.hraness.com",
   nowMs,
   verify: () => Promise.resolve(payload()),

@@ -19,14 +19,14 @@ const drawMoneyConfig = {
   surfaceOrigin: "https://draw.money",
 } as const satisfies ReadySuiteAccountsPublicConfig;
 
-const gnrteConfig = {
+const soundfishConfig = {
   ...drawMoneyConfig,
   authBasePath: "/api/suite-auth",
   authMode: "oidc-rp",
-  canonicalProductOrigin: "https://gnrte.com",
-  consumer: "gnrte",
-  siteUrl: "https://gnrte.com",
-  surfaceOrigin: "https://gnrte.com",
+  canonicalProductOrigin: "https://sound.fish",
+  consumer: "soundfish",
+  siteUrl: "https://sound.fish",
+  surfaceOrigin: "https://sound.fish",
 } as const satisfies ReadySuiteAccountsPublicConfig;
 
 type FetchCall = Readonly<{
@@ -85,10 +85,10 @@ describe("suite Accounts same-origin auth proxy", () => {
   test("does not expose the Better Auth proxy to an OAuth RP consumer", async () => {
     const upstream = recordingFetch(Response.json({ ok: true }));
     const response = await suiteAccountsAuthServerForConfig(
-      gnrteConfig,
+      soundfishConfig,
       upstream.fetch,
-    ).handler.POST(new Request("https://gnrte.com/api/suite-auth/start", {
-      headers: { origin: "https://gnrte.com" },
+    ).handler.POST(new Request("https://sound.fish/api/suite-auth/start", {
+      headers: { origin: "https://sound.fish" },
       method: "POST",
     }));
     expect(response.status).toBe(503);

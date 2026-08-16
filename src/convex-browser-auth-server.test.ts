@@ -143,7 +143,7 @@ describe("suite Convex browser P-256 keyring", () => {
     const cases = [
       { ...value, version: "v2" },
       { ...value, environment: "staging" },
-      { ...value, consumer: "sup" },
+      { ...value, consumer: "oprte" },
       { ...value, unexpected: true },
       { ...value, activeKid: "missing" },
       { ...value, keys: [] },

@@ -152,14 +152,6 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     "Elders",
     "https://elders.hraness.com",
   ),
-  gnrte: {
-    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-    displayName: "GNRTE",
-    environments: {
-      production: unsupported("https://gnrte.com"),
-    },
-    id: "gnrte",
-  },
   soundfish: {
     auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
     displayName: "Soundfish",
@@ -198,14 +190,6 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     "Sponge",
     "https://spongesearch.com",
   ),
-  sup: {
-    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-    displayName: "Sup",
-    environments: {
-      production: unsupported("https://sup.fan"),
-    },
-    id: "sup",
-  },
 } as const satisfies Readonly<
   Record<SuiteAccountsConsumerId, SuiteAccountsConsumerRegistration>
 >);
@@ -254,10 +238,8 @@ export function suiteAccountsConsumerRequiresEmailOtp(
  * not gain a product identity-link boundary.
  */
 export const SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
-  "gnrte",
   "soundfish",
   "oprte",
-  "sup",
 ] as const satisfies readonly SuiteAccountsOidcConsumerId[]);
 
 export type SuiteAccountsLinkedOidcConsumerId =

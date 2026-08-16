@@ -146,7 +146,7 @@ describe("suite Accounts client configuration", () => {
   test("rejects a different origin, client, callback, or auth mode", () => {
     const mutations = [
       { ...oprteBinding, origin: "https://example.com" },
-      { ...oprteBinding, clientId: "hraness:sup:production:v1" },
+      { ...oprteBinding, clientId: "hraness:soundfish:production:v1" },
       { ...oprteBinding, callbackUrl: "https://oprte.com/callback" },
       { ...oprteBinding, authMode: "proxy" },
     ] as const;

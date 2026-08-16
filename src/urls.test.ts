@@ -103,7 +103,7 @@ describe("suite Accounts URLs", () => {
       "hraness:elders:staging:v1",
     )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
-      "hraness:sup:production:v1",
+      "hraness:oprte:production:v1",
     )).toBe(true);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:elders:local:v1",

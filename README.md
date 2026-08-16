@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.1.3"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.2.0"
   }
 }
 ```
@@ -141,14 +141,14 @@ The package preserves these checks across the public surface:
 Do not authorize from browser profile JSON, decoded JWT data, discovery
 destinations, billing plan membership, or an unverified receipt.
 
-## Frozen v1 compatibility
+## Frozen v1 protocol compatibility
 
 `SUITE_ACCOUNTS_CONSUMERS`, `SUITE_ACCOUNTS_DEPLOYMENTS`, their policy arrays,
-and their lookup helpers preserve the currently live released v1 static
-registry. They are deeply runtime-frozen and deprecated for new consumers.
-Existing applications may use them while migrating, but new registration
-remains an Accounts service change followed by a package release and an exact
-factory binding. Retired client identifiers and routes are rejected.
+and their lookup helpers preserve the active v1 protocol registry. They are
+deeply runtime-frozen and deprecated for new consumers. Existing applications
+may use them while migrating, but new registration remains an Accounts service
+change followed by a package release and an exact factory binding. Retired
+client identifiers and routes are rejected.
 
 The published v1 browser refresh-lock and session-notification channel strings
 also remain unchanged in version 0.1. Existing tabs therefore coordinate

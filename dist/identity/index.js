@@ -77,13 +77,11 @@ var SUITE_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
   "elders",
-  "gnrte",
   "soundfish",
   "oh-computer",
   "draw-money",
   "oprte",
-  "sponge",
-  "sup"
+  "sponge"
 ]);
 var LEGACY_SUITE_CONSUMER_IDS = deepFreeze([
   "kitchen"
@@ -93,13 +91,11 @@ function parseSuiteConsumerId(value) {
     case "accounts":
     case "act60":
     case "elders":
-    case "gnrte":
     case "soundfish":
     case "oh-computer":
     case "draw-money":
     case "oprte":
     case "sponge":
-    case "sup":
       return ok2(value);
     case "kitchen":
       return ok2("oprte");
@@ -219,13 +215,11 @@ function parseSuiteUsername(value) {
 
 // src/identity/principals.ts
 var SUITE_PRODUCTS = deepFreeze([
-  "gnrte",
   "soundfish",
   "mgrte",
   "oprte",
   "crclte",
-  "pub",
-  "sup"
+  "pub"
 ]);
 var LEGACY_SUITE_PRODUCT_IDS = deepFreeze(["kitchen"]);
 var SUITE_ENVIRONMENTS = deepFreeze([
@@ -279,13 +273,11 @@ function parseIssuerSubject(value) {
 }
 function parseSuiteProduct(value) {
   switch (value) {
-    case "gnrte":
     case "soundfish":
     case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":
-    case "sup":
       return ok5(value);
     case "kitchen":
       return ok5("oprte");
@@ -374,12 +366,10 @@ var IDENTITY_LINK_MAX_TTL_MS = 5 * 60000;
 var SUITE_ENTITLEMENT_RECEIPT_MAX_TTL_MS = 5 * 60000;
 var IDENTITY_LINK_CLOCK_SKEW_MS = 30000;
 var SUITE_LINK_PRODUCTS = deepFreeze([
-  "gnrte",
   "soundfish",
   "oprte",
   "crclte",
-  "pub",
-  "sup"
+  "pub"
 ]);
 var LEGACY_SUITE_LINK_PRODUCTS = deepFreeze([
   "kitchen"
@@ -389,12 +379,10 @@ function parseSuiteLinkProduct(value) {
   if (!parsed.ok)
     return parsed;
   switch (parsed.value) {
-    case "gnrte":
     case "soundfish":
     case "oprte":
     case "crclte":
     case "pub":
-    case "sup":
       return ok6(parsed.value);
     case "mgrte":
       return err6("invalid-product");

@@ -44,7 +44,7 @@ describe("suite Convex browser-token configuration", () => {
         tokenEndpoint: "https://elders.hraness.com/api/convex-auth/token",
       });
     expect(() => suiteConvexBrowserConfiguration(
-      "sup" as SuiteConvexBrowserConsumerId,
+      "oprte" as SuiteConvexBrowserConsumerId,
       "production",
     )).toThrow("no Convex browser-token grant");
   });
@@ -86,7 +86,7 @@ describe("suite Convex browser-token configuration", () => {
     expect(Reflect.set(
       SUITE_CONVEX_BROWSER_CONSUMER_IDS,
       "0",
-      "sup",
+      "oprte",
     )).toBe(false);
     expect(Reflect.set(
       authConfig.providers[0]!,
@@ -153,7 +153,7 @@ describe("suite Convex browser identity", () => {
   test("rejects every product, suite, use, profile, and subject drift", () => {
     const cases = [
       [{ ...identity, issuer: "https://evil.example" }, "invalid-issuer"],
-      [{ ...identity, suite_client_id: "hraness:sup:production:v1" }, "invalid-client"],
+      [{ ...identity, suite_client_id: "hraness:oprte:production:v1" }, "invalid-client"],
       [{ ...identity, suite_issuer: "https://evil.example" }, "invalid-client"],
       [{ ...identity, token_use: "access" }, "invalid-token-use"],
       [{ ...identity, profile_complete: false }, "invalid-profile"],

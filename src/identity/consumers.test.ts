@@ -13,13 +13,11 @@ describe("suite consumers", () => {
       "accounts",
       "act60",
       "elders",
-      "gnrte",
       "soundfish",
       "oh-computer",
       "draw-money",
       "oprte",
       "sponge",
-      "sup",
     ]);
     for (const consumer of SUITE_CONSUMER_IDS) {
       expect(parseSuiteConsumerId(consumer)).toEqual({

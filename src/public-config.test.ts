@@ -83,12 +83,12 @@ describe("suite Accounts public configuration", () => {
     expect(() => parseSuiteAccountsPublicConfig("draw-money", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: production.convexSiteUrl,
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: production.convexUrl,
-      NEXT_PUBLIC_SITE_URL: "https://gnrte.com",
+      NEXT_PUBLIC_SITE_URL: "https://sound.fish",
     })).toThrow("owned deployment environment");
   });
 
   test("accepts local services only on the same literal loopback host", () => {
-    expect(parseSuiteAccountsPublicConfig("gnrte", {
+    expect(parseSuiteAccountsPublicConfig("soundfish", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: "http://127.0.0.1:3211",
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: "http://127.0.0.1:3210",
       NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3000",
@@ -96,7 +96,7 @@ describe("suite Accounts public configuration", () => {
       authBasePath: "/api/suite-auth",
       authMode: "oidc-rp",
       canonicalProductOrigin: "http://127.0.0.1:3000",
-      consumer: "gnrte",
+      consumer: "soundfish",
       convexSiteUrl: "http://127.0.0.1:3211",
       convexUrl: "http://127.0.0.1:3210",
       environment: "local",
@@ -104,7 +104,7 @@ describe("suite Accounts public configuration", () => {
       siteUrl: "http://127.0.0.1:3000",
       surfaceOrigin: "http://127.0.0.1:3000",
     });
-    expect(() => parseSuiteAccountsPublicConfig("gnrte", {
+    expect(() => parseSuiteAccountsPublicConfig("soundfish", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: "http://localhost:3211",
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: "http://127.0.0.1:3210",
       NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3000",
@@ -113,19 +113,19 @@ describe("suite Accounts public configuration", () => {
 
   test("makes Suite auth unavailable on a generated production-backed Preview", () => {
     const production = getSuiteAccountsDeployment("production");
-    expect(parseSuiteAccountsPublicConfig("gnrte", {
+    expect(parseSuiteAccountsPublicConfig("soundfish", {
       NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
-        "https://gnrte-change-123.vercel.app",
+        "https://soundfish-change-123.vercel.app",
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: production.convexSiteUrl,
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: production.convexUrl,
-      NEXT_PUBLIC_SITE_URL: "https://gnrte.com",
+      NEXT_PUBLIC_SITE_URL: "https://sound.fish",
     })).toEqual({
-      canonicalProductOrigin: "https://gnrte.com",
+      canonicalProductOrigin: "https://sound.fish",
       environment: "production",
       kind: "unavailable",
       message:
         "Suite authentication is unavailable on generated Vercel Preview origins.",
-      surfaceOrigin: "https://gnrte-change-123.vercel.app",
+      surfaceOrigin: "https://soundfish-change-123.vercel.app",
     });
   });
 

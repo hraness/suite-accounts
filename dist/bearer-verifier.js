@@ -27,13 +27,11 @@ var SUITE_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
   "elders",
-  "gnrte",
   "soundfish",
   "oh-computer",
   "draw-money",
   "oprte",
-  "sponge",
-  "sup"
+  "sponge"
 ]);
 var LEGACY_SUITE_CONSUMER_IDS = deepFreeze([
   "kitchen"
@@ -43,13 +41,11 @@ function parseSuiteConsumerId(value) {
     case "accounts":
     case "act60":
     case "elders":
-    case "gnrte":
     case "soundfish":
     case "oh-computer":
     case "draw-money":
     case "oprte":
     case "sponge":
-    case "sup":
       return ok(value);
     case "kitchen":
       return ok("oprte");
@@ -114,14 +110,6 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
   },
   act60: oidcSite("act60", "ACT60", "https://act60.me"),
   elders: oidcSite("elders", "Elders", "https://elders.hraness.com"),
-  gnrte: {
-    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-    displayName: "GNRTE",
-    environments: {
-      production: unsupported("https://gnrte.com")
-    },
-    id: "gnrte"
-  },
   soundfish: {
     auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
     displayName: "Soundfish",
@@ -151,15 +139,7 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     },
     id: "oprte"
   },
-  sponge: oidcSite("sponge", "Sponge", "https://spongesearch.com"),
-  sup: {
-    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-    displayName: "Sup",
-    environments: {
-      production: unsupported("https://sup.fan")
-    },
-    id: "sup"
-  }
+  sponge: oidcSite("sponge", "Sponge", "https://spongesearch.com")
 });
 var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
   sponge: {
@@ -171,10 +151,8 @@ function suiteAccountsConsumerRequiresEmailOtp(consumer) {
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
 }
 var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
-  "gnrte",
   "soundfish",
-  "oprte",
-  "sup"
+  "oprte"
 ]);
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
@@ -424,13 +402,11 @@ function parseSuiteUsername(value) {
 
 // src/identity/principals.ts
 var SUITE_PRODUCTS = deepFreeze([
-  "gnrte",
   "soundfish",
   "mgrte",
   "oprte",
   "crclte",
-  "pub",
-  "sup"
+  "pub"
 ]);
 var LEGACY_SUITE_PRODUCT_IDS = deepFreeze(["kitchen"]);
 var SUITE_ENVIRONMENTS = deepFreeze([
@@ -484,13 +460,11 @@ function parseIssuerSubject(value) {
 }
 function parseSuiteProduct(value) {
   switch (value) {
-    case "gnrte":
     case "soundfish":
     case "mgrte":
     case "oprte":
     case "crclte":
     case "pub":
-    case "sup":
       return ok5(value);
     case "kitchen":
       return ok5("oprte");

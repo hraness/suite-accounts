@@ -17,8 +17,8 @@ import { suiteAccountsOidcProviderConfiguration } from "./urls";
 const nowMs = 1_800_000_300_000;
 const nowSeconds = Math.floor(nowMs / 1_000);
 const accountId = "acct_018f1f7a7a367ccdbd5d706d4dc5c018";
-const clientId = "hraness:gnrte:production:v1";
-const siteUrl = "https://gnrte.com";
+const clientId = "hraness:soundfish:production:v1";
+const siteUrl = "https://sound.fish";
 const provider = suiteAccountsOidcProviderConfiguration("production");
 
 function discovery(overrides: Record<string, unknown> = {}) {
@@ -39,7 +39,7 @@ function discovery(overrides: Record<string, unknown> = {}) {
 
 function entitlementReceipt(
   signature = "R".repeat(43),
-  product = "gnrte",
+  product = "soundfish",
 ) {
   return {
     entitlements: {
@@ -182,7 +182,7 @@ describe("suite OAuth relying party", () => {
 
   test("keeps the relying-party endpoint configuration deeply immutable", () => {
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+      consumer: "soundfish",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       receiptKeyVersion: "v1",
@@ -198,7 +198,7 @@ describe("suite OAuth relying party", () => {
       "https://attacker.example/token",
     )).toBe(false);
     expect(relyingParty.configuration.callbackUrl).toBe(
-      "https://gnrte.com/api/suite-auth/callback",
+      "https://sound.fish/api/suite-auth/callback",
     );
     expect(relyingParty.configuration.provider.tokenEndpoint).toBe(
       "https://account.hraness.com/api/auth/oauth2/token",
@@ -226,8 +226,8 @@ describe("suite OAuth relying party", () => {
     expect(new URL(eldersStart.headers.get("location")!).searchParams.get("scope"))
       .toBe("openid profile email offline_access");
 
-    const gnrte = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+    const soundfish = createSuiteOidcRelyingParty({
+      consumer: "soundfish",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: () => Promise.reject(
@@ -237,15 +237,15 @@ describe("suite OAuth relying party", () => {
       randomBytes: randomSource(),
       receiptKeyVersion: "v1",
     });
-    const gnrteStart = await gnrte.start(request(
+    const soundfishStart = await soundfish.start(request(
       "/api/suite-auth/start",
       { headers: { "sec-fetch-site": "same-origin" } },
     ));
     expect(
-      new URL(gnrteStart.headers.get("location")!).searchParams.get("prompt"),
+      new URL(soundfishStart.headers.get("location")!).searchParams.get("prompt"),
     ).toBe("login");
     expect(
-      new URL(gnrteStart.headers.get("location")!).searchParams.get("scope"),
+      new URL(soundfishStart.headers.get("location")!).searchParams.get("scope"),
     ).toBe("openid profile email offline_access");
   });
 
@@ -363,7 +363,7 @@ describe("suite OAuth relying party", () => {
     let issuedAccessToken = "";
     const cookieSecret = "test-secret-that-is-at-least-thirty-two-bytes";
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+      consumer: "soundfish",
       cookieSecret,
       environment: "production",
       fetch: async (input) => {
@@ -499,7 +499,7 @@ describe("suite OAuth relying party", () => {
     let nonce = "";
     let issuedAccessToken = "";
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+      consumer: "soundfish",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: async (input) => {
@@ -576,7 +576,7 @@ describe("suite OAuth relying party", () => {
     let receiptCount = 0;
     let revokedBody = "";
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+      consumer: "soundfish",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: async (input, init) => {
@@ -692,7 +692,7 @@ describe("suite OAuth relying party", () => {
     ));
     expect(callback.status).toBe(302);
     expect(callback.headers.get("location")).toBe(
-      "https://gnrte.com/settings?tab=billing",
+      "https://sound.fish/settings?tab=billing",
     );
     const callbackCookies = getSetCookies(callback);
     const sessionCookie = cookiePair(
@@ -780,7 +780,7 @@ describe("suite OAuth relying party", () => {
           issuedAtMs: nowMs,
           keyVersion: "v1",
           localSubject: "local-user-17",
-          product: "gnrte",
+          product: "soundfish",
           proofSignature: "P".repeat(43),
         }),
         headers: {
@@ -865,7 +865,7 @@ describe("suite OAuth relying party", () => {
   test("rejects wrong state and tampered transaction cookies before token exchange", async () => {
     let calls = 0;
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+      consumer: "soundfish",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: () => {
@@ -898,12 +898,12 @@ describe("suite OAuth relying party", () => {
   test("rejects a signed access token with either client binding wrong", async () => {
     const signing = await signingFixture();
     for (const override of [
-      { azp: "hraness:soundfish:production:v1" },
-      { suite_client_id: "hraness:soundfish:production:v1" },
+      { azp: "hraness:oprte:production:v1" },
+      { suite_client_id: "hraness:oprte:production:v1" },
     ]) {
       let nonce = "";
       const relyingParty = createSuiteOidcRelyingParty({
-        consumer: "gnrte",
+        consumer: "soundfish",
         cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
         environment: "production",
         fetch: async (input) => {
@@ -949,7 +949,7 @@ describe("suite OAuth relying party", () => {
     const signing = await signingFixture();
     let nonce = "";
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+      consumer: "soundfish",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: async (input) => {
@@ -998,7 +998,7 @@ describe("suite OAuth relying party", () => {
     const signing = await signingFixture();
     let nonce = "";
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "gnrte",
+      consumer: "soundfish",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: async (input) => {
