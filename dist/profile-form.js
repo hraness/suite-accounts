@@ -358,7 +358,6 @@ import {
   useState
 } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
-"use client";
 function withoutFieldError(errors, field) {
   const next = { ...errors };
   delete next[field];

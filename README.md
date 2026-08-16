@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.1.0"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.1.1"
   }
 }
 ```
@@ -179,7 +179,9 @@ bun pm pack --dry-run --ignore-scripts
 `bun run check` validates the portable portfolio inventory, runs independent
 ESLint and TypeScript configuration, executes deterministic and property
 tests, builds the ESM entries, scans the public boundary, and installs the
-package in clean Bundler and NodeNext consumers on React 18.3.1 and 19.2.3.
+package in clean Bundler and NodeNext consumers on React 18.3.1 and 19.2.3. It
+also builds the packed React entries in a clean Next.js 16.2 webpack consumer,
+which verifies that every client entry has one valid top-level directive.
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Report
 suspected vulnerabilities privately as described in

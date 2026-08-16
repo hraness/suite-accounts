@@ -84,10 +84,19 @@ for (const path of [
   "dist/react.js",
 ]) {
   const source = await readFile(path, "utf8");
-  if (!source.startsWith('"use client";\n')) {
-    await writeFile(path, `"use client";\n${source}`);
-  }
   if (source.includes("jsx-dev-runtime") || source.includes("jsxDEV")) {
     throw new Error(`${path} contains a development JSX runtime.`);
   }
+  const directive = '"use client";';
+  const body = source
+    .split(/\r?\n/u)
+    .filter(line => line !== directive);
+  const clientModule = [directive, ...body].join("\n");
+  const directives = clientModule
+    .split("\n")
+    .filter(line => line === directive);
+  if (!clientModule.startsWith(`${directive}\n`) || directives.length !== 1) {
+    throw new Error(`${path} must contain one top-level client directive.`);
+  }
+  await writeFile(path, clientModule);
 }

@@ -158,6 +158,53 @@ async function verifyReactLane(
   );
 }
 
+async function verifyNextWebpackConsumer(archive: string): Promise<void> {
+  const consumer = join(work, "next-webpack");
+  await mkdir(join(consumer, "app"), { recursive: true });
+  await writeFile(
+    join(consumer, "package.json"),
+    JSON.stringify({
+      private: true,
+      scripts: { build: "next build --webpack" },
+      type: "module",
+    }),
+  );
+  await run([process.execPath, "add", archive, "--ignore-scripts"], consumer);
+  await run([
+    process.execPath,
+    "add",
+    "next@16.2.12",
+    "react@19.2.3",
+    "react-dom@19.2.3",
+    "--ignore-scripts",
+  ], consumer);
+  await writeFile(
+    join(consumer, "app", "layout.js"),
+    [
+      "export default function Layout({ children }) {",
+      '  return <html lang="en"><body>{children}</body></html>;',
+      "}",
+      "",
+    ].join("\n"),
+  );
+  await writeFile(
+    join(consumer, "app", "page.js"),
+    [
+      '"use client";',
+      "",
+      `import * as ProfileForm from ${JSON.stringify(`${packageName}/profile-form`)};`,
+      `import * as SuiteReact from ${JSON.stringify(`${packageName}/react`)};`,
+      "",
+      "export default function Page() {",
+      "  const exportCount = Object.keys(ProfileForm).length + Object.keys(SuiteReact).length;",
+      '  return <main data-suite-export-count={exportCount}>Suite Accounts</main>;',
+      "}",
+      "",
+    ].join("\n"),
+  );
+  await run([process.execPath, "run", "build"], consumer);
+}
+
 try {
   const archive = join(work, "package.tgz");
   const consumer = join(work, "consumer");
@@ -239,6 +286,7 @@ try {
   for (const lane of reactVerificationLanes) {
     await verifyReactLane(archive, lane.label, lane.packages);
   }
+  await verifyNextWebpackConsumer(archive);
 } finally {
   await rm(work, { force: true, recursive: true });
 }
