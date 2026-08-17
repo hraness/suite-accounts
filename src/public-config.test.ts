@@ -87,6 +87,15 @@ describe("suite Accounts public configuration", () => {
     })).toThrow("owned deployment environment");
   });
 
+  test("rejects the retired proxy's formerly exact production triple", () => {
+    const production = getSuiteAccountsDeployment("production");
+    expect(() => parseSuiteAccountsPublicConfig("draw-money", {
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: production.convexSiteUrl,
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: production.convexUrl,
+      NEXT_PUBLIC_SITE_URL: "https://draw.money",
+    })).toThrow("owned deployment environment");
+  });
+
   test("accepts local services only on the same literal loopback host", () => {
     expect(parseSuiteAccountsPublicConfig("soundfish", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: "http://127.0.0.1:3211",

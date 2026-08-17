@@ -7,6 +7,19 @@ import { deepFreeze } from "./immutable.js";
 export { SUITE_CONSUMER_IDS };
 export type SuiteAccountsConsumerId = SuiteConsumerId;
 
+/** Consumers that may establish new production trust through current APIs. */
+export const SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "sponge",
+] as const satisfies readonly SuiteAccountsConsumerId[]);
+export type SuiteAccountsActiveConsumerId =
+  (typeof SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS)[number];
+
 export const SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS = deepFreeze([
   "production",
 ] as const);
@@ -309,10 +322,18 @@ export function getSuiteAccountsCurrentConsumerEnvironment(
   consumer: SuiteAccountsConsumerId,
   environment: SuiteAccountsRemoteEnvironment,
 ): SuiteAccountsConsumerEnvironment | null {
+  if (!isSuiteAccountsActiveConsumerId(consumer)) return null;
   const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer as
     keyof typeof SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES];
   return override?.[environment]
     ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
+}
+
+export function isSuiteAccountsActiveConsumerId(
+  value: SuiteAccountsConsumerId,
+): value is SuiteAccountsActiveConsumerId {
+  return (SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS as readonly string[])
+    .includes(value);
 }
 
 export function getSuiteAccountsDeployment(

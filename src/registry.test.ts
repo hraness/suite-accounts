@@ -3,6 +3,7 @@ import { describe, expect, expectTypeOf, test } from "bun:test";
 import {
   SUITE_ACCOUNTS_CONSUMERS,
   SUITE_ACCOUNTS_DEPLOYMENTS,
+  SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
   SUITE_CONSUMER_IDS,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
   getSuiteAccountsCurrentConsumerEnvironment,
@@ -45,6 +46,29 @@ describe("suite Accounts auth-mode registry", () => {
       });
       expect(isSuiteAccountsOidcConsumerId(consumer)).toBe(true);
     }
+  });
+
+  test("keeps frozen v1 bytes while removing retired clients from current authority", () => {
+    expect(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS).toEqual([
+      "accounts",
+      "act60",
+      "elders",
+      "soundfish",
+      "oh-computer",
+      "oprte",
+      "sponge",
+    ]);
+    expect(getSuiteAccountsCurrentConsumerEnvironment(
+      "draw-money",
+      "production",
+    )).toBeNull();
+    expect(getSuiteAccountsConsumerEnvironment(
+      "draw-money",
+      "production",
+    )).toEqual({
+      billingReturn: { kind: "unsupported" },
+      siteUrl: "https://draw.money",
+    });
   });
 
   test("does not expose proxy cookie capabilities on OAuth registrations", () => {

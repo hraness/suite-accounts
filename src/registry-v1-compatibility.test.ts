@@ -16,7 +16,7 @@ import {
   suiteAccountsOidcProviderConfiguration,
 } from "./urls";
 
-test("the complete active v1 protocol registry remains byte-stable", () => {
+test("the complete frozen v1 protocol registry remains byte-stable", () => {
   const snapshot = JSON.stringify({
     central: (["account", "home", "login"] as const).map(destination =>
       suiteAccountsCentralUrl("production", destination)

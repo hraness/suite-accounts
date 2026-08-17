@@ -155,7 +155,7 @@ describe("suite Accounts client configuration", () => {
     }
   });
 
-  test("binds non-OAuth clients only with explicit null OAuth fields", () => {
+  test("rejects the retired proxy client even with its frozen v1 binding", () => {
     expect(createSuiteAccountsClientConfiguration({
       authMode: "proxy",
       callbackUrl: null,
@@ -163,7 +163,7 @@ describe("suite Accounts client configuration", () => {
       consumer: "draw-money",
       environment: "production",
       origin: "https://draw.money",
-    })).toMatchObject({ ok: true });
+    })).toEqual({ error: "invalid-consumer", ok: false });
   });
 
   test("does not admit retired registrations into the new boundary", () => {
