@@ -4,6 +4,7 @@ import { deepFreeze } from "./immutable.js";
 import {
   getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumer,
+  isSuiteAccountsActiveConsumerId,
   isSuiteAccountsConsumerId,
   type SuiteAccountsAuthConfiguration,
   type SuiteAccountsConsumerId,
@@ -124,6 +125,9 @@ export function createSuiteAccountsClientConfiguration(
   const binding = snapshotBinding(input);
   if (binding === null) return err("invalid-binding");
   if (!isSuiteAccountsConsumerId(binding.consumer)) {
+    return err("invalid-consumer");
+  }
+  if (!isSuiteAccountsActiveConsumerId(binding.consumer)) {
     return err("invalid-consumer");
   }
   if (binding.environment !== "production") {

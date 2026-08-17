@@ -55,6 +55,15 @@ function parseSuiteConsumerId(value) {
 }
 
 // src/registry.ts
+var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "sponge"
+]);
 var SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS = deepFreeze([
   "production"
 ]);
@@ -174,8 +183,13 @@ function getSuiteAccountsConsumerEnvironment(consumer, environment) {
   return registration.environments[environment] ?? null;
 }
 function getSuiteAccountsCurrentConsumerEnvironment(consumer, environment) {
+  if (!isSuiteAccountsActiveConsumerId(consumer))
+    return null;
   const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer];
   return override?.[environment] ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
+}
+function isSuiteAccountsActiveConsumerId(value) {
+  return SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS.includes(value);
 }
 function getSuiteAccountsDeployment(environment) {
   return SUITE_ACCOUNTS_DEPLOYMENTS[environment];
@@ -293,6 +307,9 @@ function createSuiteAccountsClientConfiguration(input) {
   if (binding === null)
     return err2("invalid-binding");
   if (!isSuiteAccountsConsumerId(binding.consumer)) {
+    return err2("invalid-consumer");
+  }
+  if (!isSuiteAccountsActiveConsumerId(binding.consumer)) {
     return err2("invalid-consumer");
   }
   if (binding.environment !== "production") {
