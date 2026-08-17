@@ -92,7 +92,7 @@ describe("suite receipt server helpers", () => {
         secret,
       }],
       version: 1,
-    })?.keys[0]?.product).toBe("oprte");
+    })?.keys[0]?.product).toBe("hra");
     expect(parseSuiteReceiptKeyring({
       keys: [
         {
@@ -264,7 +264,7 @@ describe("suite receipt server helpers", () => {
     )).toBe(false);
   });
 
-  test("verifies legacy OPRTE receipts with a canonicalized key authority", async () => {
+  test("verifies predecessor receipts with a canonical HRA key authority", async () => {
     const legacyKeyring = parseSuiteReceiptKeyring({
       keys: [{
         environment: "production",
@@ -292,6 +292,16 @@ describe("suite receipt server helpers", () => {
     };
     expect(await verifySuiteLinkReceiptSignature(
       receipt,
+      legacyKeyring,
+      nowMs,
+    )).toBe(true);
+    const oprteUnsigned = { ...unsigned, product: "oprte" } as const;
+    expect(await verifySuiteLinkReceiptSignature(
+      {
+        ...oprteUnsigned,
+        signature: await signature(suiteLinkReceiptMessage(oprteUnsigned)),
+        version: "suite-link-receipt-v1",
+      },
       legacyKeyring,
       nowMs,
     )).toBe(true);
@@ -325,9 +335,19 @@ describe("suite receipt server helpers", () => {
     )).toBe(true);
     expect(selectSuiteReceiptConfiguration(
       legacyKeyring,
+      "hra",
+      "v1",
+    )?.key.product).toBe("hra");
+    expect(selectSuiteReceiptConfiguration(
+      legacyKeyring,
       "oprte",
       "v1",
-    )?.key.product).toBe("oprte");
+    )?.key.product).toBe("hra");
+    expect(selectSuiteReceiptConfiguration(
+      legacyKeyring,
+      "kitchen",
+      "v1",
+    )?.key.product).toBe("hra");
   });
 
 });

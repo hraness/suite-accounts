@@ -102,11 +102,13 @@ export function parseSuiteReceiptKeyring(
  */
 export function selectSuiteReceiptConfiguration(
   value: unknown,
-  product: SuiteLinkProduct,
+  product: SignedSuiteLinkProduct,
   activeKeyVersion: unknown,
 ): SuiteReceiptConfiguration | null {
+  const canonicalProduct = parseSuiteLinkProduct(product);
   if (
-    typeof activeKeyVersion !== "string"
+    !canonicalProduct.ok
+    || typeof activeKeyVersion !== "string"
     || !/^[a-z0-9][a-z0-9._-]{0,31}$/u.test(activeKeyVersion)
   ) {
     return null;
@@ -114,14 +116,14 @@ export function selectSuiteReceiptConfiguration(
   const keyring = parseSuiteReceiptKeyring(value);
   if (keyring === null) return null;
   const active = keyring.keys.filter(key =>
-    key.product === product
+    key.product === canonicalProduct.value
     && key.keyVersion === activeKeyVersion
     && isSuiteIssuableEnvironment(key.environment)
   );
   if (active.length !== 1) return null;
   const key = active[0]!;
   const verificationKeys = keyring.keys.filter(candidate =>
-    candidate.product === product
+    candidate.product === canonicalProduct.value
     && candidate.environment === key.environment
   );
   return deepFreeze({

@@ -21,6 +21,8 @@ describe("shared Suite OIDC surface server", () => {
   test("binds only an exact registered environment origin", () => {
     expect(suiteEnvironmentForConsumerOrigin("oprte", "https://oprte.com"))
       .toBe("production");
+    expect(suiteEnvironmentForConsumerOrigin("hra", "https://hra.sh"))
+      .toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
       "oprte",
       "https://preview.oprte.com",
@@ -49,6 +51,14 @@ describe("shared Suite OIDC surface server", () => {
         clientId: "hraness:oprte:production:v1",
         siteUrl: "https://oprte.com",
       });
+    expect(createSurfaceSuiteRelyingParty("hra", {
+      ...configured,
+      NEXT_PUBLIC_SITE_URL: "https://hra.sh",
+    })?.configuration).toMatchObject({
+      callbackUrl: "https://hra.sh/api/suite-auth/callback",
+      clientId: "hraness:hra:production:v1",
+      siteUrl: "https://hra.sh",
+    });
     expect(createSurfaceSuiteRelyingParty("oprte", {
       ...configured,
       NEXT_PUBLIC_SITE_URL: "https://oprte.com.evil",

@@ -1,5 +1,7 @@
 import {
+  getSuiteAccountsCurrentConsumer,
   getSuiteAccountsConsumer,
+  isSuiteAccountsCurrentConsumerId,
   type SuiteAccountsCookieCapabilities,
   type SuiteAccountsCookieName,
 } from "./registry.js";
@@ -76,7 +78,9 @@ function cookiePrefix(config: ReadySuiteAccountsPublicConfig): string {
 function cookieCapabilities(
   config: ReadySuiteAccountsPublicConfig,
 ): SuiteAccountsCookieCapabilities {
-  const auth = getSuiteAccountsConsumer(config.consumer).auth;
+  const auth = isSuiteAccountsCurrentConsumerId(config.consumer)
+    ? getSuiteAccountsCurrentConsumer(config.consumer).auth
+    : getSuiteAccountsConsumer(config.consumer).auth;
   if (auth.kind !== "proxy") {
     throw new Error("Only a registered suite auth proxy may forward cookies.");
   }

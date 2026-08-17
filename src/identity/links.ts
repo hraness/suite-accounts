@@ -31,12 +31,13 @@ export const IDENTITY_LINK_CLOCK_SKEW_MS = 30_000;
 
 export const SUITE_LINK_PRODUCTS = deepFreeze([
   "soundfish",
-  "oprte",
+  "hra",
   // Compatibility-only readers for already-issued publication receipts and links.
   "crclte",
   "pub",
 ] as const satisfies readonly SuiteProduct[]);
 export const LEGACY_SUITE_LINK_PRODUCTS = deepFreeze([
+  "oprte",
   "kitchen",
 ] as const satisfies readonly LegacySuiteProductId[]);
 
@@ -54,7 +55,7 @@ export function parseSuiteLinkProduct(
   if (!parsed.ok) return parsed;
   switch (parsed.value) {
     case "soundfish":
-    case "oprte":
+    case "hra":
     case "crclte":
     case "pub":
       return ok(parsed.value);

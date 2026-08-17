@@ -7,8 +7,8 @@ import {
 } from "./oidc-rp.js";
 import {
   getSuiteAccountsCurrentConsumerEnvironment,
-  isSuiteAccountsLinkedOidcConsumerId,
-  type SuiteAccountsOidcConsumerId,
+  isSuiteAccountsCurrentLinkedOidcConsumerId,
+  type SuiteAccountsCurrentOidcConsumerId,
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
 
@@ -20,7 +20,7 @@ export type SuiteOidcSurfaceEnvironment = Readonly<{
 }>;
 
 export function suiteEnvironmentForConsumerOrigin(
-  consumer: SuiteAccountsOidcConsumerId,
+  consumer: SuiteAccountsCurrentOidcConsumerId,
   siteUrl: string | undefined,
 ): SuiteAccountsRemoteEnvironment | null {
   if (siteUrl === undefined) return null;
@@ -44,7 +44,7 @@ function processEnvironment(): SuiteOidcSurfaceEnvironment {
 }
 
 export function createSurfaceSuiteRelyingParty(
-  consumer: SuiteAccountsOidcConsumerId,
+  consumer: SuiteAccountsCurrentOidcConsumerId,
   injectedEnvironment: SuiteOidcSurfaceEnvironment = processEnvironment(),
 ): SuiteOidcRelyingParty | null {
   const environment = suiteEnvironmentForConsumerOrigin(
@@ -52,7 +52,7 @@ export function createSurfaceSuiteRelyingParty(
     injectedEnvironment.NEXT_PUBLIC_SITE_URL,
   );
   const cookieSecret = injectedEnvironment.SUITE_OIDC_COOKIE_SECRET;
-  const receiptKeyVersion = isSuiteAccountsLinkedOidcConsumerId(consumer)
+  const receiptKeyVersion = isSuiteAccountsCurrentLinkedOidcConsumerId(consumer)
     ? injectedEnvironment.SUITE_IDENTITY_RECEIPT_KEY_VERSION
     : "identity-v1";
   if (
@@ -91,7 +91,7 @@ function unavailable(): Response {
 }
 
 export function suiteOidcSurfaceHandler(
-  consumer: SuiteAccountsOidcConsumerId,
+  consumer: SuiteAccountsCurrentOidcConsumerId,
   options: Readonly<{
     createRelyingParty?: (
       request: Request,
@@ -111,7 +111,7 @@ export function suiteOidcSurfaceHandler(
 }
 
 export async function suiteOidcSurfaceServerSession(
-  consumer: SuiteAccountsOidcConsumerId,
+  consumer: SuiteAccountsCurrentOidcConsumerId,
   request: Request,
   injectedEnvironment?: SuiteOidcSurfaceEnvironment,
 ): Promise<SuiteOidcServerSession | null> {
@@ -128,7 +128,7 @@ export async function suiteOidcSurfaceServerSession(
  * to use `suiteOidcSurfaceServerSession`.
  */
 export async function suiteOidcSurfaceServerAccountSession(
-  consumer: SuiteAccountsOidcConsumerId,
+  consumer: SuiteAccountsCurrentOidcConsumerId,
   request: Request,
   injectedEnvironment?: SuiteOidcSurfaceEnvironment,
 ): Promise<SuiteOidcServerAccountSession | null> {
@@ -147,7 +147,7 @@ export async function suiteOidcSurfaceServerAccountSession(
  * browser session or relying-party cookie.
  */
 export async function suiteOidcSurfaceServerVerifiedEmail(
-  consumer: SuiteAccountsOidcConsumerId,
+  consumer: SuiteAccountsCurrentOidcConsumerId,
   request: Request,
   injectedEnvironment?: SuiteOidcSurfaceEnvironment,
   options: Readonly<{

@@ -12,12 +12,15 @@ import {
 
 export const SUITE_PRODUCTS = deepFreeze([
   "soundfish",
-  "oprte",
+  "hra",
   // Compatibility-only readers for retired publication principal evidence.
   "crclte",
   "pub",
 ] as const);
-export const LEGACY_SUITE_PRODUCT_IDS = deepFreeze(["kitchen"] as const);
+export const LEGACY_SUITE_PRODUCT_IDS = deepFreeze([
+  "oprte",
+  "kitchen",
+] as const);
 export const SUITE_ENVIRONMENTS = deepFreeze([
   "development",
   "staging",
@@ -135,15 +138,16 @@ export function parseSuiteProduct(
 ): Result<SuiteProduct, "invalid-product"> {
   switch (value) {
     case "soundfish":
-    case "oprte":
+    case "hra":
     case "crclte":
     case "pub":
       return ok(value);
-    // `kitchen` was the public product ID before the OPRTE rename. Parse it
-    // only at foreign/stored boundaries and immediately return the canonical
-    // identity so new state cannot perpetuate the alias.
+    // OPRTE and Kitchen are predecessor product IDs. Parse them only at
+    // foreign or stored boundaries and immediately return HRA so new state
+    // cannot perpetuate either predecessor identity.
+    case "oprte":
     case "kitchen":
-      return ok("oprte");
+      return ok("hra");
     default:
       return err("invalid-product");
   }

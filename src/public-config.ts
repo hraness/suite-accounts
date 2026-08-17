@@ -3,9 +3,13 @@ import { deepFreeze } from "./immutable.js";
 
 import {
   getSuiteAccountsCurrentConsumerEnvironment,
+  getSuiteAccountsCurrentConsumer,
   getSuiteAccountsConsumer,
   getSuiteAccountsDeployment,
+  isSuiteAccountsCurrentConsumerId,
+  type SuiteAccountsAuthConfiguration,
   type SuiteAccountsConsumerId,
+  type SuiteAccountsCurrentConsumerId,
   type SuiteAccountsEnvironment,
 } from "./registry.js";
 
@@ -29,7 +33,7 @@ export type SuiteAccountsPublicEnvironment = Readonly<{
 
 type ReadySuiteAccountsPublicConfigBase = Readonly<{
   canonicalProductOrigin: string;
-  consumer: SuiteAccountsConsumerId;
+  consumer: SuiteAccountsPublicConsumerId;
   convexSiteUrl: string;
   convexUrl: string;
   environment: SuiteAccountsEnvironment;
@@ -37,6 +41,10 @@ type ReadySuiteAccountsPublicConfigBase = Readonly<{
   siteUrl: string;
   surfaceOrigin: string;
 }>;
+
+export type SuiteAccountsPublicConsumerId =
+  | SuiteAccountsConsumerId
+  | SuiteAccountsCurrentConsumerId;
 
 export type ReadySuiteAccountsAuthConfiguration =
     | Readonly<{
@@ -96,12 +104,12 @@ function parseOrigin(
 }
 
 function readyRemoteConfig(
-  consumer: SuiteAccountsConsumerId,
+  consumer: SuiteAccountsPublicConsumerId,
   siteUrl: string,
   convexUrl: string,
   convexSiteUrl: string,
 ): ReadySuiteAccountsPublicConfig | null {
-  const registration = getSuiteAccountsConsumer(consumer);
+  const registration = getPublicConsumer(consumer);
   const environment = "production" as const;
   const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
     consumer,
@@ -129,7 +137,7 @@ function readyRemoteConfig(
 }
 
 function publicAuthConfiguration(
-  auth: ReturnType<typeof getSuiteAccountsConsumer>["auth"],
+  auth: SuiteAccountsAuthConfiguration,
 ): ReadySuiteAccountsAuthConfiguration {
   switch (auth.kind) {
     case "authority":
@@ -141,8 +149,14 @@ function publicAuthConfiguration(
   }
 }
 
+function getPublicConsumer(consumer: SuiteAccountsPublicConsumerId) {
+  return isSuiteAccountsCurrentConsumerId(consumer)
+    ? getSuiteAccountsCurrentConsumer(consumer)
+    : getSuiteAccountsConsumer(consumer);
+}
+
 export function parseSuiteAccountsPublicConfig(
-  consumer: SuiteAccountsConsumerId,
+  consumer: SuiteAccountsPublicConsumerId,
   environment: SuiteAccountsPublicEnvironment,
 ): Exclude<SuiteAccountsPublicConfig, { kind: "invalid" }> {
   const missing = SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS.filter((name) => {
@@ -186,7 +200,7 @@ export function parseSuiteAccountsPublicConfig(
         "Local consumer and Accounts endpoints must use the same loopback host.",
       );
     }
-    const registration = getSuiteAccountsConsumer(consumer);
+    const registration = getPublicConsumer(consumer);
     return deepFreeze({
       ...publicAuthConfiguration(registration.auth),
       canonicalProductOrigin: site.origin,
@@ -223,7 +237,7 @@ export function parseSuiteAccountsPublicConfig(
     );
     if (production === null) {
       throw new Error(
-        `${getSuiteAccountsConsumer(consumer).displayName} and Accounts endpoints `
+        `${getPublicConsumer(consumer).displayName} and Accounts endpoints `
           + "do not match the production deployment.",
       );
     }
@@ -243,13 +257,13 @@ export function parseSuiteAccountsPublicConfig(
   );
   if (remote !== null) return remote;
   throw new Error(
-    `${getSuiteAccountsConsumer(consumer).displayName} and Accounts endpoints `
+    `${getPublicConsumer(consumer).displayName} and Accounts endpoints `
       + "do not match an owned deployment environment.",
   );
 }
 
 export function suiteAccountsPublicConfigFromEnvironment(
-  consumer: SuiteAccountsConsumerId,
+  consumer: SuiteAccountsPublicConsumerId,
   environment: SuiteAccountsPublicEnvironment = {
     NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
       process.env.NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN,

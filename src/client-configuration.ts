@@ -3,11 +3,10 @@ import { err, isRecord, ok, type Result } from "@hraness/result";
 import { deepFreeze } from "./immutable.js";
 import {
   getSuiteAccountsCurrentConsumerEnvironment,
-  getSuiteAccountsConsumer,
-  isSuiteAccountsActiveConsumerId,
-  isSuiteAccountsConsumerId,
+  getSuiteAccountsCurrentConsumer,
+  isSuiteAccountsCurrentConsumerId,
   type SuiteAccountsAuthConfiguration,
-  type SuiteAccountsConsumerId,
+  type SuiteAccountsCurrentConsumerId,
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
 import {
@@ -24,7 +23,7 @@ export type SuiteAccountsClientBinding = Readonly<{
   authMode: SuiteAccountsAuthConfiguration["kind"];
   callbackUrl: string | null;
   clientId: string | null;
-  consumer: SuiteAccountsConsumerId;
+  consumer: SuiteAccountsCurrentConsumerId;
   environment: SuiteAccountsRemoteEnvironment;
   origin: string;
 }>;
@@ -124,10 +123,7 @@ export function createSuiteAccountsClientConfiguration(
 > {
   const binding = snapshotBinding(input);
   if (binding === null) return err("invalid-binding");
-  if (!isSuiteAccountsConsumerId(binding.consumer)) {
-    return err("invalid-consumer");
-  }
-  if (!isSuiteAccountsActiveConsumerId(binding.consumer)) {
+  if (!isSuiteAccountsCurrentConsumerId(binding.consumer)) {
     return err("invalid-consumer");
   }
   if (binding.environment !== "production") {
@@ -136,7 +132,7 @@ export function createSuiteAccountsClientConfiguration(
 
   const consumer = binding.consumer;
   const environment = binding.environment;
-  const registration = getSuiteAccountsConsumer(consumer);
+  const registration = getSuiteAccountsCurrentConsumer(consumer);
   const deployed = getSuiteAccountsCurrentConsumerEnvironment(
     consumer,
     environment,

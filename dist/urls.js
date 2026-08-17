@@ -55,15 +55,6 @@ function parseSuiteConsumerId(value) {
 }
 
 // src/registry.ts
-var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
-  "accounts",
-  "act60",
-  "elders",
-  "soundfish",
-  "oh-computer",
-  "oprte",
-  "sponge"
-]);
 var SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS = deepFreeze([
   "production"
 ]);
@@ -155,6 +146,45 @@ var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
     production: unsupported("https://sponge.computer")
   }
 });
+var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "hra",
+  "sponge"
+]);
+function currentOidcSite(id, displayName, productionSiteUrl) {
+  return {
+    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+    displayName,
+    environments: {
+      production: unsupported(productionSiteUrl)
+    },
+    id
+  };
+}
+var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
+  accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
+  act60: SUITE_ACCOUNTS_CONSUMERS.act60,
+  elders: SUITE_ACCOUNTS_CONSUMERS.elders,
+  soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
+  "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
+  oprte: SUITE_ACCOUNTS_CONSUMERS.oprte,
+  hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
+  sponge: currentOidcSite("sponge", "Sponge", "https://sponge.computer")
+});
+var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "sponge"
+]);
 var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 function suiteAccountsConsumerRequiresEmailOtp(consumer) {
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
@@ -162,6 +192,12 @@ function suiteAccountsConsumerRequiresEmailOtp(consumer) {
 var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
   "oprte"
+]);
+var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
+var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
+  "soundfish",
+  "oprte",
+  "hra"
 ]);
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
@@ -175,6 +211,21 @@ function isSuiteAccountsLinkedOidcConsumerId(value) {
 function isSuiteAccountsOAuthConsumerId(value) {
   return getSuiteAccountsConsumer(value).auth.kind === "oidc-rp";
 }
+function isSuiteAccountsCurrentConsumerId(value) {
+  return typeof value === "string" && SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsCurrentOidcConsumerId(value) {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+function isSuiteAccountsCurrentLinkedOidcConsumerId(value) {
+  return SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsCurrentOAuthConsumerId(value) {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+function suiteAccountsCurrentConsumerRequiresEmailOtp(consumer) {
+  return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
+}
 function getSuiteAccountsConsumer(consumer) {
   return SUITE_ACCOUNTS_CONSUMERS[consumer];
 }
@@ -182,11 +233,13 @@ function getSuiteAccountsConsumerEnvironment(consumer, environment) {
   const registration = getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;
 }
+function getSuiteAccountsCurrentConsumer(consumer) {
+  return SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer];
+}
 function getSuiteAccountsCurrentConsumerEnvironment(consumer, environment) {
-  if (!isSuiteAccountsActiveConsumerId(consumer))
+  if (!isSuiteAccountsCurrentConsumerId(consumer))
     return null;
-  const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer];
-  return override?.[environment] ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
+  return getSuiteAccountsCurrentConsumer(consumer).environments[environment] ?? null;
 }
 function isSuiteAccountsActiveConsumerId(value) {
   return SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS.includes(value);
@@ -223,7 +276,7 @@ function suiteAccountsOidcClientRegistration(consumer, environment) {
   });
 }
 function suiteAccountsCurrentOidcClientRegistration(consumer, environment) {
-  if (!isSuiteAccountsConsumerId(consumer) || !isSuiteAccountsOAuthConsumerId(consumer))
+  if (!isSuiteAccountsCurrentConsumerId(consumer) || !isSuiteAccountsCurrentOAuthConsumerId(consumer))
     return null;
   const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   if (consumerEnvironment === null)
@@ -237,6 +290,11 @@ function suiteAccountsOidcClientRequiresEmailOtp(clientId) {
   if (typeof clientId !== "string")
     return false;
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some((consumer) => suiteAccountsOidcClientRegistration(consumer, "production")?.clientId === clientId);
+}
+function suiteAccountsCurrentOidcClientRequiresEmailOtp(clientId) {
+  if (typeof clientId !== "string")
+    return false;
+  return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some((consumer) => suiteAccountsCurrentOidcClientRegistration(consumer, "production")?.clientId === clientId);
 }
 function suiteAccountsOidcProviderConfiguration(environment) {
   const issuer = getSuiteAccountsDeployment(environment).accountsOrigin;
@@ -258,6 +316,7 @@ export {
   suiteAccountsOidcProviderConfiguration,
   suiteAccountsOidcClientRequiresEmailOtp,
   suiteAccountsOidcClientRegistration,
+  suiteAccountsCurrentOidcClientRequiresEmailOtp,
   suiteAccountsCurrentOidcClientRegistration,
   suiteAccountsCentralUrl,
   suiteAccountsBillingReturnUrl,

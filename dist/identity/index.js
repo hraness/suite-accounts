@@ -216,11 +216,14 @@ function parseSuiteUsername(value) {
 // src/identity/principals.ts
 var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
-  "oprte",
+  "hra",
   "crclte",
   "pub"
 ]);
-var LEGACY_SUITE_PRODUCT_IDS = deepFreeze(["kitchen"]);
+var LEGACY_SUITE_PRODUCT_IDS = deepFreeze([
+  "oprte",
+  "kitchen"
+]);
 var SUITE_ENVIRONMENTS = deepFreeze([
   "development",
   "staging",
@@ -273,12 +276,13 @@ function parseIssuerSubject(value) {
 function parseSuiteProduct(value) {
   switch (value) {
     case "soundfish":
-    case "oprte":
+    case "hra":
     case "crclte":
     case "pub":
       return ok5(value);
+    case "oprte":
     case "kitchen":
-      return ok5("oprte");
+      return ok5("hra");
     default:
       return err5("invalid-product");
   }
@@ -365,11 +369,12 @@ var SUITE_ENTITLEMENT_RECEIPT_MAX_TTL_MS = 5 * 60000;
 var IDENTITY_LINK_CLOCK_SKEW_MS = 30000;
 var SUITE_LINK_PRODUCTS = deepFreeze([
   "soundfish",
-  "oprte",
+  "hra",
   "crclte",
   "pub"
 ]);
 var LEGACY_SUITE_LINK_PRODUCTS = deepFreeze([
+  "oprte",
   "kitchen"
 ]);
 function parseSuiteLinkProduct(value) {
@@ -378,7 +383,7 @@ function parseSuiteLinkProduct(value) {
     return parsed;
   switch (parsed.value) {
     case "soundfish":
-    case "oprte":
+    case "hra":
     case "crclte":
     case "pub":
       return ok6(parsed.value);

@@ -8,6 +8,7 @@ import {
   suiteAccountsBillingReturnUrl,
   suiteAccountsCentralUrl,
   suiteAccountsCurrentOidcClientRegistration,
+  suiteAccountsCurrentOidcClientRequiresEmailOtp,
   suiteAccountsOidcClientRegistration,
   suiteAccountsOidcClientRequiresEmailOtp,
   suiteAccountsOidcProviderConfiguration,
@@ -93,6 +94,18 @@ describe("suite Accounts URLs", () => {
       callbackUrl: "https://sponge.computer/api/suite-auth/callback",
       clientId: "hraness:sponge:production:v1",
     });
+    expect(
+      suiteAccountsCurrentOidcClientRegistration("hra", "production"),
+    ).toEqual({
+      callbackUrl: "https://hra.sh/api/suite-auth/callback",
+      clientId: "hraness:hra:production:v1",
+    });
+    expect(
+      suiteAccountsCurrentOidcClientRegistration("oprte", "production"),
+    ).toEqual({
+      callbackUrl: "https://oprte.com/api/suite-auth/callback",
+      clientId: "hraness:oprte:production:v1",
+    });
   });
 
   test("matches only checked email-OTP-required client IDs", () => {
@@ -103,6 +116,15 @@ describe("suite Accounts URLs", () => {
       "hraness:elders:staging:v1",
     )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
+      "hraness:oprte:production:v1",
+    )).toBe(true);
+    expect(suiteAccountsOidcClientRequiresEmailOtp(
+      "hraness:hra:production:v1",
+    )).toBe(false);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
+      "hraness:hra:production:v1",
+    )).toBe(true);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:oprte:production:v1",
     )).toBe(true);
     expect(suiteAccountsOidcClientRequiresEmailOtp(

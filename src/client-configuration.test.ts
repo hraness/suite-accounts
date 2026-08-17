@@ -6,23 +6,23 @@ import {
   SUITE_ACCOUNTS_WIRE_VERSION,
 } from "./client-configuration";
 
-const oprteBinding = {
+const hraBinding = {
   authMode: "oidc-rp",
-  callbackUrl: "https://oprte.com/api/suite-auth/callback",
-  clientId: "hraness:oprte:production:v1",
-  consumer: "oprte",
+  callbackUrl: "https://hra.sh/api/suite-auth/callback",
+  clientId: "hraness:hra:production:v1",
+  consumer: "hra",
   environment: "production",
-  origin: "https://oprte.com",
+  origin: "https://hra.sh",
 } as const;
 
 describe("suite Accounts client configuration", () => {
   test("derives every authority-controlled value from one exact binding", () => {
-    const result = createSuiteAccountsClientConfiguration(oprteBinding);
+    const result = createSuiteAccountsClientConfiguration(hraBinding);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value).toEqual({
       authBasePath: "/api/suite-auth",
-      binding: oprteBinding,
+      binding: hraBinding,
       configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
       provider: {
         authorizationEndpoint:
@@ -58,20 +58,20 @@ describe("suite Accounts client configuration", () => {
       "https://attacker.example",
     )).toBe(false);
     expect(result.value.provider.issuer).toBe("https://account.hraness.com");
-    expect(result.value.binding.origin).toBe("https://oprte.com");
+    expect(result.value.binding.origin).toBe("https://hra.sh");
   });
 
   test("rejects every caller-selected trust value", () => {
     for (const field of ["issuer", "jwksEndpoint", "resource", "wireVersion"]) {
       expect(createSuiteAccountsClientConfiguration({
-        ...oprteBinding,
+        ...hraBinding,
         [field]: "https://attacker.example",
       })).toEqual({ error: "invalid-binding", ok: false });
     }
   });
 
   test("rejects hidden, symbolic, and accessor binding fields", () => {
-    const hidden: Record<PropertyKey, unknown> = { ...oprteBinding };
+    const hidden: Record<PropertyKey, unknown> = { ...hraBinding };
     Object.defineProperty(hidden, "issuer", {
       enumerable: false,
       value: "https://attacker.example",
@@ -82,7 +82,7 @@ describe("suite Accounts client configuration", () => {
     });
 
     const symbolic = {
-      ...oprteBinding,
+      ...hraBinding,
       [Symbol("jwksEndpoint")]: "https://attacker.example/jwks",
     };
     expect(createSuiteAccountsClientConfiguration(symbolic)).toEqual({
@@ -91,12 +91,12 @@ describe("suite Accounts client configuration", () => {
     });
 
     let consumerReads = 0;
-    const accessor: Record<string, unknown> = { ...oprteBinding };
+    const accessor: Record<string, unknown> = { ...hraBinding };
     Object.defineProperty(accessor, "consumer", {
       enumerable: true,
       get() {
         consumerReads += 1;
-        return "oprte";
+        return "hra";
       },
     });
     expect(createSuiteAccountsClientConfiguration(accessor)).toEqual({
@@ -107,7 +107,7 @@ describe("suite Accounts client configuration", () => {
   });
 
   test("turns reflective proxy failures into an invalid binding", () => {
-    const hostile = new Proxy({ ...oprteBinding }, {
+    const hostile = new Proxy({ ...hraBinding }, {
       ownKeys() {
         throw new Error("hostile ownKeys trap");
       },
@@ -122,7 +122,7 @@ describe("suite Accounts client configuration", () => {
     let descriptorReads = 0;
     let propertyReads = 0;
     let ownKeyReads = 0;
-    const observed = new Proxy({ ...oprteBinding }, {
+    const observed = new Proxy({ ...hraBinding }, {
       get() {
         propertyReads += 1;
         throw new Error("binding properties must not be read directly");
@@ -145,14 +145,29 @@ describe("suite Accounts client configuration", () => {
 
   test("rejects a different origin, client, callback, or auth mode", () => {
     const mutations = [
-      { ...oprteBinding, origin: "https://example.com" },
-      { ...oprteBinding, clientId: "hraness:soundfish:production:v1" },
-      { ...oprteBinding, callbackUrl: "https://oprte.com/callback" },
-      { ...oprteBinding, authMode: "proxy" },
+      { ...hraBinding, origin: "https://example.com" },
+      { ...hraBinding, clientId: "hraness:soundfish:production:v1" },
+      { ...hraBinding, callbackUrl: "https://hra.sh/callback" },
+      { ...hraBinding, authMode: "proxy" },
     ] as const;
     for (const mutation of mutations) {
       expect(createSuiteAccountsClientConfiguration(mutation).ok).toBe(false);
     }
+  });
+
+  test("keeps the OPRTE client available for the bounded rollback window", () => {
+    const result = createSuiteAccountsClientConfiguration({
+      authMode: "oidc-rp",
+      callbackUrl: "https://oprte.com/api/suite-auth/callback",
+      clientId: "hraness:oprte:production:v1",
+      consumer: "oprte",
+      environment: "production",
+      origin: "https://oprte.com",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.binding.consumer).toBe("oprte");
+    expect(result.value.binding.origin).toBe("https://oprte.com");
   });
 
   test("rejects the retired proxy client even with its frozen v1 binding", () => {

@@ -16,11 +16,11 @@ import {
   type VerifiedSuiteEntitlements,
 } from "./entitlements.js";
 import {
-  type SuiteAccountsOAuthConsumerId,
+  type SuiteAccountsCurrentOAuthConsumerId,
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
 import {
-  suiteAccountsOidcClientRegistration,
+  suiteAccountsCurrentOidcClientRegistration,
   suiteAccountsOidcProviderConfiguration,
 } from "./urls.js";
 
@@ -73,7 +73,7 @@ export type SuiteBearerVerifier = Readonly<{
 }>;
 
 export type CreateSuiteBearerVerifierOptions = Readonly<{
-  consumer: SuiteAccountsOAuthConsumerId;
+  consumer: SuiteAccountsCurrentOAuthConsumerId;
   environment: SuiteAccountsRemoteEnvironment;
   fetch?: FetchImplementation;
   fetchTimeoutMs?: number;
@@ -287,7 +287,7 @@ function missingJwksKey(error: unknown): boolean {
 export function createSuiteBearerVerifier(
   options: CreateSuiteBearerVerifierOptions,
 ): SuiteBearerVerifier {
-  const client = suiteAccountsOidcClientRegistration(
+  const client = suiteAccountsCurrentOidcClientRegistration(
     options.consumer,
     options.environment,
   );

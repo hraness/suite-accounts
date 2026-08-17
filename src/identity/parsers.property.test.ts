@@ -66,13 +66,13 @@ test("all identity parsers are total over arbitrary foreign values", () => {
   );
 });
 
-test("legacy OPRTE identity aliases always canonicalize to the active ID", () => {
+test("predecessor product aliases canonicalize without changing frozen clients", () => {
   assertProperty(fc.property(
     fc.constantFrom("oprte", "kitchen"),
     (product) => {
       expect(parseSuiteProduct(product)).toEqual({
         ok: true,
-        value: "oprte",
+        value: "hra",
       });
       expect(parseSuiteConsumerId(product)).toEqual({
         ok: true,

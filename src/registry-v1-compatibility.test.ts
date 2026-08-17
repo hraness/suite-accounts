@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { expect, test } from "bun:test";
 
 import {
+  SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
   SUITE_ACCOUNTS_CONSUMERS,
   SUITE_ACCOUNTS_DEPLOYMENTS,
   SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS,
@@ -18,6 +19,7 @@ import {
 
 test("the complete frozen v1 protocol registry remains byte-stable", () => {
   const snapshot = JSON.stringify({
+    active: SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
     central: (["account", "home", "login"] as const).map(destination =>
       suiteAccountsCentralUrl("production", destination)
     ),
@@ -36,6 +38,6 @@ test("the complete frozen v1 protocol registry remains byte-stable", () => {
     ]),
   });
   expect(createHash("sha256").update(snapshot).digest("hex")).toBe(
-    "ae246aaa489e65500ca17d97f6aece9f24da05330d8f4f110bd8670a6c85f675",
+    "e06596700ffd39a76ae171586536d26f2451e7fab6e6045cea32a98480d650a6",
   );
 });

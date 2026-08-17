@@ -36,10 +36,10 @@ import {
 } from "./entitlements.js";
 import {
   getSuiteAccountsCurrentConsumerEnvironment,
-  isSuiteAccountsLinkedOidcConsumerId,
-  suiteAccountsConsumerRequiresEmailOtp,
-  type SuiteAccountsLinkedOidcConsumerId,
-  type SuiteAccountsOidcConsumerId,
+  isSuiteAccountsCurrentLinkedOidcConsumerId,
+  suiteAccountsCurrentConsumerRequiresEmailOtp,
+  type SuiteAccountsCurrentLinkedOidcConsumerId,
+  type SuiteAccountsCurrentOidcConsumerId,
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
 import {
@@ -63,8 +63,8 @@ const REMOTE_SESSION_COOKIE = "__Host-hraness-suite-oidc-session";
 const LOCAL_TRANSACTION_COOKIE = "hraness-suite-oidc-local-transaction";
 const LOCAL_SESSION_COOKIE = "hraness-suite-oidc-local-session";
 
-export type SuiteOidcConsumer = SuiteAccountsOidcConsumerId;
-type SuiteOidcReceiptConsumer = SuiteAccountsLinkedOidcConsumerId;
+export type SuiteOidcConsumer = SuiteAccountsCurrentOidcConsumerId;
+type SuiteOidcReceiptConsumer = SuiteAccountsCurrentLinkedOidcConsumerId;
 type FetchImplementation = (
   input: RequestInfo | URL,
   init?: RequestInit,
@@ -73,7 +73,7 @@ type FetchImplementation = (
 function isReceiptConsumer(
   consumer: SuiteOidcConsumer,
 ): consumer is SuiteOidcReceiptConsumer {
-  return isSuiteAccountsLinkedOidcConsumerId(consumer);
+  return isSuiteAccountsCurrentLinkedOidcConsumerId(consumer);
 }
 
 type Transaction = Readonly<{
@@ -1515,7 +1515,7 @@ export function createSuiteOidcRelyingParty(
     authorize.searchParams.set("code_challenge_method", "S256");
     authorize.searchParams.set("nonce", transaction.nonce);
     if (
-      suiteAccountsConsumerRequiresEmailOtp(consumer)
+      suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)
     ) {
       authorize.searchParams.set("prompt", "login");
     }
@@ -1524,7 +1524,7 @@ export function createSuiteOidcRelyingParty(
     authorize.searchParams.set("response_type", "code");
     authorize.searchParams.set(
       "scope",
-      suiteAccountsConsumerRequiresEmailOtp(consumer)
+      suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)
         ? "openid profile email offline_access"
         : "openid offline_access",
     );
@@ -1704,7 +1704,7 @@ export function createSuiteOidcRelyingParty(
     if (session === null || view === null) return null;
     let verifiedEmail: string | null = null;
     if (
-      suiteAccountsConsumerRequiresEmailOtp(consumer)
+      suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)
     ) {
       let userInfo: unknown;
       try {
