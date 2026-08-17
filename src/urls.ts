@@ -2,10 +2,14 @@ import {
   getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumerEnvironment,
   getSuiteAccountsDeployment,
+  isSuiteAccountsCurrentConsumerId,
+  isSuiteAccountsCurrentOAuthConsumerId,
   isSuiteAccountsConsumerId,
   isSuiteAccountsOAuthConsumerId,
+  SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
   type SuiteAccountsConsumerId,
+  type SuiteAccountsCurrentOidcClientRegistration,
   type SuiteAccountsOidcClientRegistration,
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
@@ -88,10 +92,10 @@ export function suiteAccountsOidcClientRegistration(
 export function suiteAccountsCurrentOidcClientRegistration(
   consumer: unknown,
   environment: SuiteAccountsRemoteEnvironment,
-): SuiteAccountsOidcClientRegistration | null {
+): SuiteAccountsCurrentOidcClientRegistration | null {
   if (
-    !isSuiteAccountsConsumerId(consumer)
-    || !isSuiteAccountsOAuthConsumerId(consumer)
+    !isSuiteAccountsCurrentConsumerId(consumer)
+    || !isSuiteAccountsCurrentOAuthConsumerId(consumer)
   ) return null;
   const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
     consumer,
@@ -115,6 +119,20 @@ export function suiteAccountsOidcClientRequiresEmailOtp(
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some(consumer =>
     suiteAccountsOidcClientRegistration(consumer, "production")?.clientId
       === clientId
+  );
+}
+
+/** Match an exact current browser client that accepts email-code sessions. */
+export function suiteAccountsCurrentOidcClientRequiresEmailOtp(
+  clientId: unknown,
+): boolean {
+  if (typeof clientId !== "string") return false;
+  return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some(
+    consumer =>
+      suiteAccountsCurrentOidcClientRegistration(
+        consumer,
+        "production",
+      )?.clientId === clientId,
   );
 }
 

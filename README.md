@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.2.2"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.0"
   }
 }
 ```
@@ -43,11 +43,11 @@ import { createSuiteAccountsClientConfiguration } from
 
 const configuration = createSuiteAccountsClientConfiguration({
   authMode: "oidc-rp",
-  callbackUrl: "https://oprte.com/api/suite-auth/callback",
-  clientId: "hraness:oprte:production:v1",
-  consumer: "oprte",
+  callbackUrl: "https://hra.sh/api/suite-auth/callback",
+  clientId: "hraness:hra:production:v1",
+  consumer: "hra",
   environment: "production",
-  origin: "https://oprte.com",
+  origin: "https://hra.sh",
 });
 
 if (!configuration.ok) {
@@ -59,9 +59,16 @@ configuration.value.provider.issuer;
 ```
 
 The returned configuration is frozen. Its provider endpoints, resource,
-configuration version, and wire version are derived from the package's frozen
-v1 authority data. The Accounts service independently enforces the same
+configuration version, and wire version are derived from the package's checked
+current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
+
+Version 0.3.0 registers HRA at `https://hra.sh` with client ID
+`hraness:hra:production:v1`. The current registry also retains the exact OPRTE
+registration for the bounded cutover rollback window. New product state and
+signed-protocol parsing canonicalize the predecessor `oprte` and `kitchen`
+product IDs to `hra`; signature verification still uses the original product
+bytes, so bounded predecessor receipts remain verifiable.
 
 Local development still uses `parseSuiteAccountsPublicConfig`. The consumer
 origin and both Accounts Convex origins must use one exact loopback hostname.
@@ -143,12 +150,18 @@ destinations, billing plan membership, or an unverified receipt.
 
 ## Frozen v1 protocol compatibility
 
-`SUITE_ACCOUNTS_CONSUMERS`, `SUITE_ACCOUNTS_DEPLOYMENTS`, their policy arrays,
-and their lookup helpers preserve the active v1 protocol registry. They are
-deeply runtime-frozen and deprecated for new consumers. Existing applications
-may use them while migrating, but new registration remains an Accounts service
-change followed by a package release and an exact factory binding. Retired
-client identifiers and routes are rejected.
+`SUITE_CONSUMER_IDS`, `SUITE_ACCOUNTS_CONSUMERS`,
+`SUITE_ACCOUNTS_DEPLOYMENTS`, their policy arrays, and their lookup helpers
+preserve the released v1 protocol registry byte for byte. They are deeply
+runtime-frozen and deprecated for new consumers. Existing applications may use
+them while migrating.
+
+Current authority lives under the distinct
+`SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS` and
+`SUITE_ACCOUNTS_CURRENT_CONSUMERS` exports and their current lookup helpers.
+New registration remains an Accounts service change followed by a package
+release and an exact factory binding. Retired client identifiers and routes are
+rejected by current APIs.
 
 The published v1 browser refresh-lock and session-notification channel strings
 also remain unchanged in version 0.1. Existing tabs therefore coordinate

@@ -2,15 +2,26 @@ import { describe, expect, expectTypeOf, test } from "bun:test";
 
 import {
   SUITE_ACCOUNTS_CONSUMERS,
+  SUITE_ACCOUNTS_CURRENT_CONSUMERS,
+  SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS,
+  SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
+  SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS,
   SUITE_ACCOUNTS_DEPLOYMENTS,
   SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
   SUITE_CONSUMER_IDS,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
+  getSuiteAccountsCurrentConsumer,
   getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumerEnvironment,
+  isSuiteAccountsCurrentConsumerId,
+  isSuiteAccountsCurrentOAuthConsumerId,
+  isSuiteAccountsCurrentOidcConsumerId,
   isSuiteAccountsOAuthConsumerId,
   isSuiteAccountsOidcConsumerId,
+  suiteAccountsCurrentConsumerRequiresEmailOtp,
   suiteAccountsConsumerRequiresEmailOtp,
+  type SuiteAccountsCurrentOAuthConsumerId,
+  type SuiteAccountsCurrentOidcConsumerId,
   type SuiteAccountsRemoteEnvironment,
   type SuiteAccountsOAuthConsumerId,
   type SuiteAccountsOidcConsumerId,
@@ -48,7 +59,7 @@ describe("suite Accounts auth-mode registry", () => {
     }
   });
 
-  test("keeps frozen v1 bytes while removing retired clients from current authority", () => {
+  test("keeps frozen v1 bytes while evolving a distinct current authority", () => {
     expect(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS).toEqual([
       "accounts",
       "act60",
@@ -58,6 +69,18 @@ describe("suite Accounts auth-mode registry", () => {
       "oprte",
       "sponge",
     ]);
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS).toEqual([
+      "accounts",
+      "act60",
+      "elders",
+      "soundfish",
+      "oh-computer",
+      "oprte",
+      "hra",
+      "sponge",
+    ]);
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS)
+      .not.toBe(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS);
     expect(getSuiteAccountsCurrentConsumerEnvironment(
       "draw-money",
       "production",
@@ -69,6 +92,65 @@ describe("suite Accounts auth-mode registry", () => {
       billingReturn: { kind: "unsupported" },
       siteUrl: "https://draw.money",
     });
+  });
+
+  test("registers HRA alongside the bounded OPRTE rollback client", () => {
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra).toEqual({
+      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+      displayName: "HRA",
+      environments: {
+        production: {
+          billingReturn: { kind: "unsupported" },
+          siteUrl: "https://hra.sh",
+        },
+      },
+      id: "hra",
+    });
+    expect(getSuiteAccountsCurrentConsumer("oprte"))
+      .toBe(SUITE_ACCOUNTS_CONSUMERS.oprte);
+    expect(getSuiteAccountsCurrentConsumerEnvironment(
+      "hra",
+      "production",
+    )).toEqual({
+      billingReturn: { kind: "unsupported" },
+      siteUrl: "https://hra.sh",
+    });
+    expect(isSuiteAccountsCurrentConsumerId("hra")).toBe(true);
+    expect(isSuiteAccountsCurrentConsumerId("draw-money")).toBe(false);
+    expect(isSuiteAccountsCurrentOidcConsumerId("hra")).toBe(true);
+    expect(isSuiteAccountsCurrentOAuthConsumerId("hra")).toBe(true);
+    expectTypeOf<SuiteAccountsCurrentOidcConsumerId>().toEqualTypeOf<
+      | "act60"
+      | "elders"
+      | "soundfish"
+      | "oh-computer"
+      | "oprte"
+      | "hra"
+      | "sponge"
+    >();
+    expectTypeOf<SuiteAccountsCurrentOAuthConsumerId>().toEqualTypeOf<
+      SuiteAccountsCurrentOidcConsumerId
+    >();
+  });
+
+  test("keeps current OTP and linked-product policies explicit", () => {
+    expect(SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS)
+      .toEqual([
+        "act60",
+        "elders",
+        "soundfish",
+        "oh-computer",
+        "oprte",
+        "hra",
+        "sponge",
+      ]);
+    expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
+      "soundfish",
+      "oprte",
+      "hra",
+    ]);
+    expect(suiteAccountsCurrentConsumerRequiresEmailOtp("hra")).toBe(true);
+    expect(SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS).not.toContain("hra");
   });
 
   test("does not expose proxy cookie capabilities on OAuth registrations", () => {
@@ -162,7 +244,7 @@ describe("suite Accounts auth-mode registry", () => {
     );
   });
 
-  test("registers only the canonical OPRTE identity", () => {
+  test("keeps the exact frozen v1 OPRTE identity", () => {
     expect(SUITE_ACCOUNTS_CONSUMERS.oprte).toEqual({
       auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
       displayName: "OPRTE",
@@ -214,6 +296,16 @@ describe("suite Accounts auth-mode registry", () => {
       "0",
       "accounts",
     )).toBe(false);
+    expect(Reflect.set(
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production,
+      "siteUrl",
+      "https://attacker.example",
+    )).toBe(false);
+    expect(Reflect.set(
+      SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS,
+      "0",
+      "accounts",
+    )).toBe(false);
     const authority = SUITE_ACCOUNTS_CONSUMERS.accounts.auth;
     if (authority.kind !== "authority") throw new Error("Missing authority.");
     expect(Reflect.set(authority.cookies.names, "0", "foreign_cookie"))
@@ -223,6 +315,8 @@ describe("suite Accounts auth-mode registry", () => {
     );
     expect(SUITE_ACCOUNTS_CONSUMERS.oprte.environments.production.siteUrl)
       .toBe("https://oprte.com");
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production.siteUrl)
+      .toBe("https://hra.sh");
     expect(suiteAccountsConsumerRequiresEmailOtp("act60")).toBe(true);
     expect(authority.cookies.names[0]).toBe("account_data");
   });

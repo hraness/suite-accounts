@@ -64,11 +64,11 @@ describe("suite principals", () => {
 
   test("includes current product principals without treating Accounts as one", () => {
     expectTypeOf<LegacySuiteProductId>().toEqualTypeOf<
-      "kitchen"
+      "oprte" | "kitchen"
     >();
     expect(SUITE_PRODUCTS).toEqual([
       "soundfish",
-      "oprte",
+      "hra",
       "crclte",
       "pub",
     ]);
@@ -88,11 +88,11 @@ describe("suite principals", () => {
     });
     expect(parseSuiteProduct("oprte")).toEqual({
       ok: true,
-      value: "oprte",
+      value: "hra",
     });
     expect(parseSuiteProduct("kitchen")).toEqual({
       ok: true,
-      value: "oprte",
+      value: "hra",
     });
     expect(parseSuiteProduct("accounts")).toEqual({
       error: "invalid-product",
@@ -110,7 +110,7 @@ describe("suite principals", () => {
     if (!parsed.ok) return;
     expect(parsed.value.environment).toBe("production");
     expect(String(parsed.value.legacySubject)).toBe("legacy-oprte-user");
-    expect(parsed.value.product).toBe("oprte");
+    expect(parsed.value.product).toBe("hra");
   });
 
   test("rejects the retired Loops principal identity", () => {

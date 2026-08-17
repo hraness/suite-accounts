@@ -2,7 +2,7 @@
 # Contents
 
 - `src/identity/` contains provider-neutral identity, profile, signed-message, entitlement-protocol, and view contracts, with Convex function references and billing transport isolated behind explicit opt-in subpaths.
-- `src/registry.ts`, `src/urls.ts`, and `src/client-configuration.ts` contain the frozen v1 registry and the validated steady-state product-binding factory.
+- `src/registry.ts`, `src/urls.ts`, and `src/client-configuration.ts` contain the frozen v1 registry, the separate current authority registry, and the validated product-binding factory.
 - `src/oidc-rp.ts`, `src/oidc-surface-server.ts`, `src/auth-proxy.ts`, `src/browser-session.ts`, and `src/bearer-verifier.ts` contain browser and server authentication transports.
 - `src/convex-browser-auth*.ts`, `src/receipt-verifier.ts`, and `src/entitlements.ts` contain bounded downstream token, receipt, replay, and authorization checks.
 - `src/react.tsx`, `src/profile-form.tsx`, and `src/profile-form.css` contain the optional React surface.

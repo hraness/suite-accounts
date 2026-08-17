@@ -5,8 +5,8 @@ import {
   suiteAccountsPublicConfigFromEnvironment,
 } from "./public-config";
 import {
-  SUITE_CONSUMER_IDS,
-  getSuiteAccountsConsumer,
+  SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS,
+  getSuiteAccountsCurrentConsumer,
   getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsDeployment,
 } from "./registry";
@@ -24,7 +24,7 @@ describe("suite Accounts public configuration", () => {
   });
 
   test("accepts only each consumer's exact production triple", () => {
-    for (const consumer of SUITE_CONSUMER_IDS) {
+    for (const consumer of SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS) {
       const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
         consumer,
         "production",
@@ -50,10 +50,10 @@ describe("suite Accounts public configuration", () => {
         surfaceOrigin: siteUrl,
       });
       expect(parsed.authBasePath).toBe(
-        getSuiteAccountsConsumer(consumer).auth.basePath,
+        getSuiteAccountsCurrentConsumer(consumer).auth.basePath,
       );
       expect(parsed.authMode).toBe(
-        getSuiteAccountsConsumer(consumer).auth.kind,
+        getSuiteAccountsCurrentConsumer(consumer).auth.kind,
       );
       expect(Object.isFrozen(parsed)).toBe(true);
       expect(Reflect.set(parsed, "surfaceOrigin", "https://attacker.invalid"))

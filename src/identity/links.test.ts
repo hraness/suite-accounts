@@ -60,6 +60,14 @@ describe("suite identity-link contract", () => {
       version: IDENTITY_LINK_RECEIPT_VERSION,
     } as const satisfies SuiteLinkReceipt;
     expect(validateSuiteLinkReceipt(receipt, issuedAtMs)).toBeNull();
+    const hraProof = {
+      ...proof,
+      product: "hra",
+    } as const satisfies ProductLinkProof;
+    expect(validateProductLinkProof(hraProof, issuedAtMs)).toBeNull();
+    expect(productLinkProofMessage(hraProof)).toContain(
+      '"hra","production"',
+    );
   });
 
   test("rejects the retired Loops wire identity", () => {
@@ -70,7 +78,7 @@ describe("suite identity-link contract", () => {
     expect(validateProductLinkProof(legacyProof, issuedAtMs)).toBe("invalid");
   });
 
-  test("accepts legacy OPRTE wire identity without changing signed bytes", () => {
+  test("accepts predecessor wire identities without changing signed bytes", () => {
     const legacyProof = {
       ...proof,
       product: "kitchen",

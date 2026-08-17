@@ -7,19 +7,6 @@ import { deepFreeze } from "./immutable.js";
 export { SUITE_CONSUMER_IDS };
 export type SuiteAccountsConsumerId = SuiteConsumerId;
 
-/** Consumers that may establish new production trust through current APIs. */
-export const SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
-  "accounts",
-  "act60",
-  "elders",
-  "soundfish",
-  "oh-computer",
-  "oprte",
-  "sponge",
-] as const satisfies readonly SuiteAccountsConsumerId[]);
-export type SuiteAccountsActiveConsumerId =
-  (typeof SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS)[number];
-
 export const SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS = deepFreeze([
   "production",
 ] as const);
@@ -208,9 +195,9 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
 >);
 
 /**
- * Current production-origin changes layered over the immutable released-v1
- * registry. Compatibility readers can keep using `SUITE_ACCOUNTS_CONSUMERS`;
- * active browser and authority boundaries resolve through this map.
+ * Previously published production-origin overrides retained for source
+ * compatibility. The current registry below incorporates these values rather
+ * than mutating the released-v1 registrations.
  */
 export const SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
   sponge: {
@@ -220,6 +207,84 @@ export const SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
   SuiteAccountsConsumerId,
   SuiteAccountsConsumerEnvironments
 >>>);
+
+/** Consumers that may establish new production trust through current APIs. */
+export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "hra",
+  "sponge",
+] as const);
+
+export type SuiteAccountsCurrentConsumerId =
+  (typeof SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS)[number];
+
+export type SuiteAccountsCurrentConsumerRegistration = Readonly<{
+  auth: SuiteAccountsAuthConfiguration;
+  displayName: string;
+  environments: SuiteAccountsConsumerEnvironments;
+  id: SuiteAccountsCurrentConsumerId;
+}>;
+
+function currentOidcSite<const Consumer extends SuiteAccountsCurrentConsumerId>(
+  id: Consumer,
+  displayName: string,
+  productionSiteUrl: string,
+) {
+  return {
+    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+    displayName,
+    environments: {
+      production: unsupported(productionSiteUrl),
+    },
+    id,
+  } as const;
+}
+
+/**
+ * Current Accounts authority registrations.
+ *
+ * OPRTE remains present only for the bounded HRA cutover rollback window. HRA
+ * is a separate current registration, while the frozen v1 registry above
+ * remains unchanged for already-released clients.
+ */
+export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
+  accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
+  act60: SUITE_ACCOUNTS_CONSUMERS.act60,
+  elders: SUITE_ACCOUNTS_CONSUMERS.elders,
+  soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
+  "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
+  oprte: SUITE_ACCOUNTS_CONSUMERS.oprte,
+  hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
+  sponge: currentOidcSite("sponge", "Sponge", "https://sponge.computer"),
+} as const satisfies Readonly<
+  Record<
+    SuiteAccountsCurrentConsumerId,
+    SuiteAccountsCurrentConsumerRegistration
+  >
+>);
+
+/**
+ * Frozen v0.2 compatibility name for the consumers that were active before the
+ * current registry became a distinct authority surface.
+ *
+ * @deprecated Use `SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS`.
+ */
+export const SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "sponge",
+] as const satisfies readonly SuiteAccountsConsumerId[]);
+export type SuiteAccountsActiveConsumerId =
+  (typeof SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS)[number];
 
 export type SuiteAccountsOidcConsumerId = {
   [Consumer in SuiteAccountsConsumerId]:
@@ -258,6 +323,37 @@ export const SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 export type SuiteAccountsLinkedOidcConsumerId =
   (typeof SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS)[number];
 
+export type SuiteAccountsCurrentOidcConsumerId = {
+  [Consumer in SuiteAccountsCurrentConsumerId]:
+    (typeof SUITE_ACCOUNTS_CURRENT_CONSUMERS)[Consumer]["auth"]["kind"] extends
+      "oidc-rp"
+      ? Consumer
+      : never;
+}[SuiteAccountsCurrentConsumerId];
+
+export type SuiteAccountsCurrentOAuthConsumerId =
+  SuiteAccountsCurrentOidcConsumerId;
+
+export const SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS:
+  readonly SuiteAccountsCurrentOidcConsumerId[] = deepFreeze(
+    SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter(
+      (consumer): consumer is SuiteAccountsCurrentOidcConsumerId =>
+        SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp",
+    ),
+  );
+
+export type SuiteAccountsCurrentEmailOtpRequiredOidcConsumerId =
+  SuiteAccountsCurrentOidcConsumerId;
+
+export const SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
+  "soundfish",
+  "oprte",
+  "hra",
+] as const satisfies readonly SuiteAccountsCurrentOidcConsumerId[]);
+
+export type SuiteAccountsCurrentLinkedOidcConsumerId =
+  (typeof SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)[number];
+
 export type SuiteAccountsOAuthConsumerId = {
   [Consumer in SuiteAccountsConsumerId]:
     (typeof SUITE_ACCOUNTS_CONSUMERS)[Consumer]["auth"]["kind"] extends
@@ -272,6 +368,14 @@ export type SuiteAccountsOidcClientId =
 export type SuiteAccountsOidcClientRegistration = Readonly<{
   callbackUrl: string;
   clientId: SuiteAccountsOidcClientId;
+}>;
+
+export type SuiteAccountsCurrentOidcClientId =
+  `hraness:${SuiteAccountsCurrentOAuthConsumerId}:${SuiteAccountsRemoteEnvironment}:v1`;
+
+export type SuiteAccountsCurrentOidcClientRegistration = Readonly<{
+  callbackUrl: string;
+  clientId: SuiteAccountsCurrentOidcClientId;
 }>;
 
 export function isSuiteAccountsConsumerId(
@@ -301,6 +405,43 @@ export function isSuiteAccountsOAuthConsumerId(
   return getSuiteAccountsConsumer(value).auth.kind === "oidc-rp";
 }
 
+export function isSuiteAccountsCurrentConsumerId(
+  value: unknown,
+): value is SuiteAccountsCurrentConsumerId {
+  return typeof value === "string"
+    && (SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS as readonly string[])
+      .includes(value);
+}
+
+export function isSuiteAccountsCurrentOidcConsumerId(
+  value: SuiteAccountsCurrentConsumerId,
+): value is SuiteAccountsCurrentOidcConsumerId {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+
+export function isSuiteAccountsCurrentLinkedOidcConsumerId(
+  value: SuiteAccountsCurrentOidcConsumerId,
+): value is SuiteAccountsCurrentLinkedOidcConsumerId {
+  return (
+    SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS as readonly string[]
+  ).includes(value);
+}
+
+export function isSuiteAccountsCurrentOAuthConsumerId(
+  value: SuiteAccountsCurrentConsumerId,
+): value is SuiteAccountsCurrentOAuthConsumerId {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+
+export function suiteAccountsCurrentConsumerRequiresEmailOtp(
+  consumer: SuiteAccountsCurrentOidcConsumerId,
+): consumer is SuiteAccountsCurrentEmailOtpRequiredOidcConsumerId {
+  return (
+    SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS as
+      readonly string[]
+  ).includes(consumer);
+}
+
 export function getSuiteAccountsConsumer<
   const Consumer extends SuiteAccountsConsumerId,
 >(
@@ -318,15 +459,21 @@ export function getSuiteAccountsConsumerEnvironment(
   return registration.environments[environment] ?? null;
 }
 
+export function getSuiteAccountsCurrentConsumer<
+  const Consumer extends SuiteAccountsCurrentConsumerId,
+>(
+  consumer: Consumer,
+): (typeof SUITE_ACCOUNTS_CURRENT_CONSUMERS)[Consumer] {
+  return SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer];
+}
+
 export function getSuiteAccountsCurrentConsumerEnvironment(
-  consumer: SuiteAccountsConsumerId,
+  consumer: unknown,
   environment: SuiteAccountsRemoteEnvironment,
 ): SuiteAccountsConsumerEnvironment | null {
-  if (!isSuiteAccountsActiveConsumerId(consumer)) return null;
-  const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer as
-    keyof typeof SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES];
-  return override?.[environment]
-    ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
+  if (!isSuiteAccountsCurrentConsumerId(consumer)) return null;
+  return getSuiteAccountsCurrentConsumer(consumer).environments[environment]
+    ?? null;
 }
 
 export function isSuiteAccountsActiveConsumerId(

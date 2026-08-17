@@ -55,15 +55,6 @@ function parseSuiteConsumerId(value) {
 }
 
 // src/registry.ts
-var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
-  "accounts",
-  "act60",
-  "elders",
-  "soundfish",
-  "oh-computer",
-  "oprte",
-  "sponge"
-]);
 var SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS = deepFreeze([
   "production"
 ]);
@@ -155,6 +146,45 @@ var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
     production: unsupported("https://sponge.computer")
   }
 });
+var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "hra",
+  "sponge"
+]);
+function currentOidcSite(id, displayName, productionSiteUrl) {
+  return {
+    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+    displayName,
+    environments: {
+      production: unsupported(productionSiteUrl)
+    },
+    id
+  };
+}
+var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
+  accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
+  act60: SUITE_ACCOUNTS_CONSUMERS.act60,
+  elders: SUITE_ACCOUNTS_CONSUMERS.elders,
+  soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
+  "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
+  oprte: SUITE_ACCOUNTS_CONSUMERS.oprte,
+  hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
+  sponge: currentOidcSite("sponge", "Sponge", "https://sponge.computer")
+});
+var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "oprte",
+  "sponge"
+]);
 var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 function suiteAccountsConsumerRequiresEmailOtp(consumer) {
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
@@ -162,6 +192,12 @@ function suiteAccountsConsumerRequiresEmailOtp(consumer) {
 var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
   "oprte"
+]);
+var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
+var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
+  "soundfish",
+  "oprte",
+  "hra"
 ]);
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
@@ -175,6 +211,21 @@ function isSuiteAccountsLinkedOidcConsumerId(value) {
 function isSuiteAccountsOAuthConsumerId(value) {
   return getSuiteAccountsConsumer(value).auth.kind === "oidc-rp";
 }
+function isSuiteAccountsCurrentConsumerId(value) {
+  return typeof value === "string" && SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsCurrentOidcConsumerId(value) {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+function isSuiteAccountsCurrentLinkedOidcConsumerId(value) {
+  return SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsCurrentOAuthConsumerId(value) {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+function suiteAccountsCurrentConsumerRequiresEmailOtp(consumer) {
+  return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
+}
 function getSuiteAccountsConsumer(consumer) {
   return SUITE_ACCOUNTS_CONSUMERS[consumer];
 }
@@ -182,11 +233,13 @@ function getSuiteAccountsConsumerEnvironment(consumer, environment) {
   const registration = getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;
 }
+function getSuiteAccountsCurrentConsumer(consumer) {
+  return SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer];
+}
 function getSuiteAccountsCurrentConsumerEnvironment(consumer, environment) {
-  if (!isSuiteAccountsActiveConsumerId(consumer))
+  if (!isSuiteAccountsCurrentConsumerId(consumer))
     return null;
-  const override = SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES[consumer];
-  return override?.[environment] ?? getSuiteAccountsConsumerEnvironment(consumer, environment);
+  return getSuiteAccountsCurrentConsumer(consumer).environments[environment] ?? null;
 }
 function isSuiteAccountsActiveConsumerId(value) {
   return SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS.includes(value);
@@ -223,7 +276,7 @@ function suiteAccountsOidcClientRegistration(consumer, environment) {
   });
 }
 function suiteAccountsCurrentOidcClientRegistration(consumer, environment) {
-  if (!isSuiteAccountsConsumerId(consumer) || !isSuiteAccountsOAuthConsumerId(consumer))
+  if (!isSuiteAccountsCurrentConsumerId(consumer) || !isSuiteAccountsCurrentOAuthConsumerId(consumer))
     return null;
   const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   if (consumerEnvironment === null)
@@ -237,6 +290,11 @@ function suiteAccountsOidcClientRequiresEmailOtp(clientId) {
   if (typeof clientId !== "string")
     return false;
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some((consumer) => suiteAccountsOidcClientRegistration(consumer, "production")?.clientId === clientId);
+}
+function suiteAccountsCurrentOidcClientRequiresEmailOtp(clientId) {
+  if (typeof clientId !== "string")
+    return false;
+  return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some((consumer) => suiteAccountsCurrentOidcClientRegistration(consumer, "production")?.clientId === clientId);
 }
 function suiteAccountsOidcProviderConfiguration(environment) {
   const issuer = getSuiteAccountsDeployment(environment).accountsOrigin;
@@ -306,10 +364,7 @@ function createSuiteAccountsClientConfiguration(input) {
   const binding = snapshotBinding(input);
   if (binding === null)
     return err2("invalid-binding");
-  if (!isSuiteAccountsConsumerId(binding.consumer)) {
-    return err2("invalid-consumer");
-  }
-  if (!isSuiteAccountsActiveConsumerId(binding.consumer)) {
+  if (!isSuiteAccountsCurrentConsumerId(binding.consumer)) {
     return err2("invalid-consumer");
   }
   if (binding.environment !== "production") {
@@ -317,7 +372,7 @@ function createSuiteAccountsClientConfiguration(input) {
   }
   const consumer = binding.consumer;
   const environment = binding.environment;
-  const registration = getSuiteAccountsConsumer(consumer);
+  const registration = getSuiteAccountsCurrentConsumer(consumer);
   const deployed = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   if (deployed === null || binding.origin !== deployed.siteUrl) {
     return err2("invalid-origin");
@@ -606,7 +661,7 @@ function parseOrigin(value, field) {
   return new URL(url.origin);
 }
 function readyRemoteConfig(consumer, siteUrl, convexUrl, convexSiteUrl) {
-  const registration = getSuiteAccountsConsumer(consumer);
+  const registration = getPublicConsumer(consumer);
   const environment = "production";
   const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   const deployment = getSuiteAccountsDeployment(environment);
@@ -635,6 +690,9 @@ function publicAuthConfiguration(auth) {
       return { authBasePath: auth.basePath, authMode: auth.kind };
   }
 }
+function getPublicConsumer(consumer) {
+  return isSuiteAccountsCurrentConsumerId(consumer) ? getSuiteAccountsCurrentConsumer(consumer) : getSuiteAccountsConsumer(consumer);
+}
 function parseSuiteAccountsPublicConfig(consumer, environment) {
   const missing = SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS.filter((name) => {
     const value = environment[name];
@@ -654,7 +712,7 @@ function parseSuiteAccountsPublicConfig(consumer, environment) {
     if (deployment.transport !== "local" || site.hostname !== convex.hostname || site.hostname !== convexSite.hostname) {
       throw new Error("Local consumer and Accounts endpoints must use the same loopback host.");
     }
-    const registration = getSuiteAccountsConsumer(consumer);
+    const registration = getPublicConsumer(consumer);
     return deepFreeze({
       ...publicAuthConfiguration(registration.auth),
       canonicalProductOrigin: site.origin,
@@ -678,7 +736,7 @@ function parseSuiteAccountsPublicConfig(consumer, environment) {
     }
     const production = readyRemoteConfig(consumer, site.origin, convex.origin, convexSite.origin);
     if (production === null) {
-      throw new Error(`${getSuiteAccountsConsumer(consumer).displayName} and Accounts endpoints ` + "do not match the production deployment.");
+      throw new Error(`${getPublicConsumer(consumer).displayName} and Accounts endpoints ` + "do not match the production deployment.");
     }
     return deepFreeze({
       canonicalProductOrigin: site.origin,
@@ -691,7 +749,7 @@ function parseSuiteAccountsPublicConfig(consumer, environment) {
   const remote = readyRemoteConfig(consumer, site.origin, convex.origin, convexSite.origin);
   if (remote !== null)
     return remote;
-  throw new Error(`${getSuiteAccountsConsumer(consumer).displayName} and Accounts endpoints ` + "do not match an owned deployment environment.");
+  throw new Error(`${getPublicConsumer(consumer).displayName} and Accounts endpoints ` + "do not match an owned deployment environment.");
 }
 function suiteAccountsPublicConfigFromEnvironment(consumer, environment = {
   NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN: process.env.NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN,
@@ -716,7 +774,9 @@ export {
   suiteAccountsOidcProviderConfiguration,
   suiteAccountsOidcClientRequiresEmailOtp,
   suiteAccountsOidcClientRegistration,
+  suiteAccountsCurrentOidcClientRequiresEmailOtp,
   suiteAccountsCurrentOidcClientRegistration,
+  suiteAccountsCurrentConsumerRequiresEmailOtp,
   suiteAccountsConsumerRequiresEmailOtp,
   suiteAccountsCentralUrl,
   suiteAccountsBillingReturnUrl,
@@ -725,10 +785,15 @@ export {
   isSuiteAccountsOidcConsumerId,
   isSuiteAccountsOAuthConsumerId,
   isSuiteAccountsLinkedOidcConsumerId,
+  isSuiteAccountsCurrentOidcConsumerId,
+  isSuiteAccountsCurrentOAuthConsumerId,
+  isSuiteAccountsCurrentLinkedOidcConsumerId,
+  isSuiteAccountsCurrentConsumerId,
   isSuiteAccountsConsumerId,
   isSuiteAccountsActiveConsumerId,
   getSuiteAccountsDeployment,
   getSuiteAccountsCurrentConsumerEnvironment,
+  getSuiteAccountsCurrentConsumer,
   getSuiteAccountsConsumerEnvironment,
   getSuiteAccountsConsumer,
   createSuiteAccountsClientConfiguration,
@@ -750,6 +815,10 @@ export {
   SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS,
   SUITE_ACCOUNTS_DEPLOYMENTS,
   SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES,
+  SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS,
+  SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
+  SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS,
+  SUITE_ACCOUNTS_CURRENT_CONSUMERS,
   SUITE_ACCOUNTS_CONSUMERS,
   SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
   SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS
