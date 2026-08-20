@@ -6,6 +6,7 @@ import {
   SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS,
   SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
   SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS,
+  SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES,
   SUITE_ACCOUNTS_DEPLOYMENTS,
   SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
   SUITE_CONSUMER_IDS,
@@ -214,7 +215,13 @@ describe("suite Accounts auth-mode registry", () => {
       "production",
     )).toEqual({
       billingReturn: { kind: "unsupported" },
-      siteUrl: "https://sponge.computer",
+      siteUrl: "https://spongeresearch.com",
+    });
+    expect(SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge).toEqual({
+      production: {
+        billingReturn: { kind: "unsupported" },
+        siteUrl: "https://spongeresearch.com",
+      },
     });
     expect(getSuiteAccountsConsumerEnvironment("sponge", "production"))
       .toMatchObject({ siteUrl: "https://spongesearch.com" });

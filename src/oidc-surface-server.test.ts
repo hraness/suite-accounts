@@ -35,8 +35,12 @@ describe("shared Suite OIDC surface server", () => {
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "sponge",
-      "https://sponge.computer",
+      "https://spongeresearch.com",
     )).toBe("production");
+    expect(suiteEnvironmentForConsumerOrigin(
+      "sponge",
+      "https://sponge.computer",
+    )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "sponge",
       "https://spongesearch.com",
