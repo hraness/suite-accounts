@@ -91,7 +91,7 @@ describe("suite Accounts URLs", () => {
     expect(
       suiteAccountsCurrentOidcClientRegistration("sponge", "production"),
     ).toEqual({
-      callbackUrl: "https://sponge.computer/api/suite-auth/callback",
+      callbackUrl: "https://spongeresearch.com/api/suite-auth/callback",
       clientId: "hraness:sponge:production:v1",
     });
     expect(

@@ -201,7 +201,7 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
  */
 export const SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
   sponge: {
-    production: unsupported("https://sponge.computer"),
+    production: unsupported("https://spongeresearch.com"),
   },
 } as const satisfies Partial<Readonly<Record<
   SuiteAccountsConsumerId,
@@ -260,7 +260,11 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
   oprte: SUITE_ACCOUNTS_CONSUMERS.oprte,
   hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
-  sponge: currentOidcSite("sponge", "Sponge", "https://sponge.computer"),
+  sponge: currentOidcSite(
+    "sponge",
+    "Sponge",
+    SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl,
+  ),
 } as const satisfies Readonly<
   Record<
     SuiteAccountsCurrentConsumerId,
