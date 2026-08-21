@@ -218,6 +218,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "oprte",
   "hra",
   "sponge",
+  "subcounter",
 ] as const);
 
 export type SuiteAccountsCurrentConsumerId =
@@ -264,6 +265,11 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
     "sponge",
     "Sponge",
     SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl,
+  ),
+  subcounter: currentOidcSite(
+    "subcounter",
+    "Subcounter",
+    "https://subcounter.com",
   ),
 } as const satisfies Readonly<
   Record<

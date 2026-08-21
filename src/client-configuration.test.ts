@@ -15,6 +15,15 @@ const hraBinding = {
   origin: "https://hra.sh",
 } as const;
 
+const subcounterBinding = {
+  authMode: "oidc-rp",
+  callbackUrl: "https://subcounter.com/api/suite-auth/callback",
+  clientId: "hraness:subcounter:production:v1",
+  consumer: "subcounter",
+  environment: "production",
+  origin: "https://subcounter.com",
+} as const;
+
 describe("suite Accounts client configuration", () => {
   test("derives every authority-controlled value from one exact binding", () => {
     const result = createSuiteAccountsClientConfiguration(hraBinding);
@@ -168,6 +177,35 @@ describe("suite Accounts client configuration", () => {
     if (!result.ok) return;
     expect(result.value.binding.consumer).toBe("oprte");
     expect(result.value.binding.origin).toBe("https://oprte.com");
+  });
+
+  test("binds Subcounter only to its exact current production registration", () => {
+    const result = createSuiteAccountsClientConfiguration(subcounterBinding);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toMatchObject({
+      authBasePath: "/api/suite-auth",
+      binding: subcounterBinding,
+      configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
+      wireVersion: SUITE_ACCOUNTS_WIRE_VERSION,
+    });
+
+    expect(createSuiteAccountsClientConfiguration({
+      ...subcounterBinding,
+      origin: "https://subcounter.com.evil.example",
+    })).toEqual({ error: "invalid-origin", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...subcounterBinding,
+      origin: "https://subcounter-git-main.vercel.app",
+    })).toEqual({ error: "invalid-origin", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...subcounterBinding,
+      callbackUrl: "https://subcounter.com/api/suite-auth/foreign",
+    })).toEqual({ error: "invalid-callback-url", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...subcounterBinding,
+      clientId: "hraness:subcounter:preview:v1",
+    })).toEqual({ error: "invalid-client-id", ok: false });
   });
 
   test("rejects the retired proxy client even with its frozen v1 binding", () => {

@@ -79,6 +79,7 @@ describe("suite Accounts auth-mode registry", () => {
       "oprte",
       "hra",
       "sponge",
+      "subcounter",
     ]);
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS)
       .not.toBe(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS);
@@ -128,10 +129,37 @@ describe("suite Accounts auth-mode registry", () => {
       | "oprte"
       | "hra"
       | "sponge"
+      | "subcounter"
     >();
     expectTypeOf<SuiteAccountsCurrentOAuthConsumerId>().toEqualTypeOf<
       SuiteAccountsCurrentOidcConsumerId
     >();
+  });
+
+  test("registers Subcounter only in the current unlinked OIDC authority", () => {
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter).toEqual({
+      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+      displayName: "Subcounter",
+      environments: {
+        production: {
+          billingReturn: { kind: "unsupported" },
+          siteUrl: "https://subcounter.com",
+        },
+      },
+      id: "subcounter",
+    });
+    expect(getSuiteAccountsCurrentConsumerEnvironment(
+      "subcounter",
+      "production",
+    )).toEqual({
+      billingReturn: { kind: "unsupported" },
+      siteUrl: "https://subcounter.com",
+    });
+    expect(isSuiteAccountsCurrentConsumerId("subcounter")).toBe(true);
+    expect(isSuiteAccountsCurrentOidcConsumerId("subcounter")).toBe(true);
+    expect(isSuiteAccountsCurrentOAuthConsumerId("subcounter")).toBe(true);
+    expect("subcounter" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
+    expect(SUITE_CONSUMER_IDS).not.toContain("subcounter");
   });
 
   test("keeps current OTP and linked-product policies explicit", () => {
@@ -144,6 +172,7 @@ describe("suite Accounts auth-mode registry", () => {
         "oprte",
         "hra",
         "sponge",
+        "subcounter",
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",
@@ -151,6 +180,10 @@ describe("suite Accounts auth-mode registry", () => {
       "hra",
     ]);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("hra")).toBe(true);
+    expect(suiteAccountsCurrentConsumerRequiresEmailOtp("subcounter"))
+      .toBe(true);
+    expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)
+      .not.toContain("subcounter");
     expect(SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS).not.toContain("hra");
   });
 
@@ -313,6 +346,11 @@ describe("suite Accounts auth-mode registry", () => {
       "0",
       "accounts",
     )).toBe(false);
+    expect(Reflect.set(
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production,
+      "siteUrl",
+      "https://attacker.example",
+    )).toBe(false);
     const authority = SUITE_ACCOUNTS_CONSUMERS.accounts.auth;
     if (authority.kind !== "authority") throw new Error("Missing authority.");
     expect(Reflect.set(authority.cookies.names, "0", "foreign_cookie"))
@@ -324,6 +362,9 @@ describe("suite Accounts auth-mode registry", () => {
       .toBe("https://oprte.com");
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production.siteUrl)
       .toBe("https://hra.sh");
+    expect(
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production.siteUrl,
+    ).toBe("https://subcounter.com");
     expect(suiteAccountsConsumerRequiresEmailOtp("act60")).toBe(true);
     expect(authority.cookies.names[0]).toBe("account_data");
   });
