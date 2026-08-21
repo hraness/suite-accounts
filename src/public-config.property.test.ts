@@ -48,4 +48,24 @@ describe("suite Accounts public origin laws", () => {
       },
     ));
   });
+
+  test("SlackOrgs never accepts a decorated or insecure canonical origin", () => {
+    assertProperty(fc.property(
+      fc.constantFrom(
+        "https://user:pass@slackorgs.com",
+        "https://slackorgs.com/path",
+        "https://slackorgs.com/?token=secret",
+        "https://slackorgs.com/#secret",
+        "http://slackorgs.com",
+        "https://slackorgs.com.evil.example",
+        "https://slackorgs-git-main.vercel.app",
+      ),
+      (siteUrl) => {
+        expect(() => parseSuiteAccountsPublicConfig("slackorgs", {
+          ...accounts,
+          NEXT_PUBLIC_SITE_URL: siteUrl,
+        })).toThrow();
+      },
+    ));
+  });
 });

@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.2"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.3"
   }
 }
 ```
@@ -63,13 +63,13 @@ configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
 
-Version 0.3.2 registers Subcounter at `https://subcounter.com` with client ID
-`hraness:subcounter:production:v1`. It is an unlinked OIDC client that accepts
-email-code sessions. The current registry also retains HRA and the exact OPRTE
-registration for the bounded cutover rollback window. New product state and
-signed-protocol parsing canonicalize the predecessor `oprte` and `kitchen`
-product IDs to `hra`; signature verification still uses the original product
-bytes, so bounded predecessor receipts remain verifiable.
+Version 0.3.3 registers SlackOrgs at `https://slackorgs.com` with client ID
+`hraness:slackorgs:production:v1`. It is an unlinked OIDC client that accepts
+email-code sessions. The current registry also includes Subcounter and retains
+HRA and the exact OPRTE registration for the bounded cutover rollback window.
+New product state and signed-protocol parsing canonicalize the predecessor
+`oprte` and `kitchen` product IDs to `hra`; signature verification still uses
+the original product bytes, so bounded predecessor receipts remain verifiable.
 
 Local development still uses `parseSuiteAccountsPublicConfig`. The consumer
 origin and both Accounts Convex origins must use one exact loopback hostname.

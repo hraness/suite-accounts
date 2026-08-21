@@ -115,6 +115,15 @@ describe("suite Accounts URLs", () => {
     expect(
       suiteAccountsOidcClientRegistration("subcounter", "production"),
     ).toBeNull();
+    expect(
+      suiteAccountsCurrentOidcClientRegistration("slackorgs", "production"),
+    ).toEqual({
+      callbackUrl: "https://slackorgs.com/api/suite-auth/callback",
+      clientId: "hraness:slackorgs:production:v1",
+    });
+    expect(
+      suiteAccountsOidcClientRegistration("slackorgs", "production"),
+    ).toBeNull();
   });
 
   test("matches only checked email-OTP-required client IDs", () => {
@@ -144,6 +153,15 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:subcounter:preview:v1",
+    )).toBe(false);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
+      "hraness:slackorgs:production:v1",
+    )).toBe(true);
+    expect(suiteAccountsOidcClientRequiresEmailOtp(
+      "hraness:slackorgs:production:v1",
+    )).toBe(false);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
+      "hraness:slackorgs:preview:v1",
     )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:elders:local:v1",

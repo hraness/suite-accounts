@@ -24,6 +24,15 @@ const subcounterBinding = {
   origin: "https://subcounter.com",
 } as const;
 
+const slackorgsBinding = {
+  authMode: "oidc-rp",
+  callbackUrl: "https://slackorgs.com/api/suite-auth/callback",
+  clientId: "hraness:slackorgs:production:v1",
+  consumer: "slackorgs",
+  environment: "production",
+  origin: "https://slackorgs.com",
+} as const;
+
 describe("suite Accounts client configuration", () => {
   test("derives every authority-controlled value from one exact binding", () => {
     const result = createSuiteAccountsClientConfiguration(hraBinding);
@@ -205,6 +214,35 @@ describe("suite Accounts client configuration", () => {
     expect(createSuiteAccountsClientConfiguration({
       ...subcounterBinding,
       clientId: "hraness:subcounter:preview:v1",
+    })).toEqual({ error: "invalid-client-id", ok: false });
+  });
+
+  test("binds SlackOrgs only to its exact current production registration", () => {
+    const result = createSuiteAccountsClientConfiguration(slackorgsBinding);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toMatchObject({
+      authBasePath: "/api/suite-auth",
+      binding: slackorgsBinding,
+      configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
+      wireVersion: SUITE_ACCOUNTS_WIRE_VERSION,
+    });
+
+    expect(createSuiteAccountsClientConfiguration({
+      ...slackorgsBinding,
+      origin: "https://slackorgs.com.evil.example",
+    })).toEqual({ error: "invalid-origin", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...slackorgsBinding,
+      origin: "https://slackorgs-git-main.vercel.app",
+    })).toEqual({ error: "invalid-origin", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...slackorgsBinding,
+      callbackUrl: "https://slackorgs.com/api/suite-auth/foreign",
+    })).toEqual({ error: "invalid-callback-url", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...slackorgsBinding,
+      clientId: "hraness:slackorgs:preview:v1",
     })).toEqual({ error: "invalid-client-id", ok: false });
   });
 

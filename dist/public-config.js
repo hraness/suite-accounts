@@ -155,7 +155,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "oprte",
   "hra",
   "sponge",
-  "subcounter"
+  "subcounter",
+  "slackorgs"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -176,7 +177,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   oprte: SUITE_ACCOUNTS_CONSUMERS.oprte,
   hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
-  subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com")
+  subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
+  slackorgs: currentOidcSite("slackorgs", "SlackOrgs", "https://slackorgs.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",

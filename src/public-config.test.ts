@@ -111,6 +111,55 @@ describe("suite Accounts public configuration", () => {
     });
   });
 
+  test("binds SlackOrgs public configuration only on its canonical surface", () => {
+    const accounts = getSuiteAccountsDeployment("production");
+    expect(parseSuiteAccountsPublicConfig("slackorgs", {
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
+      NEXT_PUBLIC_SITE_URL: "https://slackorgs.com",
+    })).toEqual({
+      authBasePath: "/api/suite-auth",
+      authMode: "oidc-rp",
+      canonicalProductOrigin: "https://slackorgs.com",
+      consumer: "slackorgs",
+      convexSiteUrl: accounts.convexSiteUrl,
+      convexUrl: accounts.convexUrl,
+      environment: "production",
+      kind: "ready",
+      siteUrl: "https://slackorgs.com",
+      surfaceOrigin: "https://slackorgs.com",
+    });
+
+    expect(() => parseSuiteAccountsPublicConfig("slackorgs", {
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
+      NEXT_PUBLIC_SITE_URL: "https://foreign.example",
+    })).toThrow("SlackOrgs and Accounts endpoints do not match");
+    expect(() => parseSuiteAccountsPublicConfig("slackorgs", {
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
+      NEXT_PUBLIC_SITE_URL: "https://slackorgs-git-main.vercel.app",
+    })).toThrow("SlackOrgs and Accounts endpoints do not match");
+  });
+
+  test("keeps Suite authentication unavailable on SlackOrgs previews", () => {
+    const accounts = getSuiteAccountsDeployment("production");
+    expect(parseSuiteAccountsPublicConfig("slackorgs", {
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
+      NEXT_PUBLIC_SITE_URL: "https://slackorgs.com",
+      NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
+        "https://slackorgs-git-main.vercel.app",
+    })).toEqual({
+      canonicalProductOrigin: "https://slackorgs.com",
+      environment: "production",
+      kind: "unavailable",
+      message:
+        "Suite authentication is unavailable on generated Vercel Preview origins.",
+      surfaceOrigin: "https://slackorgs-git-main.vercel.app",
+    });
+  });
+
   test("rejects the retired staging deployment and origin", () => {
     expect(() => parseSuiteAccountsPublicConfig("act60", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL:

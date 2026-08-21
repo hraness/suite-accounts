@@ -36,6 +36,18 @@ describe("shared Suite OIDC surface server", () => {
       "https://subcounter.com.evil.example",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
+      "slackorgs",
+      "https://slackorgs.com",
+    )).toBe("production");
+    expect(suiteEnvironmentForConsumerOrigin(
+      "slackorgs",
+      "https://slackorgs-git-main.vercel.app",
+    )).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin(
+      "slackorgs",
+      "https://slackorgs.com.evil.example",
+    )).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin(
       "oprte",
       "https://preview.oprte.com",
     )).toBeNull();
@@ -90,6 +102,24 @@ describe("shared Suite OIDC surface server", () => {
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("subcounter", {
+      NEXT_PUBLIC_SITE_URL: "https://foreign.example",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })).toBeNull();
+    expect(createSurfaceSuiteRelyingParty("slackorgs", {
+      NEXT_PUBLIC_SITE_URL: "https://slackorgs.com",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })?.configuration).toMatchObject({
+      callbackUrl: "https://slackorgs.com/api/suite-auth/callback",
+      clientId: "hraness:slackorgs:production:v1",
+      siteUrl: "https://slackorgs.com",
+    });
+    expect(createSurfaceSuiteRelyingParty("slackorgs", {
+      NEXT_PUBLIC_SITE_URL: "https://slackorgs.com",
+      NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
+        "https://slackorgs-git-main.vercel.app",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })).toBeNull();
+    expect(createSurfaceSuiteRelyingParty("slackorgs", {
       NEXT_PUBLIC_SITE_URL: "https://foreign.example",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
