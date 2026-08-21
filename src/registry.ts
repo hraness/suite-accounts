@@ -219,6 +219,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "hra",
   "sponge",
   "subcounter",
+  "slackorgs",
 ] as const);
 
 export type SuiteAccountsCurrentConsumerId =
@@ -270,6 +271,11 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
     "subcounter",
     "Subcounter",
     "https://subcounter.com",
+  ),
+  slackorgs: currentOidcSite(
+    "slackorgs",
+    "SlackOrgs",
+    "https://slackorgs.com",
   ),
 } as const satisfies Readonly<
   Record<
