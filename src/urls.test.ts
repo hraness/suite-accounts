@@ -106,6 +106,15 @@ describe("suite Accounts URLs", () => {
       callbackUrl: "https://oprte.com/api/suite-auth/callback",
       clientId: "hraness:oprte:production:v1",
     });
+    expect(
+      suiteAccountsCurrentOidcClientRegistration("subcounter", "production"),
+    ).toEqual({
+      callbackUrl: "https://subcounter.com/api/suite-auth/callback",
+      clientId: "hraness:subcounter:production:v1",
+    });
+    expect(
+      suiteAccountsOidcClientRegistration("subcounter", "production"),
+    ).toBeNull();
   });
 
   test("matches only checked email-OTP-required client IDs", () => {
@@ -127,6 +136,15 @@ describe("suite Accounts URLs", () => {
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:oprte:production:v1",
     )).toBe(true);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
+      "hraness:subcounter:production:v1",
+    )).toBe(true);
+    expect(suiteAccountsOidcClientRequiresEmailOtp(
+      "hraness:subcounter:production:v1",
+    )).toBe(false);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
+      "hraness:subcounter:preview:v1",
+    )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:elders:local:v1",
     )).toBe(false);

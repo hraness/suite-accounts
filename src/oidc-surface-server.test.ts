@@ -24,6 +24,18 @@ describe("shared Suite OIDC surface server", () => {
     expect(suiteEnvironmentForConsumerOrigin("hra", "https://hra.sh"))
       .toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
+      "subcounter",
+      "https://subcounter.com",
+    )).toBe("production");
+    expect(suiteEnvironmentForConsumerOrigin(
+      "subcounter",
+      "https://subcounter-git-main.vercel.app",
+    )).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin(
+      "subcounter",
+      "https://subcounter.com.evil.example",
+    )).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin(
       "oprte",
       "https://preview.oprte.com",
     )).toBeNull();
@@ -63,6 +75,24 @@ describe("shared Suite OIDC surface server", () => {
       clientId: "hraness:hra:production:v1",
       siteUrl: "https://hra.sh",
     });
+    expect(createSurfaceSuiteRelyingParty("subcounter", {
+      NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })?.configuration).toMatchObject({
+      callbackUrl: "https://subcounter.com/api/suite-auth/callback",
+      clientId: "hraness:subcounter:production:v1",
+      siteUrl: "https://subcounter.com",
+    });
+    expect(createSurfaceSuiteRelyingParty("subcounter", {
+      NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
+      NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
+        "https://subcounter-git-main.vercel.app",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })).toBeNull();
+    expect(createSurfaceSuiteRelyingParty("subcounter", {
+      NEXT_PUBLIC_SITE_URL: "https://foreign.example",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("oprte", {
       ...configured,
       NEXT_PUBLIC_SITE_URL: "https://oprte.com.evil",
