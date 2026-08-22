@@ -102,10 +102,7 @@ describe("suite Accounts URLs", () => {
     });
     expect(
       suiteAccountsCurrentOidcClientRegistration("oprte", "production"),
-    ).toEqual({
-      callbackUrl: "https://oprte.com/api/suite-auth/callback",
-      clientId: "hraness:oprte:production:v1",
-    });
+    ).toBeNull();
     expect(
       suiteAccountsCurrentOidcClientRegistration("subcounter", "production"),
     ).toEqual({
@@ -144,7 +141,7 @@ describe("suite Accounts URLs", () => {
     )).toBe(true);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:oprte:production:v1",
-    )).toBe(true);
+    )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:subcounter:production:v1",
     )).toBe(true);

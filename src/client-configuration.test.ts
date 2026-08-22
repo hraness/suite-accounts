@@ -173,7 +173,7 @@ describe("suite Accounts client configuration", () => {
     }
   });
 
-  test("keeps the OPRTE client available for the bounded rollback window", () => {
+  test("rejects the retired OPRTE client from current bindings", () => {
     const result = createSuiteAccountsClientConfiguration({
       authMode: "oidc-rp",
       callbackUrl: "https://oprte.com/api/suite-auth/callback",
@@ -182,10 +182,7 @@ describe("suite Accounts client configuration", () => {
       environment: "production",
       origin: "https://oprte.com",
     });
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.binding.consumer).toBe("oprte");
-    expect(result.value.binding.origin).toBe("https://oprte.com");
+    expect(result).toEqual({ error: "invalid-consumer", ok: false });
   });
 
   test("binds Subcounter only to its exact current production registration", () => {

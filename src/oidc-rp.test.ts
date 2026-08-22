@@ -214,15 +214,6 @@ describe("suite OAuth relying party", () => {
       clientId: "hraness:hra:production:v1",
       siteUrl: "https://hra.sh",
     });
-    const rollback = createSuiteOidcRelyingParty({
-      consumer: "oprte",
-      cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
-      environment: "production",
-      receiptKeyVersion: "v1",
-    });
-    expect(rollback.configuration.clientId).toBe(
-      "hraness:oprte:production:v1",
-    );
   });
 
   test("forces a fresh provider login for every shared browser product", async () => {

@@ -215,7 +215,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "elders",
   "soundfish",
   "oh-computer",
-  "oprte",
   "hra",
   "sponge",
   "subcounter",
@@ -250,9 +249,9 @@ function currentOidcSite<const Consumer extends SuiteAccountsCurrentConsumerId>(
 /**
  * Current Accounts authority registrations.
  *
- * OPRTE remains present only for the bounded HRA cutover rollback window. HRA
- * is a separate current registration, while the frozen v1 registry above
- * remains unchanged for already-released clients.
+ * HRA is the canonical current registration. The frozen v1 registry above
+ * remains unchanged for already-released clients, but its retired OPRTE
+ * registration cannot establish new trust through current APIs.
  */
 export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
@@ -260,7 +259,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
-  oprte: SUITE_ACCOUNTS_CONSUMERS.oprte,
   hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
   sponge: currentOidcSite(
     "sponge",
@@ -363,7 +361,6 @@ export type SuiteAccountsCurrentEmailOtpRequiredOidcConsumerId =
 
 export const SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "oprte",
   "hra",
 ] as const satisfies readonly SuiteAccountsCurrentOidcConsumerId[]);
 
