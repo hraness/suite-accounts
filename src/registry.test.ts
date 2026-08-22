@@ -11,7 +11,6 @@ import {
   SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
   SUITE_CONSUMER_IDS,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
-  getSuiteAccountsCurrentConsumer,
   getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumerEnvironment,
   isSuiteAccountsCurrentConsumerId,
@@ -76,7 +75,6 @@ describe("suite Accounts auth-mode registry", () => {
       "elders",
       "soundfish",
       "oh-computer",
-      "oprte",
       "hra",
       "sponge",
       "subcounter",
@@ -97,7 +95,7 @@ describe("suite Accounts auth-mode registry", () => {
     });
   });
 
-  test("registers HRA alongside the bounded OPRTE rollback client", () => {
+  test("registers HRA as the canonical current client", () => {
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra).toEqual({
       auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
       displayName: "HRA",
@@ -109,8 +107,10 @@ describe("suite Accounts auth-mode registry", () => {
       },
       id: "hra",
     });
-    expect(getSuiteAccountsCurrentConsumer("oprte"))
-      .toBe(SUITE_ACCOUNTS_CONSUMERS.oprte);
+    expect(getSuiteAccountsCurrentConsumerEnvironment(
+      "oprte",
+      "production",
+    )).toBeNull();
     expect(getSuiteAccountsCurrentConsumerEnvironment(
       "hra",
       "production",
@@ -119,6 +119,7 @@ describe("suite Accounts auth-mode registry", () => {
       siteUrl: "https://hra.sh",
     });
     expect(isSuiteAccountsCurrentConsumerId("hra")).toBe(true);
+    expect(isSuiteAccountsCurrentConsumerId("oprte")).toBe(false);
     expect(isSuiteAccountsCurrentConsumerId("draw-money")).toBe(false);
     expect(isSuiteAccountsCurrentOidcConsumerId("hra")).toBe(true);
     expect(isSuiteAccountsCurrentOAuthConsumerId("hra")).toBe(true);
@@ -127,7 +128,6 @@ describe("suite Accounts auth-mode registry", () => {
       | "elders"
       | "soundfish"
       | "oh-computer"
-      | "oprte"
       | "hra"
       | "sponge"
       | "subcounter"
@@ -197,7 +197,6 @@ describe("suite Accounts auth-mode registry", () => {
         "elders",
         "soundfish",
         "oh-computer",
-        "oprte",
         "hra",
         "sponge",
         "subcounter",
@@ -205,7 +204,6 @@ describe("suite Accounts auth-mode registry", () => {
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",
-      "oprte",
       "hra",
     ]);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("hra")).toBe(true);

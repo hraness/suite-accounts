@@ -12,15 +12,13 @@ import {
 } from "./oidc-surface-server";
 
 const configured = {
-  NEXT_PUBLIC_SITE_URL: "https://oprte.com",
+  NEXT_PUBLIC_SITE_URL: "https://hra.sh",
   SUITE_IDENTITY_RECEIPT_KEY_VERSION: "test-v1",
   SUITE_OIDC_COOKIE_SECRET: "0123456789abcdef0123456789abcdef",
 } as const;
 
 describe("shared Suite OIDC surface server", () => {
   test("binds only an exact registered environment origin", () => {
-    expect(suiteEnvironmentForConsumerOrigin("oprte", "https://oprte.com"))
-      .toBe("production");
     expect(suiteEnvironmentForConsumerOrigin("hra", "https://hra.sh"))
       .toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
@@ -48,12 +46,6 @@ describe("shared Suite OIDC surface server", () => {
       "https://slackorgs.com.evil.example",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
-      "oprte",
-      "https://preview.oprte.com",
-    )).toBeNull();
-    expect(suiteEnvironmentForConsumerOrigin("oprte", "https://oprte.com.evil"))
-      .toBeNull();
-    expect(suiteEnvironmentForConsumerOrigin(
       "act60",
       "https://preview.act60.me",
     )).toBeNull();
@@ -69,16 +61,10 @@ describe("shared Suite OIDC surface server", () => {
       "sponge",
       "https://spongesearch.com",
     )).toBeNull();
-    expect(suiteEnvironmentForConsumerOrigin("oprte", undefined)).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin("hra", undefined)).toBeNull();
   });
 
   test("creates a public client only from complete checked configuration", () => {
-    expect(createSurfaceSuiteRelyingParty("oprte", configured)?.configuration)
-      .toMatchObject({
-        callbackUrl: "https://oprte.com/api/suite-auth/callback",
-        clientId: "hraness:oprte:production:v1",
-        siteUrl: "https://oprte.com",
-      });
     expect(createSurfaceSuiteRelyingParty("hra", {
       ...configured,
       NEXT_PUBLIC_SITE_URL: "https://hra.sh",
@@ -123,9 +109,9 @@ describe("shared Suite OIDC surface server", () => {
       NEXT_PUBLIC_SITE_URL: "https://foreign.example",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
-    expect(createSurfaceSuiteRelyingParty("oprte", {
+    expect(createSurfaceSuiteRelyingParty("hra", {
       ...configured,
-      NEXT_PUBLIC_SITE_URL: "https://oprte.com.evil",
+      NEXT_PUBLIC_SITE_URL: "https://hra.sh.evil",
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("act60", {
       NEXT_PUBLIC_SITE_URL: "https://act60.me",
@@ -143,18 +129,18 @@ describe("shared Suite OIDC surface server", () => {
 
   test("does not expose a server session from a foreign origin", async () => {
     const session = await suiteOidcSurfaceServerSession(
-      "oprte",
+      "hra",
       new Request("https://evil.example/api/private"),
       configured,
     );
     expect(session).toBeNull();
     expect(await suiteOidcSurfaceServerAccountSession(
-      "oprte",
+      "hra",
       new Request("https://evil.example/join"),
       configured,
     )).toBeNull();
     expect(await suiteOidcSurfaceServerVerifiedEmail(
-      "oprte",
+      "hra",
       new Request("https://evil.example/join"),
       configured,
     )).toBeNull();
@@ -168,10 +154,10 @@ describe("shared Suite OIDC surface server", () => {
     if (!parsedAccountId.ok || !parsedUsername.ok) {
       throw new Error("Expected valid Suite identity values.");
     }
-    const request = new Request("https://oprte.com/private-profile");
+    const request = new Request("https://hra.sh/private-profile");
 
     const verifiedEmail = await suiteOidcSurfaceServerVerifiedEmail(
-      "oprte",
+      "hra",
       request,
       configured,
       {

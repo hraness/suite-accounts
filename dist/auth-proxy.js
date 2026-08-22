@@ -152,7 +152,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "elders",
   "soundfish",
   "oh-computer",
-  "oprte",
   "hra",
   "sponge",
   "subcounter",
@@ -174,7 +173,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
-  oprte: SUITE_ACCOUNTS_CONSUMERS.oprte,
   hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
@@ -200,7 +198,6 @@ var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "oprte",
   "hra"
 ]);
 function isSuiteAccountsConsumerId(value) {
