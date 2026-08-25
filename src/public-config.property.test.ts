@@ -49,16 +49,17 @@ describe("suite Accounts public origin laws", () => {
     ));
   });
 
-  test("SlackOrgs never accepts a decorated or insecure canonical origin", () => {
+  test("SubdomainData never accepts a decorated or insecure canonical origin", () => {
     assertProperty(fc.property(
       fc.constantFrom(
-        "https://user:pass@slackorgs.com",
-        "https://slackorgs.com/path",
-        "https://slackorgs.com/?token=secret",
-        "https://slackorgs.com/#secret",
-        "http://slackorgs.com",
-        "https://slackorgs.com.evil.example",
-        "https://slackorgs-git-main.vercel.app",
+        "https://user:pass@subdomaindata.com",
+        "https://subdomaindata.com/path",
+        "https://subdomaindata.com/?token=secret",
+        "https://subdomaindata.com/#secret",
+        "http://subdomaindata.com",
+        "https://subdomaindata.com.evil.example",
+        "https://subdomaindata-git-main.vercel.app",
+        "https://slackorgs.com",
       ),
       (siteUrl) => {
         expect(() => parseSuiteAccountsPublicConfig("slackorgs", {

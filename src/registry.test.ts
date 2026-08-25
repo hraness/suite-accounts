@@ -164,14 +164,14 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_CONSUMER_IDS).not.toContain("subcounter");
   });
 
-  test("registers SlackOrgs only in the current unlinked OIDC authority", () => {
+  test("registers SubdomainData only in the current unlinked OIDC authority", () => {
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.slackorgs).toEqual({
       auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "SlackOrgs",
+      displayName: "SubdomainData",
       environments: {
         production: {
           billingReturn: { kind: "unsupported" },
-          siteUrl: "https://slackorgs.com",
+          siteUrl: "https://subdomaindata.com",
         },
       },
       id: "slackorgs",
@@ -181,7 +181,7 @@ describe("suite Accounts auth-mode registry", () => {
       "production",
     )).toEqual({
       billingReturn: { kind: "unsupported" },
-      siteUrl: "https://slackorgs.com",
+      siteUrl: "https://subdomaindata.com",
     });
     expect(isSuiteAccountsCurrentConsumerId("slackorgs")).toBe(true);
     expect(isSuiteAccountsCurrentOidcConsumerId("slackorgs")).toBe(true);
@@ -403,7 +403,7 @@ describe("suite Accounts auth-mode registry", () => {
     ).toBe("https://subcounter.com");
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.slackorgs.environments.production.siteUrl,
-    ).toBe("https://slackorgs.com");
+    ).toBe("https://subdomaindata.com");
     expect(suiteAccountsConsumerRequiresEmailOtp("act60")).toBe(true);
     expect(authority.cookies.names[0]).toBe("account_data");
   });

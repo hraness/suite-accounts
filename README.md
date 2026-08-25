@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.4"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.5"
   }
 }
 ```
@@ -63,10 +63,14 @@ configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
 
-Version 0.3.4 retires the OPRTE browser client and origin from the current
-authority. HRA at `https://hra.sh` is the sole current client for that product
-line. The frozen v1 registry remains source-compatible for released readers,
-and signed-protocol parsing still canonicalizes the predecessor `oprte` and
+Version 0.3.5 renames the current `slackorgs` registration to SubdomainData and
+moves its production surface to `https://subdomaindata.com`. The stable
+`slackorgs` consumer ID and `hraness:slackorgs:production:v1` client ID remain
+unchanged, so existing account bindings stay compatible. Version 0.3.4 retired
+the OPRTE browser client and origin from the current authority. HRA at
+`https://hra.sh` remains the sole current client for that product line. The
+frozen v1 registry remains source-compatible for released readers, and
+signed-protocol parsing still canonicalizes the predecessor `oprte` and
 `kitchen` product IDs to `hra`. Signature verification uses the original
 product bytes, so bounded predecessor receipts remain verifiable.
 

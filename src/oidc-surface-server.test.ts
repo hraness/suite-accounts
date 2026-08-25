@@ -35,15 +35,19 @@ describe("shared Suite OIDC surface server", () => {
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "slackorgs",
-      "https://slackorgs.com",
+      "https://subdomaindata.com",
     )).toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
       "slackorgs",
-      "https://slackorgs-git-main.vercel.app",
+      "https://subdomaindata-git-main.vercel.app",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "slackorgs",
-      "https://slackorgs.com.evil.example",
+      "https://subdomaindata.com.evil.example",
+    )).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin(
+      "slackorgs",
+      "https://slackorgs.com",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "act60",
@@ -92,17 +96,21 @@ describe("shared Suite OIDC surface server", () => {
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("slackorgs", {
-      NEXT_PUBLIC_SITE_URL: "https://slackorgs.com",
+      NEXT_PUBLIC_SITE_URL: "https://subdomaindata.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })?.configuration).toMatchObject({
-      callbackUrl: "https://slackorgs.com/api/suite-auth/callback",
+      callbackUrl: "https://subdomaindata.com/api/suite-auth/callback",
       clientId: "hraness:slackorgs:production:v1",
-      siteUrl: "https://slackorgs.com",
+      siteUrl: "https://subdomaindata.com",
     });
     expect(createSurfaceSuiteRelyingParty("slackorgs", {
-      NEXT_PUBLIC_SITE_URL: "https://slackorgs.com",
+      NEXT_PUBLIC_SITE_URL: "https://subdomaindata.com",
       NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
-        "https://slackorgs-git-main.vercel.app",
+        "https://subdomaindata-git-main.vercel.app",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })).toBeNull();
+    expect(createSurfaceSuiteRelyingParty("slackorgs", {
+      NEXT_PUBLIC_SITE_URL: "https://slackorgs.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("slackorgs", {
