@@ -272,8 +272,8 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   ),
   slackorgs: currentOidcSite(
     "slackorgs",
-    "SlackOrgs",
-    "https://slackorgs.com",
+    "SubdomainData",
+    "https://subdomaindata.com",
   ),
 } as const satisfies Readonly<
   Record<

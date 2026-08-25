@@ -115,7 +115,7 @@ describe("suite Accounts URLs", () => {
     expect(
       suiteAccountsCurrentOidcClientRegistration("slackorgs", "production"),
     ).toEqual({
-      callbackUrl: "https://slackorgs.com/api/suite-auth/callback",
+      callbackUrl: "https://subdomaindata.com/api/suite-auth/callback",
       clientId: "hraness:slackorgs:production:v1",
     });
     expect(
