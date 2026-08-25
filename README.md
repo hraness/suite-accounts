@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.0"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.6"
   }
 }
 ```
@@ -63,9 +63,10 @@ configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
 
-Version 0.3.0 registers HRA at `https://hra.sh` with client ID
-`hraness:hra:production:v1`. The current registry also retains the exact OPRTE
-registration for the bounded cutover rollback window. New product state and
+Version 0.3.6 registers Sponge at `https://sponge.computer` with client ID
+`hraness:sponge:production:v1`, while retaining HRA at `https://hra.sh`. The
+current registry also retains the exact OPRTE registration for the bounded
+cutover rollback window. New product state and
 signed-protocol parsing canonicalize the predecessor `oprte` and `kitchen`
 product IDs to `hra`; signature verification still uses the original product
 bytes, so bounded predecessor receipts remain verifiable.
