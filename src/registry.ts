@@ -201,7 +201,7 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
  */
 export const SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
   sponge: {
-    production: unsupported("https://spongeresearch.com"),
+    production: unsupported("https://sponge.computer"),
   },
 } as const satisfies Partial<Readonly<Record<
   SuiteAccountsConsumerId,
