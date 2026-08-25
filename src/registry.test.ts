@@ -279,12 +279,12 @@ describe("suite Accounts auth-mode registry", () => {
       "production",
     )).toEqual({
       billingReturn: { kind: "unsupported" },
-      siteUrl: "https://spongeresearch.com",
+      siteUrl: "https://sponge.computer",
     });
     expect(SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge).toEqual({
       production: {
         billingReturn: { kind: "unsupported" },
-        siteUrl: "https://spongeresearch.com",
+        siteUrl: "https://sponge.computer",
       },
     });
     expect(getSuiteAccountsConsumerEnvironment("sponge", "production"))

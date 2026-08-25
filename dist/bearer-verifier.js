@@ -143,7 +143,7 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
 });
 var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
   sponge: {
-    production: unsupported("https://spongeresearch.com")
+    production: unsupported("https://sponge.computer")
   }
 });
 var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([

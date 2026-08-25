@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.5"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.6"
   }
 }
 ```
@@ -63,7 +63,10 @@ configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
 
-Version 0.3.5 renames the current `slackorgs` registration to SubdomainData and
+Version 0.3.6 moves the current Sponge registration to
+`https://sponge.computer` while keeping client ID
+`hraness:sponge:production:v1`. Version 0.3.5 renames the current `slackorgs`
+registration to SubdomainData and
 moves its production surface to `https://subdomaindata.com`. The stable
 `slackorgs` consumer ID and `hraness:slackorgs:production:v1` client ID remain
 unchanged, so existing account bindings stay compatible. Version 0.3.4 retired
