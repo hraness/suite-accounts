@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
   getSuiteAccountsConsumer,
-  SUITE_CONSUMER_IDS,
+  SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS,
 } from "./registry";
 import {
   suiteAccountsBillingReturnUrl,
@@ -46,7 +46,7 @@ describe("suite Accounts URLs", () => {
     expect(suiteAccountsBillingReturnUrl("accounts", "production")).toBe(
       "https://account.hraness.com/account",
     );
-    for (const consumer of SUITE_CONSUMER_IDS) {
+    for (const consumer of SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS) {
       if (consumer === "accounts") continue;
       expect(suiteAccountsBillingReturnUrl(consumer, "production")).toBeNull();
     }
@@ -57,7 +57,7 @@ describe("suite Accounts URLs", () => {
       .toBeNull();
     expect(suiteAccountsOidcClientRegistration("draw-money", "production"))
       .toBeNull();
-    for (const consumer of SUITE_CONSUMER_IDS) {
+    for (const consumer of SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS) {
       if (
         consumer === "accounts"
         || consumer === "draw-money"
@@ -78,10 +78,7 @@ describe("suite Accounts URLs", () => {
     }
     expect(
       suiteAccountsOidcClientRegistration("oprte", "production"),
-    ).toEqual({
-      callbackUrl: "https://oprte.com/api/suite-auth/callback",
-      clientId: "hraness:oprte:production:v1",
-    });
+    ).toBeNull();
     expect(
       suiteAccountsOidcClientRegistration("sponge", "production"),
     ).toEqual({
@@ -132,7 +129,7 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:oprte:production:v1",
-    )).toBe(true);
+    )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:hra:production:v1",
     )).toBe(false);
@@ -169,10 +166,15 @@ describe("suite Accounts URLs", () => {
   });
 
   test("rejects retired OAuth clients", () => {
-    expect(
-      suiteAccountsOidcClientRegistration("kitchen", "production"),
-    ).toBeNull();
-    for (const retired of ["transmute", "transmute-cli", "studio", "graphics", "loops"]) {
+    for (const retired of [
+      "oprte",
+      "kitchen",
+      "transmute",
+      "transmute-cli",
+      "studio",
+      "graphics",
+      "loops",
+    ]) {
       expect(suiteAccountsOidcClientRegistration(retired, "production"))
         .toBeNull();
     }
@@ -181,10 +183,10 @@ describe("suite Accounts URLs", () => {
   test("returns immutable RP endpoints and client registrations", () => {
     const provider = suiteAccountsOidcProviderConfiguration("production");
     const registration = suiteAccountsOidcClientRegistration(
-      "oprte",
+      "elders",
       "production",
     );
-    if (registration === null) throw new Error("Missing OPRTE registration.");
+    if (registration === null) throw new Error("Missing Elders registration.");
     expect(Reflect.set(
       provider,
       "authorizationEndpoint",
@@ -197,7 +199,7 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsOidcProviderConfiguration("production").authorizationEndpoint)
       .toBe("https://account.hraness.com/api/auth/oauth2/authorize");
-    expect(suiteAccountsOidcClientRegistration("oprte", "production")?.callbackUrl)
-      .toBe("https://oprte.com/api/suite-auth/callback");
+    expect(suiteAccountsOidcClientRegistration("elders", "production")?.callbackUrl)
+      .toBe("https://elders.hraness.com/api/suite-auth/callback");
   });
 });

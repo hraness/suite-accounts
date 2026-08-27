@@ -92,6 +92,15 @@ function oidcSite(id, displayName, productionSiteUrl) {
     id
   };
 }
+var SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "draw-money",
+  "sponge"
+]);
 var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
   accounts: {
     auth: {
@@ -130,14 +139,6 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
       production: unsupported("https://draw.money")
     },
     id: "draw-money"
-  },
-  oprte: {
-    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-    displayName: "OPRTE",
-    environments: {
-      production: unsupported("https://oprte.com")
-    },
-    id: "oprte"
   },
   sponge: oidcSite("sponge", "Sponge", "https://spongesearch.com")
 });
@@ -184,16 +185,14 @@ var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "elders",
   "soundfish",
   "oh-computer",
-  "oprte",
   "sponge"
 ]);
-var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
+var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 function suiteAccountsConsumerRequiresEmailOtp(consumer) {
   return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
 }
 var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
-  "soundfish",
-  "oprte"
+  "soundfish"
 ]);
 var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
@@ -203,14 +202,17 @@ var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
 }
+function isSuiteAccountsRegisteredConsumerId(value) {
+  return typeof value === "string" && SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.includes(value);
+}
 function isSuiteAccountsOidcConsumerId(value) {
-  return getSuiteAccountsConsumer(value).auth.kind === "oidc-rp";
+  return isSuiteAccountsRegisteredConsumerId(value) && SUITE_ACCOUNTS_CONSUMERS[value].auth.kind === "oidc-rp";
 }
 function isSuiteAccountsLinkedOidcConsumerId(value) {
   return SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS.includes(value);
 }
 function isSuiteAccountsOAuthConsumerId(value) {
-  return getSuiteAccountsConsumer(value).auth.kind === "oidc-rp";
+  return isSuiteAccountsRegisteredConsumerId(value) && SUITE_ACCOUNTS_CONSUMERS[value].auth.kind === "oidc-rp";
 }
 function isSuiteAccountsCurrentConsumerId(value) {
   return typeof value === "string" && SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.includes(value);
@@ -231,6 +233,8 @@ function getSuiteAccountsConsumer(consumer) {
   return SUITE_ACCOUNTS_CONSUMERS[consumer];
 }
 function getSuiteAccountsConsumerEnvironment(consumer, environment) {
+  if (!isSuiteAccountsRegisteredConsumerId(consumer))
+    return null;
   const registration = getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;
 }
@@ -783,6 +787,7 @@ export {
   suiteAccountsBillingReturnUrl,
   parseSuiteConvexBrowserIdentity,
   parseSuiteAccountsPublicConfig,
+  isSuiteAccountsRegisteredConsumerId,
   isSuiteAccountsOidcConsumerId,
   isSuiteAccountsOAuthConsumerId,
   isSuiteAccountsLinkedOidcConsumerId,
@@ -811,6 +816,7 @@ export {
   SUITE_CONSUMER_IDS,
   SUITE_ACCOUNTS_WIRE_VERSION,
   SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS,
+  SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS,
   SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS,
   SUITE_ACCOUNTS_OAUTH_RESOURCE,
   SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS,

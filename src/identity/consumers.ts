@@ -2,11 +2,12 @@ import { err, ok, type Result } from "@hraness/result";
 import { deepFreeze } from "../immutable.js";
 
 /**
- * Deployments that consume the central Accounts authority.
+ * Consumer identities accepted by the released v1 protocol.
  *
- * This is intentionally distinct from `SUITE_PRODUCTS`: Accounts is a
- * consumer but not a product principal, while some product identities have no
- * interactive authentication surface.
+ * This is intentionally distinct from both `SUITE_PRODUCTS` and the client
+ * registration authority. Accounts is a consumer but not a product principal,
+ * some product identities have no interactive authentication surface, and a
+ * retired consumer identity may remain parseable without retaining trust.
  */
 export const SUITE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -19,9 +20,9 @@ export const SUITE_CONSUMER_IDS = deepFreeze([
   "sponge",
 ] as const);
 /**
- * Retired client identities accepted only while parsing bounded pre-OPRTE
- * evidence. New registrations and state always use a canonical ID from
- * `SUITE_CONSUMER_IDS`.
+ * Earlier client identities accepted only while parsing bounded historical
+ * evidence. Registration authority is defined separately and may reject both
+ * these aliases and retired canonical identities.
  */
 export const LEGACY_SUITE_CONSUMER_IDS = deepFreeze([
   "kitchen",

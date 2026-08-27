@@ -17,7 +17,7 @@ import {
   suiteAccountsOidcProviderConfiguration,
 } from "./urls";
 
-test("the complete frozen v1 protocol registry remains byte-stable", () => {
+test("the remaining deprecated registry remains byte-stable", () => {
   const snapshot = JSON.stringify({
     active: SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
     central: (["account", "home", "login"] as const).map(destination =>
@@ -38,6 +38,6 @@ test("the complete frozen v1 protocol registry remains byte-stable", () => {
     ]),
   });
   expect(createHash("sha256").update(snapshot).digest("hex")).toBe(
-    "e06596700ffd39a76ae171586536d26f2451e7fab6e6045cea32a98480d650a6",
+    "fdc15c4c6380e8514a2a96fae65fde323ab69fac7d688eac3bbc0be4f572a401",
   );
 });

@@ -22,6 +22,10 @@ const legacyBrowserIdentifierFiles = new Set([
   "src/browser-session.test.ts",
   "src/browser-session.ts",
 ]);
+const retiredSuiteDomains = [
+  ["oprte", "com"].join("."),
+  ["hraness", "kitchen"].join("."),
+];
 
 const forbiddenText = [
   privateNamespace,
@@ -31,6 +35,7 @@ const forbiddenText = [
   ["VERCEL", "OWNER", "ID"].join("_"),
   ["VERCEL", "PROJECT", "ID"].join("_"),
   ["BEGIN", "PRIVATE", "KEY"].join(" "),
+  ...retiredSuiteDomains,
 ];
 // Match dependency-like literals without rejecting public KB metadata or ordinary prose.
 const privateDependencyProtocol = /["'`](?:workspace|catalog):[^"'`\s]*["'`]/u;
