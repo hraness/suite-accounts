@@ -8,9 +8,9 @@ import {
   getSuiteAccountsDeployment,
   isSuiteAccountsCurrentConsumerId,
   type SuiteAccountsAuthConfiguration,
-  type SuiteAccountsConsumerId,
   type SuiteAccountsCurrentConsumerId,
   type SuiteAccountsEnvironment,
+  type SuiteAccountsRegisteredConsumerId,
 } from "./registry.js";
 
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "[::1]", "localhost"]);
@@ -43,7 +43,7 @@ type ReadySuiteAccountsPublicConfigBase = Readonly<{
 }>;
 
 export type SuiteAccountsPublicConsumerId =
-  | SuiteAccountsConsumerId
+  | SuiteAccountsRegisteredConsumerId
   | SuiteAccountsCurrentConsumerId;
 
 export type ReadySuiteAccountsAuthConfiguration =

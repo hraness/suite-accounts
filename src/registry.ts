@@ -120,8 +120,26 @@ function oidcSite<const Consumer extends SuiteAccountsConsumerId>(
   } as const;
 }
 
+/** Consumer identities that still have a deprecated v1 registration. */
+export const SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "draw-money",
+  "sponge",
+] as const satisfies readonly SuiteAccountsConsumerId[]);
+
+export type SuiteAccountsRegisteredConsumerId =
+  (typeof SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS)[number];
+
 /**
- * Frozen v1 registrations retained for source and wire compatibility.
+ * Deprecated v1 registrations for clients that remain registered.
+ *
+ * Historical identity parsing is intentionally separate from client trust:
+ * a retired identity may remain parseable without retaining an origin or
+ * OAuth registration here.
  *
  * @deprecated New consumers must use `createSuiteAccountsClientConfiguration`
  * and must not extend or copy this object.
@@ -177,21 +195,13 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     },
     id: "draw-money",
   },
-  oprte: {
-    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-    displayName: "OPRTE",
-    environments: {
-      production: unsupported("https://oprte.com"),
-    },
-    id: "oprte",
-  },
   sponge: oidcSite(
     "sponge",
     "Sponge",
     "https://spongesearch.com",
   ),
 } as const satisfies Readonly<
-  Record<SuiteAccountsConsumerId, SuiteAccountsConsumerRegistration>
+  Record<SuiteAccountsRegisteredConsumerId, SuiteAccountsConsumerRegistration>
 >);
 
 /**
@@ -249,9 +259,9 @@ function currentOidcSite<const Consumer extends SuiteAccountsCurrentConsumerId>(
 /**
  * Current Accounts authority registrations.
  *
- * HRA is the canonical current registration. The frozen v1 registry above
- * remains unchanged for already-released clients, but its retired OPRTE
- * registration cannot establish new trust through current APIs.
+ * HRA is the canonical current registration. Historical predecessor
+ * identities remain parseable, but neither current nor deprecated registration
+ * helpers retain their browser origins or OAuth clients.
  */
 export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
@@ -294,24 +304,24 @@ export const SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "elders",
   "soundfish",
   "oh-computer",
-  "oprte",
   "sponge",
 ] as const satisfies readonly SuiteAccountsConsumerId[]);
 export type SuiteAccountsActiveConsumerId =
   (typeof SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS)[number];
 
 export type SuiteAccountsOidcConsumerId = {
-  [Consumer in SuiteAccountsConsumerId]:
+  [Consumer in SuiteAccountsRegisteredConsumerId]:
     (typeof SUITE_ACCOUNTS_CONSUMERS)[Consumer]["auth"]["kind"] extends "oidc-rp"
       ? Consumer
       : never;
-}[SuiteAccountsConsumerId];
+}[SuiteAccountsRegisteredConsumerId];
 
 /** Every canonical browser OIDC product accepts only email-code sessions. */
 export const SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS:
   readonly SuiteAccountsOidcConsumerId[] = deepFreeze(
-    SUITE_CONSUMER_IDS.filter((consumer): consumer is SuiteAccountsOidcConsumerId =>
-      SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"
+    SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter(
+      (consumer): consumer is SuiteAccountsOidcConsumerId =>
+        SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp",
     ),
   );
 
@@ -331,7 +341,6 @@ export function suiteAccountsConsumerRequiresEmailOtp(
  */
 export const SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "oprte",
 ] as const satisfies readonly SuiteAccountsOidcConsumerId[]);
 
 export type SuiteAccountsLinkedOidcConsumerId =
@@ -368,12 +377,12 @@ export type SuiteAccountsCurrentLinkedOidcConsumerId =
   (typeof SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)[number];
 
 export type SuiteAccountsOAuthConsumerId = {
-  [Consumer in SuiteAccountsConsumerId]:
+  [Consumer in SuiteAccountsRegisteredConsumerId]:
     (typeof SUITE_ACCOUNTS_CONSUMERS)[Consumer]["auth"]["kind"] extends
       "oidc-rp"
       ? Consumer
       : never;
-}[SuiteAccountsConsumerId];
+}[SuiteAccountsRegisteredConsumerId];
 
 export type SuiteAccountsOidcClientId =
   `hraness:${SuiteAccountsOAuthConsumerId}:${SuiteAccountsRemoteEnvironment}:v1`;
@@ -398,10 +407,19 @@ export function isSuiteAccountsConsumerId(
     && (SUITE_CONSUMER_IDS as readonly string[]).includes(value);
 }
 
+export function isSuiteAccountsRegisteredConsumerId(
+  value: unknown,
+): value is SuiteAccountsRegisteredConsumerId {
+  return typeof value === "string"
+    && (SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS as readonly string[])
+      .includes(value);
+}
+
 export function isSuiteAccountsOidcConsumerId(
   value: SuiteAccountsConsumerId,
 ): value is SuiteAccountsOidcConsumerId {
-  return getSuiteAccountsConsumer(value).auth.kind === "oidc-rp";
+  return isSuiteAccountsRegisteredConsumerId(value)
+    && SUITE_ACCOUNTS_CONSUMERS[value].auth.kind === "oidc-rp";
 }
 
 export function isSuiteAccountsLinkedOidcConsumerId(
@@ -415,7 +433,8 @@ export function isSuiteAccountsLinkedOidcConsumerId(
 export function isSuiteAccountsOAuthConsumerId(
   value: SuiteAccountsConsumerId,
 ): value is SuiteAccountsOAuthConsumerId {
-  return getSuiteAccountsConsumer(value).auth.kind === "oidc-rp";
+  return isSuiteAccountsRegisteredConsumerId(value)
+    && SUITE_ACCOUNTS_CONSUMERS[value].auth.kind === "oidc-rp";
 }
 
 export function isSuiteAccountsCurrentConsumerId(
@@ -456,7 +475,7 @@ export function suiteAccountsCurrentConsumerRequiresEmailOtp(
 }
 
 export function getSuiteAccountsConsumer<
-  const Consumer extends SuiteAccountsConsumerId,
+  const Consumer extends SuiteAccountsRegisteredConsumerId,
 >(
   consumer: Consumer,
 ): (typeof SUITE_ACCOUNTS_CONSUMERS)[Consumer] {
@@ -464,9 +483,10 @@ export function getSuiteAccountsConsumer<
 }
 
 export function getSuiteAccountsConsumerEnvironment(
-  consumer: SuiteAccountsConsumerId,
+  consumer: unknown,
   environment: SuiteAccountsRemoteEnvironment,
 ): SuiteAccountsConsumerEnvironment | null {
+  if (!isSuiteAccountsRegisteredConsumerId(consumer)) return null;
   const registration: SuiteAccountsConsumerRegistration =
     getSuiteAccountsConsumer(consumer);
   return registration.environments[environment] ?? null;

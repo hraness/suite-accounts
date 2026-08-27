@@ -9,6 +9,7 @@ import {
   SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES,
   SUITE_ACCOUNTS_DEPLOYMENTS,
   SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS,
+  SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS,
   SUITE_CONSUMER_IDS,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
   getSuiteAccountsCurrentConsumerEnvironment,
@@ -18,6 +19,7 @@ import {
   isSuiteAccountsCurrentOidcConsumerId,
   isSuiteAccountsOAuthConsumerId,
   isSuiteAccountsOidcConsumerId,
+  isSuiteAccountsRegisteredConsumerId,
   suiteAccountsCurrentConsumerRequiresEmailOtp,
   suiteAccountsConsumerRequiresEmailOtp,
   type SuiteAccountsCurrentOAuthConsumerId,
@@ -25,12 +27,13 @@ import {
   type SuiteAccountsRemoteEnvironment,
   type SuiteAccountsOAuthConsumerId,
   type SuiteAccountsOidcConsumerId,
+  type SuiteAccountsRegisteredConsumerId,
 } from "./registry";
 
 describe("suite Accounts auth-mode registry", () => {
   test("assigns one explicit auth transport to every consumer", () => {
     expect(Object.keys(SUITE_ACCOUNTS_CONSUMERS).sort()).toEqual(
-      [...SUITE_CONSUMER_IDS].sort(),
+      [...SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS].sort(),
     );
     expect(SUITE_ACCOUNTS_CONSUMERS.accounts.auth).toMatchObject({
       basePath: "/api/auth",
@@ -46,10 +49,10 @@ describe("suite Accounts auth-mode registry", () => {
         siteUrl: "https://draw.money",
       },
     });
-    const oidcConsumers = SUITE_CONSUMER_IDS.filter(
+    const oidcConsumers = SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter(
       isSuiteAccountsOidcConsumerId,
     );
-    expect(oidcConsumers).toHaveLength(6);
+    expect(oidcConsumers).toHaveLength(5);
     for (const consumer of oidcConsumers) {
       expect(SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toEqual({
         basePath: "/api/suite-auth",
@@ -59,14 +62,13 @@ describe("suite Accounts auth-mode registry", () => {
     }
   });
 
-  test("keeps frozen v1 bytes while evolving a distinct current authority", () => {
+  test("keeps deprecated and current authority surfaces distinct", () => {
     expect(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS).toEqual([
       "accounts",
       "act60",
       "elders",
       "soundfish",
       "oh-computer",
-      "oprte",
       "sponge",
     ]);
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS).toEqual([
@@ -93,6 +95,8 @@ describe("suite Accounts auth-mode registry", () => {
       billingReturn: { kind: "unsupported" },
       siteUrl: "https://draw.money",
     });
+    expect(getSuiteAccountsConsumerEnvironment("oprte", "production"))
+      .toBeNull();
   });
 
   test("registers HRA as the canonical current client", () => {
@@ -219,10 +223,10 @@ describe("suite Accounts auth-mode registry", () => {
   });
 
   test("does not expose proxy cookie capabilities on OAuth registrations", () => {
-    const oauthConsumers = SUITE_CONSUMER_IDS.filter(
+    const oauthConsumers = SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter(
       isSuiteAccountsOAuthConsumerId,
     );
-    expect(oauthConsumers).toHaveLength(6);
+    expect(oauthConsumers).toHaveLength(5);
     for (const consumer of oauthConsumers) {
       expect("cookies" in SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toBe(false);
       expect(isSuiteAccountsOAuthConsumerId(consumer)).toBe(true);
@@ -235,12 +239,23 @@ describe("suite Accounts auth-mode registry", () => {
       | "elders"
       | "soundfish"
       | "oh-computer"
-      | "oprte"
       | "sponge"
     >();
     expectTypeOf<SuiteAccountsOAuthConsumerId>().toEqualTypeOf<
       SuiteAccountsOidcConsumerId
     >();
+    expectTypeOf<SuiteAccountsRegisteredConsumerId>().toEqualTypeOf<
+      | "accounts"
+      | "act60"
+      | "elders"
+      | "soundfish"
+      | "oh-computer"
+      | "draw-money"
+      | "sponge"
+    >();
+    expect(isSuiteAccountsRegisteredConsumerId("oprte")).toBe(false);
+    expect(isSuiteAccountsOidcConsumerId("oprte")).toBe(false);
+    expect(isSuiteAccountsOAuthConsumerId("oprte")).toBe(false);
   });
 
   test("registers every remote consumer only in production", () => {
@@ -259,7 +274,7 @@ describe("suite Accounts auth-mode registry", () => {
     });
     expect(getSuiteAccountsConsumerEnvironment("act60", "production"))
       .toMatchObject({ siteUrl: "https://act60.me" });
-    for (const consumer of SUITE_CONSUMER_IDS) {
+    for (const consumer of SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS) {
       expect(getSuiteAccountsConsumerEnvironment(consumer, "production"))
         .not.toBeNull();
     }
@@ -315,19 +330,14 @@ describe("suite Accounts auth-mode registry", () => {
     );
   });
 
-  test("keeps the exact frozen v1 OPRTE identity", () => {
-    expect(SUITE_ACCOUNTS_CONSUMERS.oprte).toEqual({
-      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "OPRTE",
-      environments: {
-        production: {
-          billingReturn: { kind: "unsupported" },
-          siteUrl: "https://oprte.com",
-        },
-      },
-      id: "oprte",
-    });
+  test("keeps historical identities separate from client registration", () => {
+    expect(SUITE_CONSUMER_IDS).toContain("oprte");
+    expect("oprte" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
     expect("kitchen" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
+    expect(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS).not.toContain("oprte");
+    expect(SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS).not.toContain("oprte");
+    expect(getSuiteAccountsConsumerEnvironment("oprte", "production"))
+      .toBeNull();
   });
 
   test("registers only the canonical Soundfish client", () => {
@@ -358,7 +368,7 @@ describe("suite Accounts auth-mode registry", () => {
       "https://attacker.example",
     )).toBe(false);
     expect(Reflect.set(
-      SUITE_ACCOUNTS_CONSUMERS.oprte.environments.production,
+      SUITE_ACCOUNTS_CONSUMERS.soundfish.environments.production,
       "siteUrl",
       "https://attacker.example",
     )).toBe(false);
@@ -394,8 +404,8 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_ACCOUNTS_DEPLOYMENTS.production.accountsOrigin).toBe(
       "https://account.hraness.com",
     );
-    expect(SUITE_ACCOUNTS_CONSUMERS.oprte.environments.production.siteUrl)
-      .toBe("https://oprte.com");
+    expect(SUITE_ACCOUNTS_CONSUMERS.soundfish.environments.production.siteUrl)
+      .toBe("https://sound.fish");
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production.siteUrl)
       .toBe("https://hra.sh");
     expect(
