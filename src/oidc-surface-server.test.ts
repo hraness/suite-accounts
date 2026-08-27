@@ -35,15 +35,19 @@ describe("shared Suite OIDC surface server", () => {
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "slackorgs",
-      "https://subdomaindata.com",
+      "https://bigdatadepot.com",
     )).toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
       "slackorgs",
-      "https://subdomaindata-git-main.vercel.app",
+      "https://bigdatadepot-git-main.vercel.app",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "slackorgs",
-      "https://subdomaindata.com.evil.example",
+      "https://bigdatadepot.com.evil.example",
+    )).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin(
+      "slackorgs",
+      "https://subdomaindata.com",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "slackorgs",
@@ -96,17 +100,21 @@ describe("shared Suite OIDC surface server", () => {
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("slackorgs", {
-      NEXT_PUBLIC_SITE_URL: "https://subdomaindata.com",
+      NEXT_PUBLIC_SITE_URL: "https://bigdatadepot.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })?.configuration).toMatchObject({
-      callbackUrl: "https://subdomaindata.com/api/suite-auth/callback",
+      callbackUrl: "https://bigdatadepot.com/api/suite-auth/callback",
       clientId: "hraness:slackorgs:production:v1",
-      siteUrl: "https://subdomaindata.com",
+      siteUrl: "https://bigdatadepot.com",
     });
     expect(createSurfaceSuiteRelyingParty("slackorgs", {
-      NEXT_PUBLIC_SITE_URL: "https://subdomaindata.com",
+      NEXT_PUBLIC_SITE_URL: "https://bigdatadepot.com",
       NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
-        "https://subdomaindata-git-main.vercel.app",
+        "https://bigdatadepot-git-main.vercel.app",
+      SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
+    })).toBeNull();
+    expect(createSurfaceSuiteRelyingParty("slackorgs", {
+      NEXT_PUBLIC_SITE_URL: "https://subdomaindata.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("slackorgs", {

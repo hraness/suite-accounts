@@ -24,13 +24,13 @@ const subcounterBinding = {
   origin: "https://subcounter.com",
 } as const;
 
-const subdomainDataBinding = {
+const bigDataDepotBinding = {
   authMode: "oidc-rp",
-  callbackUrl: "https://subdomaindata.com/api/suite-auth/callback",
+  callbackUrl: "https://bigdatadepot.com/api/suite-auth/callback",
   clientId: "hraness:slackorgs:production:v1",
   consumer: "slackorgs",
   environment: "production",
-  origin: "https://subdomaindata.com",
+  origin: "https://bigdatadepot.com",
 } as const;
 
 describe("suite Accounts client configuration", () => {
@@ -214,35 +214,39 @@ describe("suite Accounts client configuration", () => {
     })).toEqual({ error: "invalid-client-id", ok: false });
   });
 
-  test("binds SubdomainData only to its exact current production registration", () => {
-    const result = createSuiteAccountsClientConfiguration(subdomainDataBinding);
+  test("binds BigDataDepot only to its exact current production registration", () => {
+    const result = createSuiteAccountsClientConfiguration(bigDataDepotBinding);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value).toMatchObject({
       authBasePath: "/api/suite-auth",
-      binding: subdomainDataBinding,
+      binding: bigDataDepotBinding,
       configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
       wireVersion: SUITE_ACCOUNTS_WIRE_VERSION,
     });
 
     expect(createSuiteAccountsClientConfiguration({
-      ...subdomainDataBinding,
-      origin: "https://subdomaindata.com.evil.example",
+      ...bigDataDepotBinding,
+      origin: "https://bigdatadepot.com.evil.example",
     })).toEqual({ error: "invalid-origin", ok: false });
     expect(createSuiteAccountsClientConfiguration({
-      ...subdomainDataBinding,
-      origin: "https://subdomaindata-git-main.vercel.app",
+      ...bigDataDepotBinding,
+      origin: "https://bigdatadepot-git-main.vercel.app",
     })).toEqual({ error: "invalid-origin", ok: false });
     expect(createSuiteAccountsClientConfiguration({
-      ...subdomainDataBinding,
+      ...bigDataDepotBinding,
+      origin: "https://subdomaindata.com",
+    })).toEqual({ error: "invalid-origin", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...bigDataDepotBinding,
       origin: "https://slackorgs.com",
     })).toEqual({ error: "invalid-origin", ok: false });
     expect(createSuiteAccountsClientConfiguration({
-      ...subdomainDataBinding,
-      callbackUrl: "https://subdomaindata.com/api/suite-auth/foreign",
+      ...bigDataDepotBinding,
+      callbackUrl: "https://bigdatadepot.com/api/suite-auth/foreign",
     })).toEqual({ error: "invalid-callback-url", ok: false });
     expect(createSuiteAccountsClientConfiguration({
-      ...subdomainDataBinding,
+      ...bigDataDepotBinding,
       clientId: "hraness:slackorgs:preview:v1",
     })).toEqual({ error: "invalid-client-id", ok: false });
   });

@@ -49,16 +49,17 @@ describe("suite Accounts public origin laws", () => {
     ));
   });
 
-  test("SubdomainData never accepts a decorated or insecure canonical origin", () => {
+  test("BigDataDepot never accepts a decorated, insecure, or legacy origin", () => {
     assertProperty(fc.property(
       fc.constantFrom(
-        "https://user:pass@subdomaindata.com",
-        "https://subdomaindata.com/path",
-        "https://subdomaindata.com/?token=secret",
-        "https://subdomaindata.com/#secret",
-        "http://subdomaindata.com",
-        "https://subdomaindata.com.evil.example",
-        "https://subdomaindata-git-main.vercel.app",
+        "https://user:pass@bigdatadepot.com",
+        "https://bigdatadepot.com/path",
+        "https://bigdatadepot.com/?token=secret",
+        "https://bigdatadepot.com/#secret",
+        "http://bigdatadepot.com",
+        "https://bigdatadepot.com.evil.example",
+        "https://bigdatadepot-git-main.vercel.app",
+        "https://subdomaindata.com",
         "https://slackorgs.com",
       ),
       (siteUrl) => {

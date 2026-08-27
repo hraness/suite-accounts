@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.6"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.3.7"
   }
 }
 ```
@@ -63,7 +63,13 @@ configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
 
-Version 0.3.6 moves the current Sponge registration to
+Version 0.3.7 renames the current `slackorgs` registration to BigDataDepot and
+moves its production surface to `https://bigdatadepot.com`. The stable
+`slackorgs` consumer ID and `hraness:slackorgs:production:v1` client ID remain
+unchanged, so existing account bindings stay compatible. The predecessor
+SubdomainData and SlackOrgs origins are not current OAuth callbacks or trusted
+origins; those hostnames may redirect at the product edge without gaining
+Accounts authority. Version 0.3.6 moves the current Sponge registration to
 `https://sponge.computer` while keeping client ID
 `hraness:sponge:production:v1`. Version 0.3.5 renames the current `slackorgs`
 registration to SubdomainData and
