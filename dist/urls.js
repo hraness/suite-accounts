@@ -176,7 +176,7 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
-  slackorgs: currentOidcSite("slackorgs", "SubdomainData", "https://subdomaindata.com")
+  slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
