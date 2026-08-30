@@ -6,7 +6,7 @@ import {
   type JWK,
 } from "jose";
 
-import { SUITE_CATALOG_REVISION } from "./identity";
+import { parseSuiteAccountId, SUITE_CATALOG_REVISION } from "./identity";
 
 import {
   createSuiteOidcRelyingParty,
@@ -16,7 +16,11 @@ import { suiteAccountsOidcProviderConfiguration } from "./urls";
 
 const nowMs = 1_800_000_300_000;
 const nowSeconds = Math.floor(nowMs / 1_000);
-const accountId = "acct_018f1f7a7a367ccdbd5d706d4dc5c018";
+const parsedAccountId = parseSuiteAccountId(
+  "acct_018f1f7a7a367ccdbd5d706d4dc5c018",
+);
+if (!parsedAccountId.ok) throw new Error("Test Suite account ID is invalid.");
+const accountId = parsedAccountId.value;
 const clientId = "hraness:soundfish:production:v1";
 const siteUrl = "https://sound.fish";
 const provider = suiteAccountsOidcProviderConfiguration("production");
@@ -500,17 +504,28 @@ describe("suite OAuth relying party", () => {
     expect(await relyingParty.serverSession(syncRequest)).toBeNull();
   });
 
-  test("exposes a server-only account bearer before username onboarding", async () => {
-    const signing = await signingFixture();
+  test("projects a live verified email before username onboarding", async () => {
+    const peopleBladeClientId = "hraness:peopleblade:production:v1";
+    const peopleBladeSiteUrl = "https://peopleblade.com";
+    const peopleBladeRequest = (
+      path: string,
+      init: RequestInit = {},
+    ): Request => new Request(new URL(path, peopleBladeSiteUrl), init);
+    const signing = await signingFixture(peopleBladeClientId);
     const incompleteProfile = {
       profile_complete: false,
       profile_revision: "username-v1",
       username: null,
     };
+    let clockMs = nowMs;
     let nonce = "";
     let issuedAccessToken = "";
+    let userInfoOverrides: Record<string, unknown> = {
+      email: "Reader@Example.com",
+    };
+    let userInfoUnavailable = false;
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "soundfish",
+      consumer: "peopleblade",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: async (input) => {
@@ -533,24 +548,33 @@ describe("suite OAuth relying party", () => {
           });
         }
         if (url === provider.entitlementReceiptEndpoint) {
-          return Response.json(entitlementReceipt());
+          return Response.json(entitlementReceipt(
+            "R".repeat(43),
+            "peopleblade",
+          ));
         }
         if (url === provider.userInfoAudience) {
-          return Response.json(signing.userInfo(incompleteProfile));
+          if (userInfoUnavailable) {
+            return Response.json({ error: "session_revoked" }, { status: 401 });
+          }
+          return Response.json(signing.userInfo({
+            ...incompleteProfile,
+            ...userInfoOverrides,
+          }));
         }
         throw new Error(`Unexpected provider URL: ${url}`);
       },
-      now: () => nowMs,
+      now: () => clockMs,
       randomBytes: randomSource(),
       receiptKeyVersion: "v1",
     });
-    const started = await relyingParty.start(request(
+    const started = await relyingParty.start(peopleBladeRequest(
       "/api/suite-auth/start",
       { headers: { "sec-fetch-site": "same-origin" } },
     ));
     const authorization = new URL(started.headers.get("location")!);
     nonce = authorization.searchParams.get("nonce")!;
-    const callback = await relyingParty.callback(request(
+    const callback = await relyingParty.callback(peopleBladeRequest(
       `/api/suite-auth/callback?code=code&state=${
         authorization.searchParams.get("state")!
       }`,
@@ -564,7 +588,7 @@ describe("suite OAuth relying party", () => {
     const sessionCookie = cookiePair(getSetCookies(callback).find(cookie =>
       cookie.startsWith("__Host-hraness-suite-oidc-session=")
     )!);
-    const accountRequest = request("/join", {
+    const accountRequest = peopleBladeRequest("/join", {
       headers: {
         cookie: sessionCookie,
         "sec-fetch-site": "same-origin",
@@ -576,7 +600,72 @@ describe("suite OAuth relying party", () => {
       accessTokenExpiresAtMs: nowMs + 10 * 60_000,
       suiteAccountId: accountId,
     });
+    expect(await relyingParty.serverVerifiedAccountEmail(accountRequest)).toEqual({
+      accessTokenExpiresAtMs: nowMs + 10 * 60_000,
+      email: "reader@example.com",
+      suiteAccountId: accountId,
+    });
     expect(await relyingParty.serverSession(accountRequest)).toBeNull();
+    expect(await relyingParty.serverVerifiedEmail(accountRequest)).toBeNull();
+
+    for (const mismatch of [
+      { suite_account_id: "acct_018f1f7a7a367ccdbd5d706d4dc5c019" },
+      { suite_client_id: clientId },
+      { sub: "better-auth-user-18" },
+      {
+        profile_complete: true,
+        profile_revision: "username-v1",
+        username: "reader",
+      },
+      { profile_revision: null },
+      { username: "reader" },
+    ]) {
+      userInfoOverrides = mismatch;
+      expect(await relyingParty.serverVerifiedAccountEmail(accountRequest))
+        .toBeNull();
+    }
+
+    for (const invalidEmail of [
+      { email_verified: false },
+      { email: null },
+      { email: " reader@example.com" },
+    ]) {
+      userInfoOverrides = invalidEmail;
+      expect(await relyingParty.serverVerifiedAccountEmail(accountRequest))
+        .toBeNull();
+    }
+
+    userInfoOverrides = {};
+    userInfoUnavailable = true;
+    expect(await relyingParty.serverVerifiedAccountEmail(accountRequest))
+      .toBeNull();
+    userInfoUnavailable = false;
+    expect(await relyingParty.serverVerifiedAccountEmail(new Request(
+      "https://attacker.example/join",
+      {
+        headers: {
+          cookie: sessionCookie,
+          "sec-fetch-site": "same-origin",
+        },
+      },
+    ))).toBeNull();
+    expect(await relyingParty.serverVerifiedAccountEmail(peopleBladeRequest("/join", {
+      headers: {
+        cookie: sessionCookie,
+        "sec-fetch-site": "cross-site",
+      },
+    }))).toBeNull();
+    const tamperedCookie = `${sessionCookie.slice(0, -1)}!`;
+    expect(await relyingParty.serverVerifiedAccountEmail(peopleBladeRequest("/join", {
+      headers: {
+        cookie: tamperedCookie,
+        "sec-fetch-site": "same-origin",
+      },
+    }))).toBeNull();
+
+    clockMs = nowMs + 10 * 60_000;
+    expect(await relyingParty.serverVerifiedAccountEmail(accountRequest))
+      .toBeNull();
   });
 
   test("runs authorization, cross-site callback, receipt delivery, refresh rotation, ack, and revocation", async () => {
