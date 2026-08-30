@@ -185,6 +185,7 @@ function parseSuiteUsername(value) {
 var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
+  "peopleblade",
   "crclte",
   "pub"
 ]);
@@ -245,6 +246,7 @@ function parseSuiteProduct(value) {
   switch (value) {
     case "soundfish":
     case "hra":
+    case "peopleblade":
     case "crclte":
     case "pub":
       return ok4(value);
@@ -338,6 +340,7 @@ var IDENTITY_LINK_CLOCK_SKEW_MS = 30000;
 var SUITE_LINK_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
+  "peopleblade",
   "crclte",
   "pub"
 ]);
@@ -352,6 +355,7 @@ function parseSuiteLinkProduct(value) {
   switch (parsed.value) {
     case "soundfish":
     case "hra":
+    case "peopleblade":
     case "crclte":
     case "pub":
       return ok5(parsed.value);

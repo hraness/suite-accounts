@@ -68,6 +68,15 @@ describe("suite identity-link contract", () => {
     expect(productLinkProofMessage(hraProof)).toContain(
       '"hra","production"',
     );
+    const peopleBladeProof = {
+      ...proof,
+      localSubject: "peopleblade-user-1",
+      product: "peopleblade",
+    } as const satisfies ProductLinkProof;
+    expect(validateProductLinkProof(peopleBladeProof, issuedAtMs)).toBeNull();
+    expect(productLinkProofMessage(peopleBladeProof)).toContain(
+      '"peopleblade","production","peopleblade-user-1"',
+    );
   });
 
   test("rejects the retired Loops wire identity", () => {

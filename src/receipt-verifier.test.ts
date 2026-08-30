@@ -72,6 +72,15 @@ describe("suite receipt server helpers", () => {
       keys: [{
         environment: "production",
         keyVersion: "v1",
+        product: "peopleblade",
+        secret,
+      }],
+      version: 1,
+    })?.keys[0]?.product).toBe("peopleblade");
+    expect(parseSuiteReceiptKeyring({
+      keys: [{
+        environment: "production",
+        keyVersion: "v1",
         product: "loops",
         secret,
       }],

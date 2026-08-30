@@ -184,6 +184,7 @@ function parseSuiteUsername(value) {
 var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
+  "peopleblade",
   "crclte",
   "pub"
 ]);
@@ -244,6 +245,7 @@ function parseSuiteProduct(value) {
   switch (value) {
     case "soundfish":
     case "hra":
+    case "peopleblade":
     case "crclte":
     case "pub":
       return ok4(value);

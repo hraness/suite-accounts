@@ -156,7 +156,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "hra",
   "sponge",
   "subcounter",
-  "slackorgs"
+  "slackorgs",
+  "peopleblade"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -177,7 +178,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
-  slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com")
+  slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com"),
+  peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -197,7 +199,8 @@ var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "hra"
+  "hra",
+  "peopleblade"
 ]);
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);

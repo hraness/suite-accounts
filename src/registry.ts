@@ -229,6 +229,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "sponge",
   "subcounter",
   "slackorgs",
+  "peopleblade",
 ] as const);
 
 export type SuiteAccountsCurrentConsumerId =
@@ -284,6 +285,11 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
     "slackorgs",
     "BigDataDepot",
     "https://bigdatadepot.com",
+  ),
+  peopleblade: currentOidcSite(
+    "peopleblade",
+    "PeopleBlade",
+    "https://peopleblade.com",
   ),
 } as const satisfies Readonly<
   Record<
@@ -371,6 +377,7 @@ export type SuiteAccountsCurrentEmailOtpRequiredOidcConsumerId =
 export const SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
   "hra",
+  "peopleblade",
 ] as const satisfies readonly SuiteAccountsCurrentOidcConsumerId[]);
 
 export type SuiteAccountsCurrentLinkedOidcConsumerId =
