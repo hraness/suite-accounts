@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.4.0"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.4.1"
   }
 }
 ```
@@ -62,6 +62,14 @@ The returned configuration is frozen. Its provider endpoints, resource,
 configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
+
+Version 0.4.1 registers PeopleBlade as a current production-only linked OIDC
+consumer at `https://peopleblade.com`, with client ID
+`hraness:peopleblade:production:v1` and callback
+`https://peopleblade.com/api/suite-auth/callback`. It accepts only email-OTP
+sessions. Its signed product-link receipts bind one PeopleBlade local subject
+to one Suite account; email equality is contact evidence and never creates or
+merges that link.
 
 Version 0.4.0 removes the retired OPRTE browser client from the deprecated v1
 registration helpers as well as the current authority. HRA at

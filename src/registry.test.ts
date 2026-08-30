@@ -81,6 +81,7 @@ describe("suite Accounts auth-mode registry", () => {
       "sponge",
       "subcounter",
       "slackorgs",
+      "peopleblade",
     ]);
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS)
       .not.toBe(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS);
@@ -136,6 +137,7 @@ describe("suite Accounts auth-mode registry", () => {
       | "sponge"
       | "subcounter"
       | "slackorgs"
+      | "peopleblade"
     >();
     expectTypeOf<SuiteAccountsCurrentOAuthConsumerId>().toEqualTypeOf<
       SuiteAccountsCurrentOidcConsumerId
@@ -194,6 +196,32 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_CONSUMER_IDS).not.toContain("slackorgs");
   });
 
+  test("registers PeopleBlade only in the current linked OIDC authority", () => {
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade).toEqual({
+      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+      displayName: "PeopleBlade",
+      environments: {
+        production: {
+          billingReturn: { kind: "unsupported" },
+          siteUrl: "https://peopleblade.com",
+        },
+      },
+      id: "peopleblade",
+    });
+    expect(getSuiteAccountsCurrentConsumerEnvironment(
+      "peopleblade",
+      "production",
+    )).toEqual({
+      billingReturn: { kind: "unsupported" },
+      siteUrl: "https://peopleblade.com",
+    });
+    expect(isSuiteAccountsCurrentConsumerId("peopleblade")).toBe(true);
+    expect(isSuiteAccountsCurrentOidcConsumerId("peopleblade")).toBe(true);
+    expect(isSuiteAccountsCurrentOAuthConsumerId("peopleblade")).toBe(true);
+    expect("peopleblade" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
+    expect(SUITE_CONSUMER_IDS).not.toContain("peopleblade");
+  });
+
   test("keeps current OTP and linked-product policies explicit", () => {
     expect(SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS)
       .toEqual([
@@ -205,15 +233,19 @@ describe("suite Accounts auth-mode registry", () => {
         "sponge",
         "subcounter",
         "slackorgs",
+        "peopleblade",
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",
       "hra",
+      "peopleblade",
     ]);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("hra")).toBe(true);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("subcounter"))
       .toBe(true);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("slackorgs"))
+      .toBe(true);
+    expect(suiteAccountsCurrentConsumerRequiresEmailOtp("peopleblade"))
       .toBe(true);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)
       .not.toContain("subcounter");
@@ -397,6 +429,11 @@ describe("suite Accounts auth-mode registry", () => {
       "siteUrl",
       "https://attacker.example",
     )).toBe(false);
+    expect(Reflect.set(
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production,
+      "siteUrl",
+      "https://attacker.example",
+    )).toBe(false);
     const authority = SUITE_ACCOUNTS_CONSUMERS.accounts.auth;
     if (authority.kind !== "authority") throw new Error("Missing authority.");
     expect(Reflect.set(authority.cookies.names, "0", "foreign_cookie"))
@@ -414,6 +451,9 @@ describe("suite Accounts auth-mode registry", () => {
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.slackorgs.environments.production.siteUrl,
     ).toBe("https://bigdatadepot.com");
+    expect(
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production.siteUrl,
+    ).toBe("https://peopleblade.com");
     expect(suiteAccountsConsumerRequiresEmailOtp("act60")).toBe(true);
     expect(authority.cookies.names[0]).toBe("account_data");
   });

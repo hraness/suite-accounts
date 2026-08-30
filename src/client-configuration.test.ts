@@ -33,6 +33,15 @@ const bigDataDepotBinding = {
   origin: "https://bigdatadepot.com",
 } as const;
 
+const peopleBladeBinding = {
+  authMode: "oidc-rp",
+  callbackUrl: "https://peopleblade.com/api/suite-auth/callback",
+  clientId: "hraness:peopleblade:production:v1",
+  consumer: "peopleblade",
+  environment: "production",
+  origin: "https://peopleblade.com",
+} as const;
+
 describe("suite Accounts client configuration", () => {
   test("derives every authority-controlled value from one exact binding", () => {
     const result = createSuiteAccountsClientConfiguration(hraBinding);
@@ -248,6 +257,35 @@ describe("suite Accounts client configuration", () => {
     expect(createSuiteAccountsClientConfiguration({
       ...bigDataDepotBinding,
       clientId: "hraness:slackorgs:preview:v1",
+    })).toEqual({ error: "invalid-client-id", ok: false });
+  });
+
+  test("binds PeopleBlade only to its exact current production registration", () => {
+    const result = createSuiteAccountsClientConfiguration(peopleBladeBinding);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toMatchObject({
+      authBasePath: "/api/suite-auth",
+      binding: peopleBladeBinding,
+      configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
+      wireVersion: SUITE_ACCOUNTS_WIRE_VERSION,
+    });
+
+    expect(createSuiteAccountsClientConfiguration({
+      ...peopleBladeBinding,
+      origin: "https://peopleblade.com.evil.example",
+    })).toEqual({ error: "invalid-origin", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...peopleBladeBinding,
+      origin: "https://peopleblade-git-main.vercel.app",
+    })).toEqual({ error: "invalid-origin", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...peopleBladeBinding,
+      callbackUrl: "https://peopleblade.com/api/suite-auth/foreign",
+    })).toEqual({ error: "invalid-callback-url", ok: false });
+    expect(createSuiteAccountsClientConfiguration({
+      ...peopleBladeBinding,
+      clientId: "hraness:peopleblade:preview:v1",
     })).toEqual({ error: "invalid-client-id", ok: false });
   });
 

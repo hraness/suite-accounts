@@ -69,6 +69,7 @@ describe("suite principals", () => {
     expect(SUITE_PRODUCTS).toEqual([
       "soundfish",
       "hra",
+      "peopleblade",
       "crclte",
       "pub",
     ]);
@@ -81,6 +82,10 @@ describe("suite principals", () => {
     expect(parseSuiteProduct("soundfish")).toEqual({
       ok: true,
       value: "soundfish",
+    });
+    expect(parseSuiteProduct("peopleblade")).toEqual({
+      ok: true,
+      value: "peopleblade",
     });
     expect(parseSuiteProduct("loops")).toEqual({
       error: "invalid-product",

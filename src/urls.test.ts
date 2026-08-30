@@ -118,6 +118,15 @@ describe("suite Accounts URLs", () => {
     expect(
       suiteAccountsOidcClientRegistration("slackorgs", "production"),
     ).toBeNull();
+    expect(
+      suiteAccountsCurrentOidcClientRegistration("peopleblade", "production"),
+    ).toEqual({
+      callbackUrl: "https://peopleblade.com/api/suite-auth/callback",
+      clientId: "hraness:peopleblade:production:v1",
+    });
+    expect(
+      suiteAccountsOidcClientRegistration("peopleblade", "production"),
+    ).toBeNull();
   });
 
   test("matches only checked email-OTP-required client IDs", () => {
@@ -156,6 +165,15 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:slackorgs:preview:v1",
+    )).toBe(false);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
+      "hraness:peopleblade:production:v1",
+    )).toBe(true);
+    expect(suiteAccountsOidcClientRequiresEmailOtp(
+      "hraness:peopleblade:production:v1",
+    )).toBe(false);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
+      "hraness:peopleblade:preview:v1",
     )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:elders:local:v1",
