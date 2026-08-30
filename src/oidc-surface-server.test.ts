@@ -7,6 +7,7 @@ import {
   suiteEnvironmentForConsumerOrigin,
   suiteOidcSurfaceHandler,
   suiteOidcSurfaceServerAccountSession,
+  suiteOidcSurfaceServerVerifiedAccountEmail,
   suiteOidcSurfaceServerSession,
   suiteOidcSurfaceServerVerifiedEmail,
 } from "./oidc-surface-server";
@@ -155,6 +156,11 @@ describe("shared Suite OIDC surface server", () => {
       new Request("https://evil.example/join"),
       configured,
     )).toBeNull();
+    expect(await suiteOidcSurfaceServerVerifiedAccountEmail(
+      "hra",
+      new Request("https://evil.example/join"),
+      configured,
+    )).toBeNull();
     expect(await suiteOidcSurfaceServerVerifiedEmail(
       "hra",
       new Request("https://evil.example/join"),
@@ -162,7 +168,7 @@ describe("shared Suite OIDC surface server", () => {
     )).toBeNull();
   });
 
-  test("preserves the verified email's Suite account binding", async () => {
+  test("preserves each verified email's Suite account binding", async () => {
     const parsedAccountId = parseSuiteAccountId(
       "acct_018f1f7a7a367ccdbd5d706d4dc5c018",
     );
@@ -171,6 +177,33 @@ describe("shared Suite OIDC surface server", () => {
       throw new Error("Expected valid Suite identity values.");
     }
     const request = new Request("https://hra.sh/private-profile");
+
+    const accountVerifiedEmail =
+      await suiteOidcSurfaceServerVerifiedAccountEmail(
+        "hra",
+        request,
+        configured,
+        {
+          createRelyingParty: (incomingRequest) => {
+            expect(incomingRequest).toBe(request);
+            return {
+              serverVerifiedAccountEmail: (serverRequest) => {
+                expect(serverRequest).toBe(request);
+                return Promise.resolve({
+                  accessTokenExpiresAtMs: 2_000,
+                  email: "reader@example.com",
+                  suiteAccountId: parsedAccountId.value,
+                });
+              },
+            };
+          },
+        },
+      );
+    expect(accountVerifiedEmail).toEqual({
+      accessTokenExpiresAtMs: 2_000,
+      email: "reader@example.com",
+      suiteAccountId: parsedAccountId.value,
+    });
 
     const verifiedEmail = await suiteOidcSurfaceServerVerifiedEmail(
       "hra",

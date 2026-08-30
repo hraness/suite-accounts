@@ -1828,6 +1828,14 @@ function createSuiteOidcRelyingParty(options) {
       suiteAccountId: state.view.suiteAccountId
     };
   }
+  async function serverVerifiedAccountEmail(request) {
+    const state = await serverSessionState(request);
+    return state === null || state.verifiedEmail === null ? null : {
+      accessTokenExpiresAtMs: state.session.accessTokenExpiresAtMs,
+      email: state.verifiedEmail,
+      suiteAccountId: state.view.suiteAccountId
+    };
+  }
   async function serverSession(request) {
     const state = await serverSessionState(request);
     return state?.view.profileComplete === true ? {
@@ -2013,6 +2021,7 @@ function createSuiteOidcRelyingParty(options) {
     linkReceipt,
     refreshSession,
     serverAccountSession,
+    serverVerifiedAccountEmail,
     serverSession,
     serverVerifiedEmail,
     signOut,
@@ -2079,12 +2088,17 @@ async function suiteOidcSurfaceServerAccountSession(consumer, request, injectedE
   const relyingParty = createSurfaceSuiteRelyingParty(consumer, injectedEnvironment);
   return relyingParty === null ? null : await relyingParty.serverAccountSession(request);
 }
+async function suiteOidcSurfaceServerVerifiedAccountEmail(consumer, request, injectedEnvironment, options = {}) {
+  const relyingParty = options.createRelyingParty?.(request) ?? createSurfaceSuiteRelyingParty(consumer, injectedEnvironment);
+  return relyingParty === null ? null : await relyingParty.serverVerifiedAccountEmail(request);
+}
 async function suiteOidcSurfaceServerVerifiedEmail(consumer, request, injectedEnvironment, options = {}) {
   const relyingParty = options.createRelyingParty?.(request) ?? createSurfaceSuiteRelyingParty(consumer, injectedEnvironment);
   return relyingParty === null ? null : await relyingParty.serverVerifiedEmail(request);
 }
 export {
   suiteOidcSurfaceServerVerifiedEmail,
+  suiteOidcSurfaceServerVerifiedAccountEmail,
   suiteOidcSurfaceServerSession,
   suiteOidcSurfaceServerAccountSession,
   suiteOidcSurfaceHandler,

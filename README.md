@@ -17,7 +17,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.4.1"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.4.2"
   }
 }
 ```
@@ -62,6 +62,14 @@ The returned configuration is frozen. Its provider endpoints, resource,
 configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
+
+Version 0.4.2 adds `serverVerifiedAccountEmail` and
+`suiteOidcSurfaceServerVerifiedAccountEmail` for products that provision an
+account before optional username onboarding is complete. The accessors require
+live userinfo to match the session's subject, client, Suite account, and profile
+state, and return an email only when `email_verified` is `true`. The existing
+`serverVerifiedEmail` accessor keeps its completed-profile and username
+contract.
 
 Version 0.4.1 registers PeopleBlade as a current production-only linked OIDC
 consumer at `https://peopleblade.com`, with client ID

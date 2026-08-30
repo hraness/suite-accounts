@@ -145,17 +145,23 @@ export type SuiteOidcServerSession = SuiteOidcServerAccountSession & Readonly<{
 }>;
 
 /**
- * Canonical verified email projected only to trusted product server code.
+ * Canonical account email projected only to trusted product server code.
  *
  * This value is fetched from the live Suite userinfo response. It is never
- * stored in the relying-party cookie or included in the browser session view.
+ * stored in the relying-party cookie or included in the browser session view,
+ * and it does not require optional username onboarding to be complete.
  */
-export type SuiteOidcServerVerifiedEmail = Readonly<{
+export type SuiteOidcServerVerifiedAccountEmail = Readonly<{
   accessTokenExpiresAtMs: number;
   email: string;
   suiteAccountId: SuiteAccountId;
-  username: SuiteUsername;
 }>;
+
+/** Completed-profile email projection with the permanent Suite username. */
+export type SuiteOidcServerVerifiedEmail =
+  SuiteOidcServerVerifiedAccountEmail & Readonly<{
+    username: SuiteUsername;
+  }>;
 
 export type SuiteOidcRelyingPartyOptions = Readonly<{
   consumer: SuiteOidcConsumer;
@@ -184,6 +190,9 @@ export type SuiteOidcRelyingParty = Readonly<{
   serverAccountSession(
     request: Request,
   ): Promise<SuiteOidcServerAccountSession | null>;
+  serverVerifiedAccountEmail(
+    request: Request,
+  ): Promise<SuiteOidcServerVerifiedAccountEmail | null>;
   serverSession(request: Request): Promise<SuiteOidcServerSession | null>;
   serverVerifiedEmail(
     request: Request,
@@ -1747,6 +1756,19 @@ export function createSuiteOidcRelyingParty(
         };
   }
 
+  async function serverVerifiedAccountEmail(
+    request: Request,
+  ): Promise<SuiteOidcServerVerifiedAccountEmail | null> {
+    const state = await serverSessionState(request);
+    return state === null || state.verifiedEmail === null
+      ? null
+      : {
+          accessTokenExpiresAtMs: state.session.accessTokenExpiresAtMs,
+          email: state.verifiedEmail,
+          suiteAccountId: state.view.suiteAccountId,
+        };
+  }
+
   async function serverSession(
     request: Request,
   ): Promise<SuiteOidcServerSession | null> {
@@ -2006,6 +2028,7 @@ export function createSuiteOidcRelyingParty(
     linkReceipt,
     refreshSession,
     serverAccountSession,
+    serverVerifiedAccountEmail,
     serverSession,
     serverVerifiedEmail,
     signOut,

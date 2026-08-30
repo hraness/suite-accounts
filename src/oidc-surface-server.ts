@@ -2,6 +2,7 @@ import {
   createSuiteOidcRelyingParty,
   type SuiteOidcRelyingParty,
   type SuiteOidcServerAccountSession,
+  type SuiteOidcServerVerifiedAccountEmail,
   type SuiteOidcServerSession,
   type SuiteOidcServerVerifiedEmail,
 } from "./oidc-rp.js";
@@ -139,6 +140,27 @@ export async function suiteOidcSurfaceServerAccountSession(
   return relyingParty === null
     ? null
     : await relyingParty.serverAccountSession(request);
+}
+
+/**
+ * Returns a live verified email for a valid Suite account session, including
+ * sessions whose optional username onboarding is incomplete.
+ */
+export async function suiteOidcSurfaceServerVerifiedAccountEmail(
+  consumer: SuiteAccountsCurrentOidcConsumerId,
+  request: Request,
+  injectedEnvironment?: SuiteOidcSurfaceEnvironment,
+  options: Readonly<{
+    createRelyingParty?: (
+      request: Request,
+    ) => Pick<SuiteOidcRelyingParty, "serverVerifiedAccountEmail"> | null;
+  }> = {},
+): Promise<SuiteOidcServerVerifiedAccountEmail | null> {
+  const relyingParty = options.createRelyingParty?.(request)
+    ?? createSurfaceSuiteRelyingParty(consumer, injectedEnvironment);
+  return relyingParty === null
+    ? null
+    : await relyingParty.serverVerifiedAccountEmail(request);
 }
 
 /**
