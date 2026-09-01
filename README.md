@@ -1,9 +1,15 @@
 # hraness/suite-accounts
 
-`@hraness/suite-accounts` provides the client and signed-protocol boundaries
-for Hraness Accounts. It validates one product's registered binding, pins every
-OAuth and OIDC trust value, keeps browser bearer custody server-side, and
-parses suite identity and entitlement evidence from `unknown`.
+Give a Hraness product one registered sign-in and authorization boundary without
+letting application code choose what to trust. `@hraness/suite-accounts`
+accepts an exact product binding, returns closed OAuth and OIDC configuration,
+keeps browser bearer custody on the server, and parses identity and entitlement
+evidence from `unknown`.
+
+The first useful result is a frozen configuration tied to one known origin,
+callback, client ID, and authentication mode. A misspelled field, retired
+client, unregistered origin, or caller-supplied trust value fails before the
+product starts an Accounts flow.
 
 Accounts remains the sole authority for account records, OAuth client
 registration, identity links, and entitlements. Installing this package does
@@ -32,7 +38,7 @@ React and React DOM 18.3.1 through 19.x are optional peers. Install them only
 when using `@hraness/suite-accounts/react` or
 `@hraness/suite-accounts/profile-form`.
 
-## Bind a registered client
+## First proof: bind one registered client
 
 Pass the exact public fields assigned to the product. The factory rejects
 unknown fields, including attempts to supply authority-controlled trust data.
@@ -58,50 +64,28 @@ configuration.value.provider.issuer;
 // "https://account.hraness.com"
 ```
 
+For the registered HRA production client, the checked result begins with:
+
+```json
+{
+  "authBasePath": "/api/suite-auth",
+  "configurationVersion": "suite-accounts-client-configuration-v1",
+  "provider": {
+    "issuer": "https://account.hraness.com",
+    "resource": "https://hraness.com/suite"
+  },
+  "wireVersion": "v1"
+}
+```
+
+The example shows selected fields from the returned configuration. The package
+also supplies the authorization, token, revocation, userinfo, JWKS, identity
+link, and entitlement receipt endpoints from closed current-authority data.
+
 The returned configuration is frozen. Its provider endpoints, resource,
 configuration version, and wire version are derived from the package's checked
 current authority data. The Accounts service independently enforces the same
 registration, so this client-side check never creates authority.
-
-Version 0.4.2 adds `serverVerifiedAccountEmail` and
-`suiteOidcSurfaceServerVerifiedAccountEmail` for products that provision an
-account before optional username onboarding is complete. The accessors require
-live userinfo to match the session's subject, client, Suite account, and profile
-state, and return an email only when `email_verified` is `true`. The existing
-`serverVerifiedEmail` accessor keeps its completed-profile and username
-contract.
-
-Version 0.4.1 registers PeopleBlade as a current production-only linked OIDC
-consumer at `https://peopleblade.com`, with client ID
-`hraness:peopleblade:production:v1` and callback
-`https://peopleblade.com/api/suite-auth/callback`. It accepts only email-OTP
-sessions. Its signed product-link receipts bind one PeopleBlade local subject
-to one Suite account; email equality is contact evidence and never creates or
-merges that link.
-
-Version 0.4.0 removes the retired OPRTE browser client from the deprecated v1
-registration helpers as well as the current authority. HRA at
-`https://hra.sh` remains the sole current client for that product line.
-Historical `oprte` and `kitchen` product identifiers remain parseable only so
-bounded signed evidence can canonicalize them to `hra`; they no longer retain
-a browser origin or OAuth registration.
-
-Version 0.3.7 renames the current `slackorgs` registration to BigDataDepot and
-moves its production surface to `https://bigdatadepot.com`. The stable
-`slackorgs` consumer ID and `hraness:slackorgs:production:v1` client ID remain
-unchanged, so existing account bindings stay compatible. The predecessor
-SubdomainData and SlackOrgs origins are not current OAuth callbacks or trusted
-origins; those hostnames may redirect at the product edge without gaining
-Accounts authority. Version 0.3.6 moves the current Sponge registration to
-`https://sponge.computer` while keeping client ID
-`hraness:sponge:production:v1`. Version 0.3.5 renames the current `slackorgs`
-registration to SubdomainData and
-moves its production surface to `https://subdomaindata.com`. The stable
-`slackorgs` consumer ID and `hraness:slackorgs:production:v1` client ID remain
-unchanged, so existing account bindings stay compatible. Version 0.3.4 retired
-the OPRTE browser client and origin from the current authority. Signature
-verification continues to use original product bytes, so bounded predecessor
-receipts remain verifiable.
 
 Local development still uses `parseSuiteAccountsPublicConfig`. The consumer
 origin and both Accounts Convex origins must use one exact loopback hostname.
@@ -109,6 +93,25 @@ Remote configuration accepts only the checked production deployment.
 Generated Vercel Preview surfaces can report their surface origin through
 `NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN`, but suite authentication remains
 unavailable there.
+
+## Follow the trust path
+
+```text
+browser
+  -> product-owned /api/suite-auth route and encrypted HttpOnly session
+  -> registered Accounts authorization, token, userinfo, and JWKS endpoints
+  -> product server verifies audience, client binding, receipt, and entitlement
+  -> browser receives bounded session JSON, never an OAuth bearer
+```
+
+The package participates at each protocol boundary, but it does not become the
+Accounts service or the product backend:
+
+| Authority | Owns |
+| --- | --- |
+| Accounts service | Account records, client registration, identity links, entitlements, and authoritative provider operations |
+| `@hraness/suite-accounts` | Closed registrations, trust configuration, protocol parsers, server transports, receipt verification, and optional React adapters |
+| Product | Its registered origin and callback, cookie encryption keys, local subject, authorization decision, interface copy, and provider deployment |
 
 ## Use the identity protocol
 
@@ -133,17 +136,19 @@ part of this package.
 signature, issuer, audience, or time trust. Use the registry-pinned verifier
 for authorization.
 
-## Choose the narrow subpath
+## Interface map
 
 | Subpath | Intended runtime |
 | --- | --- |
 | `.` | Dependency-light configuration, registry, URL, and Convex browser-token contracts |
+| `./auth-client` | Legacy product-neutral browser auth adapter |
 | `./identity` | Provider-neutral identity types, parsers, views, and signed messages |
 | `./identity/functions` | Opt-in Convex function references and billing transport types |
 | `./identity/return-targets` | Opt-in Accounts-owned billing return-target identifiers |
 | `./client-configuration` | Additive validated product-binding factory |
 | `./browser-session` | Same-origin browser session reads and serialized refresh |
 | `./oidc-rp` | Server-only OAuth 2.1 relying-party implementation |
+| `./oidc-session-policy` | Shared encrypted-cookie and session-lifetime policy |
 | `./oidc-surface-server` | Registered browser-RP server handlers |
 | `./bearer-verifier` | Server-only registry-pinned ES256 bearer verification |
 | `./receipt-verifier` | Server-only HMAC receipt and product-keyring verification |
@@ -154,13 +159,15 @@ for authorization.
 | `./entitlements` | Post-signature entitlement checks and receipt ordering |
 | `./profile` | Provider-neutral profile contracts |
 | `./profile-form` | Optional controlled React profile editor |
+| `./profile-form.css` | Product-neutral profile-form styles |
+| `./public-config` | Validated public development and production configuration |
 | `./react` | Optional route-local Accounts Convex context |
+| `./registry` | Deprecated v1 compatibility registry and distinct current authority |
+| `./urls` | Closed Accounts and product URL helpers |
 
-The existing `./auth-client`, `./public-config`, `./registry`, `./urls`, and
-other listed suite subpaths remain available for released clients. Import
-server-only modules only from server code.
+Import server-only modules only from server code.
 
-## Security contract
+## Trust boundary
 
 The package preserves these checks across the public surface:
 
@@ -205,6 +212,25 @@ The compatibility registry is intentionally closed. It must not gain runtime
 mutation, remote discovery, environment overrides, or caller-supplied trust
 values.
 
+## Current compatibility evidence
+
+The immutable `v0.4.2` release matches the install example and package
+manifest. Its current changes remain bounded:
+
+| Release | Checked change |
+| --- | --- |
+| `v0.4.2` | Adds verified-account-email accessors for provisioning before optional username onboarding. Live userinfo must match subject, client, Suite account, and profile state; the accessor returns only an `email_verified` address. |
+| `v0.4.1` | Registers PeopleBlade at `https://peopleblade.com` for email-OTP OIDC. Its signed product-link receipt binds local and Suite subjects; email equality never creates or merges a link. |
+| `v0.4.0` | Removes the retired OPRTE browser client from current and deprecated registration helpers while preserving bounded historical product-ID parsing. |
+| `v0.3.7` | Moves the stable `slackorgs` consumer registration to BigDataDepot at `https://bigdatadepot.com` without changing its client ID. Predecessor origins gain no Accounts authority. |
+| `v0.3.6` | Moves the current Sponge origin to `https://sponge.computer` without changing its client ID. |
+
+Deterministic tests exercise valid registrations and readable failures.
+Property tests cover foreign-value parsers, ordering, and round trips. The
+package smoke installs built entries into clean Bundler and NodeNext consumers
+with React 18.3.1 and 19.2.3, then builds the client entries in a clean Next.js
+16.2 webpack consumer.
+
 ## Service boundary
 
 This repository does not contain billing prices or provider lookup keys,
@@ -214,6 +240,32 @@ service policy. Those concerns belong to the Accounts service. The Convex
 function references and billing transport types required by existing clients
 are isolated behind explicit opt-in identity subpaths; the root and client
 configuration entries do not load them.
+
+## Questions before integration
+
+### Can a product register itself with this package?
+
+No. The product must already exist in current Accounts authority. The validated
+factory can confirm that binding, but it cannot create or widen it.
+
+### Can browser code authorize from session JSON or a decoded JWT?
+
+No. Browser JSON is a display and session-state surface. A product server must
+verify signature, issuer, audience, client binding, time, receipt ordering, and
+the exact required entitlement before it grants access.
+
+### Does this package own prices, billing, or provider reconciliation?
+
+No. It contains finite identity and entitlement protocol values plus opt-in
+transport types. Prices, provider keys, events, credentials, and product policy
+stay with their authoritative services.
+
+### Where should a new integration start?
+
+Start with `./client-configuration` and commit the exact assigned binding. Add
+`./oidc-surface-server` for registered browser sign-in, then import only the
+server verifiers and identity subpaths required by the product. Run the package
+and product gates before the callback is enabled in production.
 
 ## Development
 
