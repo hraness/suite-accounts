@@ -1,5 +1,7 @@
 "use client";
 
+import { profileFormClasses } from "./profile-form.stylex.js";
+
 import {
   SUITE_PROFILE_BIO_MAX_LENGTH,
   SUITE_PROFILE_NAME_MAX_LENGTH,
@@ -166,8 +168,8 @@ export function SuiteProfileForm({
   }
 
   const formClassName = className === undefined
-    ? "suite-profile-form"
-    : `suite-profile-form ${className}`;
+    ? `suite-profile-form ${profileFormClasses.form}`
+    : `suite-profile-form ${profileFormClasses.form} ${className}`;
 
   return (
     <form
@@ -177,9 +179,10 @@ export function SuiteProfileForm({
         void submit(event);
       }}
     >
-      <label className="suite-profile-field" htmlFor={`${id}-name`}>
-        <span>Name</span>
+      <label className={`suite-profile-field ${profileFormClasses.field}`} htmlFor={`${id}-name`}>
+        <span className={profileFormClasses.label}>Name</span>
         <input
+          className={profileFormClasses.control}
           aria-describedby={
             fieldErrors.name === undefined ? undefined : `${id}-name-error`
           }
@@ -200,7 +203,7 @@ export function SuiteProfileForm({
           ? null
           : (
             <span
-              className="suite-profile-error"
+              className={`suite-profile-error ${profileFormClasses.error}`}
               id={`${id}-name-error`}
               role="alert"
             >
@@ -209,9 +212,10 @@ export function SuiteProfileForm({
           )}
       </label>
 
-      <label className="suite-profile-field" htmlFor={`${id}-email`}>
-        <span>Email</span>
+      <label className={`suite-profile-field ${profileFormClasses.field}`} htmlFor={`${id}-email`}>
+        <span className={profileFormClasses.label}>Email</span>
         <input
+          className={profileFormClasses.email}
           aria-readonly="true"
           autoComplete="email"
           id={`${id}-email`}
@@ -221,9 +225,10 @@ export function SuiteProfileForm({
         />
       </label>
 
-      <label className="suite-profile-field" htmlFor={`${id}-bio`}>
-        <span>Bio</span>
+      <label className={`suite-profile-field ${profileFormClasses.field}`} htmlFor={`${id}-bio`}>
+        <span className={profileFormClasses.label}>Bio</span>
         <textarea
+          className={profileFormClasses.textarea}
           aria-describedby={
             fieldErrors.bio === undefined ? undefined : `${id}-bio-error`
           }
@@ -243,7 +248,7 @@ export function SuiteProfileForm({
           ? null
           : (
             <span
-              className="suite-profile-error"
+              className={`suite-profile-error ${profileFormClasses.error}`}
               id={`${id}-bio-error`}
               role="alert"
             >
@@ -256,12 +261,13 @@ export function SuiteProfileForm({
         const error = fieldErrors[key];
         return (
           <label
-            className="suite-profile-field"
+            className={`suite-profile-field ${profileFormClasses.field}`}
             htmlFor={`${id}-${key}`}
             key={key}
           >
-            <span>{label}</span>
+            <span className={profileFormClasses.label}>{label}</span>
             <input
+              className={profileFormClasses.control}
               aria-describedby={
                 error === undefined ? undefined : `${id}-${key}-error`
               }
@@ -285,7 +291,7 @@ export function SuiteProfileForm({
               ? null
               : (
                 <span
-                  className="suite-profile-error"
+                  className={`suite-profile-error ${profileFormClasses.error}`}
                   id={`${id}-${key}-error`}
                   role="alert"
                 >
@@ -298,8 +304,8 @@ export function SuiteProfileForm({
 
       {formError === null
         ? null
-        : <p className="suite-profile-error" role="alert">{formError}</p>}
-      <button disabled={pending} type="submit">{submitLabel}</button>
+        : <p className={`suite-profile-error ${profileFormClasses.error}`} role="alert">{formError}</p>}
+      <button className={profileFormClasses.button} disabled={pending} type="submit">{submitLabel}</button>
     </form>
   );
 }

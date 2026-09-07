@@ -8,7 +8,7 @@
       "name": "@hraness/suite-accounts",
       "path": ".",
       "visibility": "public",
-      "version": "0.4.2"
+      "version": "0.5.0"
     }
   ],
   "dependencies": [
@@ -17,6 +17,12 @@
       "scope": "runtime",
       "specifier": "github:hraness/result#17b311c0b31cf456777efc7d7f5fa1f1cafefe74",
       "to": "@hraness/result"
+    },
+    {
+      "from": "@hraness/suite-accounts",
+      "scope": "development",
+      "specifier": "github:hraness/ui#v0.5.3",
+      "to": "@hraness/ui"
     }
   ],
   "deployments": [],

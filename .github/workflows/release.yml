@@ -57,6 +57,10 @@ jobs:
           printf 'tag=%s\n' "$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
       - run: bun install --frozen-lockfile --ignore-scripts
       - run: bun run check
+      - name: Verify native profile form in the installed browser
+        env:
+          CHROMIUM_EXECUTABLE_PATH: /usr/bin/google-chrome
+        run: bun run test:browser
       - run: |
           generated_status="$(git status --porcelain --untracked-files=all -- dist bun.lock)"
           if [[ -n "$generated_status" ]]; then

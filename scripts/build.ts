@@ -1,4 +1,15 @@
 import { readFile, rm, writeFile } from "node:fs/promises";
+import {
+  STYLEX_PACKAGE_MANIFEST_SCHEMA_VERSION,
+  artifactForFile,
+  canonicalJson,
+  compilerContract,
+  compilerSha256,
+  serializeStylexPackageRules,
+  stylexRulesSha256,
+  validateStylexPackageManifest,
+} from "@hraness/ui/stylex-build";
+import { profileStylexTransform } from "./stylex-transform.js";
 
 const entrypoints = [
   "src/index.ts",
@@ -40,6 +51,7 @@ if (process.env["NODE_ENV"] !== "production") {
 }
 
 await rm("dist", { force: true, recursive: true });
+const { collector, plugin } = profileStylexTransform(process.cwd());
 const result = await Bun.build({
   entrypoints,
   format: "esm",
@@ -51,6 +63,7 @@ const result = await Bun.build({
   minify: false,
   outdir: "dist",
   packages: "external",
+  plugins: [plugin],
   root: "src",
   splitting: false,
   target: "node",
@@ -100,3 +113,30 @@ for (const path of [
   }
   await writeFile(path, clientModule);
 }
+
+const rules = collector.seal();
+if (rules.length === 0) throw new Error("Profile build collected no StyleX rules.");
+const standaloneSerializer = {
+  before: ["components.hraness-suite-accounts.legacy"],
+  prefix: "components.hraness-suite-accounts",
+} as const;
+await writeFile("dist/stylex.css", serializeStylexPackageRules(rules, standaloneSerializer));
+const packageData: unknown = JSON.parse(await readFile("package.json", "utf8"));
+if (typeof packageData !== "object" || packageData === null || !("version" in packageData)
+  || typeof packageData.version !== "string") throw new Error("Missing package version.");
+const manifest = validateStylexPackageManifest({
+  buildTools: [],
+  compiler: compilerContract,
+  compilerFoundation: "compiler-foundation.css",
+  compilerSha256,
+  kind: "hraness-stylex-package-manifest",
+  package: { name: "@hraness/suite-accounts", version: packageData.version },
+  rules,
+  rulesSha256: stylexRulesSha256(rules),
+  runtime: [await artifactForFile(process.cwd(), "dist/profile-form.js")],
+  schemaVersion: STYLEX_PACKAGE_MANIFEST_SCHEMA_VERSION,
+  standaloneCss: await artifactForFile(process.cwd(), "dist/stylex.css"),
+  standaloneSerializer,
+  stylesheets: await Promise.all(["compiler-foundation.css", "src/profile-form.css"].map(path => artifactForFile(process.cwd(), path))),
+});
+await writeFile("dist/stylex-manifest.json", `${canonicalJson(manifest)}\n`);

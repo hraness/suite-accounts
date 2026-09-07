@@ -1,0 +1,279 @@
+@layer base, components;
+@layer components.hraness-suite-accounts.legacy, components.hraness-suite-accounts.priority1, components.hraness-suite-accounts.priority2, components.hraness-suite-accounts.priority3;
+@layer components.hraness-suite-accounts.priority1 {
+  .x1y4qj14 {
+    background-position: 0 0;
+  }
+
+  .x9ox504 {
+    border-color: var(--suite-profile-button-background, currentColor);
+  }
+
+  .xxut2h2 {
+    border-color: var(--suite-profile-line, currentColor);
+  }
+
+  .x5goj4r {
+    border-radius: .35rem;
+  }
+
+  .x1e6avla {
+    border-radius: 999px;
+  }
+
+  .x1y0btm7 {
+    border-style: solid;
+  }
+
+  .xmkeg23 {
+    border-width: 1px;
+  }
+
+  .x1aazh3f {
+    font-variant: inherit;
+  }
+
+  .x73f2yu {
+    gap: .35rem;
+  }
+
+  .x8fetqu {
+    gap: 1rem;
+  }
+}
+
+@layer components.hraness-suite-accounts.priority2 {
+  .x1fdtg7e {
+    background-attachment: scroll;
+  }
+
+  .x1u7o2vf {
+    background-clip: border-box;
+  }
+
+  .x1jfjhf8 {
+    background-color: var(--suite-profile-button-background, currentColor);
+  }
+
+  .x1w9dvvm {
+    background-color: var(--suite-profile-input-background, transparent);
+  }
+
+  .x18o3ruo {
+    background-image: none;
+  }
+
+  .x12koezg {
+    background-origin: padding-box;
+  }
+
+  .x182nak8 {
+    background-repeat: repeat;
+  }
+
+  .x103pssi {
+    background-size: auto;
+  }
+
+  .x1e53mt7 {
+    border-image-outset: 0;
+  }
+
+  .xgkqhyc {
+    border-image-repeat: stretch;
+  }
+
+  .x1jleocg {
+    border-image-slice: 100%;
+  }
+
+  .x18sabzy {
+    border-image-source: none;
+  }
+
+  .x1pjjote {
+    border-image-width: 1;
+  }
+
+  .x1heor9g {
+    color: inherit;
+  }
+
+  .xz46ci {
+    color: var(--suite-profile-button-foreground, Canvas);
+  }
+
+  .xd5ouml {
+    color: var(--suite-profile-error, #a83232);
+  }
+
+  .x5ee4ez {
+    color: var(--suite-profile-muted, currentColor);
+  }
+
+  .xt0e3qv {
+    cursor: default;
+  }
+
+  .x1ypdohk {
+    cursor: pointer;
+  }
+
+  .xrvj5dj {
+    display: grid;
+  }
+
+  .xjb2p0i {
+    font-family: inherit;
+  }
+
+  .x10rt0pk {
+    font-feature-settings: inherit;
+  }
+
+  .xvmqkbn {
+    font-kerning: inherit;
+  }
+
+  .x1rcybi7 {
+    font-language-override: inherit;
+  }
+
+  .x61gc8y {
+    font-optical-sizing: inherit;
+  }
+
+  .xd4aj15 {
+    font-size-adjust: inherit;
+  }
+
+  .x1nrrp6k {
+    font-size: .9rem;
+  }
+
+  .x1qlqyl8 {
+    font-size: inherit;
+  }
+
+  .x1xh6y1q {
+    font-stretch: inherit;
+  }
+
+  .x1t35e8 {
+    font-style: inherit;
+  }
+
+  .xkyhvkk {
+    font-variation-settings: inherit;
+  }
+
+  .x1xlr1w8 {
+    font-weight: 700;
+  }
+
+  .x1pd3egz {
+    font-weight: inherit;
+  }
+
+  .x1lqcxt8 {
+    justify-self: start;
+  }
+
+  .x37zpob {
+    line-height: 1.4;
+  }
+
+  .x15bjb6t {
+    line-height: inherit;
+  }
+
+  .xf9vgkq {
+    opacity: .72;
+  }
+
+  .x288g5 {
+    resize: vertical;
+  }
+
+  .xo8l03z:focus-visible {
+    outline-color: var(--suite-profile-focus, currentColor);
+  }
+
+  .x7s97pk:focus-visible {
+    outline-offset: 2px;
+  }
+
+  .x9v5kkp:focus-visible {
+    outline-style: solid;
+  }
+
+  .x784prv:focus-visible {
+    outline-width: 2px;
+  }
+
+  .xjb0foi:disabled {
+    cursor: wait;
+  }
+
+  .xfqoyci:disabled {
+    opacity: .6;
+  }
+}
+
+@layer components.hraness-suite-accounts.priority3 {
+  .xat24cr {
+    margin-bottom: 0;
+  }
+
+  .xj3b58b {
+    margin-left: 0;
+  }
+
+  .x1yf7rl7 {
+    margin-right: 0;
+  }
+
+  .xdj266r {
+    margin-top: 0;
+  }
+
+  .xeuugli {
+    min-width: 0;
+  }
+
+  .x4odjur {
+    padding-bottom: .65rem;
+  }
+
+  .xvgi8cs {
+    padding-bottom: .7rem;
+  }
+
+  .x79ra4s {
+    padding-left: .75rem;
+  }
+
+  .x9dzeaa {
+    padding-left: 1rem;
+  }
+
+  .x33uob6 {
+    padding-right: .75rem;
+  }
+
+  .x52dz5p {
+    padding-right: 1rem;
+  }
+
+  .x1flg24d {
+    padding-top: .65rem;
+  }
+
+  .x15y8ph0 {
+    padding-top: .7rem;
+  }
+
+  .xh8yej3 {
+    width: 100%;
+  }
+}

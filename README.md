@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.4.2"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.0"
   }
 }
 ```
@@ -37,6 +37,26 @@ bun install
 React and React DOM 18.3.1 through 19.x are optional peers. Install them only
 when using `@hraness/suite-accounts/react` or
 `@hraness/suite-accounts/profile-form`.
+
+Import `@hraness/suite-accounts/profile-form.css` once when rendering the profile
+form. It loads the precompiled StyleX stylesheet; consumers do not need a Babel
+plugin or a StyleX runtime compiler. The semantic `suite-profile-*` classes stay
+available for inspection, and caller classes remain on the form.
+
+The seven public variables are `--suite-profile-input-background`,
+`--suite-profile-line`, `--suite-profile-focus`, `--suite-profile-muted`,
+`--suite-profile-button-background`, `--suite-profile-button-foreground`, and
+`--suite-profile-error`. Native readonly, disabled, and focus-visible behavior
+is preserved. Width and padding retain the existing physical-axis contract in
+vertical writing modes.
+
+Applications that already join StyleX package rules can consume
+`@hraness/suite-accounts/stylex-manifest.json` and
+`@hraness/suite-accounts/compiler-foundation.css` with the public
+`@hraness/ui/stylex-build` compiler. In that mode, include the generated rule
+union instead of the standalone `profile-form.css` or `stylex.css` export.
+The profile form is the only styled runtime entry. Root authentication and
+protocol imports do not import React or StyleX presentation.
 
 ## First proof: bind one registered client
 
@@ -160,6 +180,9 @@ for authorization.
 | `./profile` | Provider-neutral profile contracts |
 | `./profile-form` | Optional controlled React profile editor |
 | `./profile-form.css` | Product-neutral profile-form styles |
+| `./stylex.css` | Precompiled standalone profile rules |
+| `./stylex-manifest.json` | Canonical rule manifest for an application-wide compiler join |
+| `./compiler-foundation.css` | Empty structural foundation for compiler adopters |
 | `./public-config` | Validated public development and production configuration |
 | `./react` | Optional route-local Accounts Convex context |
 | `./registry` | Deprecated v1 compatibility registry and distinct current authority |
@@ -214,11 +237,12 @@ values.
 
 ## Current compatibility evidence
 
-The immutable `v0.4.2` release matches the install example and package
+The immutable `v0.5.0` release matches the install example and package
 manifest. Its current changes remain bounded:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.5.0` | Compiles the optional native profile form with StyleX, preserving public variables, semantic hooks, save behavior, and non-React authentication boundaries. Publishes a canonical compiler manifest and verifies standalone styles in a real browser. |
 | `v0.4.2` | Adds verified-account-email accessors for provisioning before optional username onboarding. Live userinfo must match subject, client, Suite account, and profile state; the accessor returns only an `email_verified` address. |
 | `v0.4.1` | Registers PeopleBlade at `https://peopleblade.com` for email-OTP OIDC. Its signed product-link receipt binds local and Suite subjects; email equality never creates or merges a link. |
 | `v0.4.0` | Removes the retired OPRTE browser client from current and deprecated registration helpers while preserving bounded historical product-ID parsing. |
@@ -272,15 +296,26 @@ and product gates before the callback is enabled in production.
 ```sh
 bun install --frozen-lockfile --ignore-scripts
 bun run check
+bun run test:browser
 bun pm pack --dry-run --ignore-scripts
 ```
 
 `bun run check` validates the portable portfolio inventory, runs independent
 ESLint and TypeScript configuration, executes deterministic and property
-tests, builds the ESM entries, scans the public boundary, and installs the
+tests, builds the ESM entries, verifies canonical StyleX rules and deterministic
+artifacts across isolated roots, scans every source and packed file, and installs the
 package in clean Bundler and NodeNext consumers on React 18.3.1 and 19.2.3. It
 also builds the packed React entries in a clean Next.js 16.2 webpack consumer,
 which verifies that every client entry has one valid top-level directive.
+
+`bun run test:browser` uses the built profile form under a strict Content Security
+Policy. It checks server-rendered light and dark styles at compact and wide
+widths, native focus and readonly controls, vertical writing, hydration, pending
+saves, conflict revisions, validation errors, and save failures. Only the save
+transport is synthetic. The script uses an installed browser without downloading
+one; set `CHROMIUM_EXECUTABLE_PATH` to select its executable. It prints the retained
+temporary evidence directory and closes its own browser and loopback server.
+Branch and release verification both require this browser check.
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Report
 suspected vulnerabilities privately as described in
