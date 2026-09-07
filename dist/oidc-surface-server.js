@@ -885,6 +885,50 @@ import {
   decodeProtectedHeader,
   jwtVerify
 } from "jose";
+
+// src/oidc-continuation.ts
+function htmlAttribute(value) {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("'", "&#39;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+function inlineJson(value) {
+  return JSON.stringify(value).replaceAll("&", "\\u0026").replaceAll("<", "\\u003c").replaceAll(">", "\\u003e").replaceAll("\u2028", "\\u2028").replaceAll("\u2029", "\\u2029");
+}
+function createOidcContinuationResponse(returnTo, nonce, cookies) {
+  const headers = new Headers({
+    "cache-control": "no-store",
+    "content-security-policy": [
+      "default-src 'none'",
+      "base-uri 'none'",
+      "form-action 'none'",
+      "frame-ancestors 'none'",
+      `script-src 'nonce-${nonce}'`
+    ].join("; "),
+    "content-type": "text/html; charset=utf-8",
+    pragma: "no-cache",
+    "referrer-policy": "no-referrer",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY"
+  });
+  for (const cookie of cookies)
+    headers.append("set-cookie", cookie);
+  const body = [
+    "<!doctype html>",
+    '<html lang="en">',
+    "<head>",
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1">',
+    "<title>Continue</title>",
+    "</head>",
+    "<body>",
+    `<p><a href="${htmlAttribute(returnTo)}">Continue</a></p>`,
+    `<script nonce="${nonce}">location.replace(${inlineJson(returnTo)});</script>`,
+    "</body>",
+    "</html>"
+  ].join("");
+  return new Response(body, { headers, status: 200 });
+}
+
+// src/oidc-rp.ts
 var TRANSACTION_TTL_MS = 10 * 60000;
 var SESSION_TTL_MS = 7 * 24 * 60 * 60000;
 var FETCH_TIMEOUT_MS = 8000;
@@ -1760,13 +1804,10 @@ function createSuiteOidcRelyingParty(options) {
         pendingEntitlementReceipt: await entitlementReceipt(tokens.accessToken, verifiedSession.suiteAccountId)
       };
       const sessionCookie = await sealCookie(session, await key, "session", randomBytes);
-      const headers = new Headers({
-        "cache-control": "no-store",
-        location: new URL(transaction.returnTo, siteUrl).href
-      });
-      headers.append("set-cookie", clear);
-      headers.append("set-cookie", setCookie(names.session, sessionCookie, names.secure, SESSION_TTL_MS / 1000));
-      return new Response(null, { headers, status: 302 });
+      return createOidcContinuationResponse(transaction.returnTo, randomValue(24, randomBytes), [
+        clear,
+        setCookie(names.session, sessionCookie, names.secure, SESSION_TTL_MS / 1000)
+      ]);
     } catch {
       return failure("OIDC_UPSTREAM_FAILED", 502, [clear]);
     }

@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.0"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.1"
   }
 }
 ```
@@ -199,6 +199,8 @@ The package preserves these checks across the public surface:
   match the registered values.
 - OAuth access and refresh tokens remain in encrypted HttpOnly cookies or
   server-to-server requests. Browser session JSON never exposes bearer tokens.
+- A verified callback ends the cross-site redirect chain before a nonce-locked
+  continuation starts the product navigation from its registered origin.
 - Refresh-token rotation uses an origin-scoped exclusive lock and re-reads the
   session after acquiring it.
 - Bearer verification accepts only bounded public P-256 ES256 keys from the
@@ -237,11 +239,12 @@ values.
 
 ## Current compatibility evidence
 
-The immutable `v0.5.0` release matches the install example and package
+The immutable `v0.5.1` release matches the install example and package
 manifest. Its current changes remain bounded:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.5.1` | Ends the verified OAuth callback with a nonce-locked same-origin continuation document, so the return page resolves its session without admitting a cross-site request. |
 | `v0.5.0` | Compiles the optional native profile form with StyleX, preserving public variables, semantic hooks, save behavior, and non-React authentication boundaries. Publishes a canonical compiler manifest and verifies standalone styles in a real browser. |
 | `v0.4.2` | Adds verified-account-email accessors for provisioning before optional username onboarding. Live userinfo must match subject, client, Suite account, and profile state; the accessor returns only an `email_verified` address. |
 | `v0.4.1` | Registers PeopleBlade at `https://peopleblade.com` for email-OTP OIDC. Its signed product-link receipt binds local and Suite subjects; email equality never creates or merges a link. |
@@ -308,14 +311,17 @@ package in clean Bundler and NodeNext consumers on React 18.3.1 and 19.2.3. It
 also builds the packed React entries in a clean Next.js 16.2 webpack consumer,
 which verifies that every client entry has one valid top-level directive.
 
-`bun run test:browser` uses the built profile form under a strict Content Security
-Policy. It checks server-rendered light and dark styles at compact and wide
-widths, native focus and readonly controls, vertical writing, hydration, pending
-saves, conflict revisions, validation errors, and save failures. Only the save
-transport is synthetic. The script uses an installed browser without downloading
-one; set `CHROMIUM_EXECUTABLE_PATH` to select its executable. It prints the retained
-temporary evidence directory and closes its own browser and loopback server.
-Branch and release verification both require this browser check.
+`bun run test:browser` uses the built profile form and OIDC continuation under
+strict Content Security Policies. It checks server-rendered light and dark
+styles at compact and wide widths, native focus and readonly controls, vertical
+writing, hydration, pending saves, conflict revisions, validation errors, and
+save failures. It also verifies that a real cross-site callback ends before the
+nonce-locked continuation starts a same-origin session request. Only the save
+transport and callback provider are synthetic. The script uses an installed
+browser without downloading one; set `CHROMIUM_EXECUTABLE_PATH` to select its
+executable. It prints the retained temporary profile evidence directory and
+closes its own browsers and loopback servers. Branch and release verification
+both require this browser check.
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Report
 suspected vulnerabilities privately as described in

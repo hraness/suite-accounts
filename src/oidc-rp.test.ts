@@ -425,7 +425,7 @@ describe("suite OAuth relying party", () => {
         },
       },
     ));
-    expect(callback.status).toBe(302);
+    expect(callback.status).toBe(200);
     const sessionCookie = cookiePair(getSetCookies(callback).find(cookie =>
       cookie.startsWith("__Host-hraness-suite-oidc-session=")
     )!);
@@ -753,8 +753,9 @@ describe("suite OAuth relying party", () => {
       receiptKeyVersion: "v1",
     });
 
+    const returnPath = "/settings?tab=billing&continue=%3C%2Fscript%3E";
     const started = await relyingParty.start(
-      request("/api/suite-auth/start?return_to=%2Fsettings%3Ftab%3Dbilling", {
+      request(`/api/suite-auth/start?return_to=${encodeURIComponent(returnPath)}`, {
         headers: { "sec-fetch-site": "same-origin" },
       }),
     );
@@ -790,10 +791,35 @@ describe("suite OAuth relying party", () => {
         },
       },
     ));
-    expect(callback.status).toBe(302);
-    expect(callback.headers.get("location")).toBe(
-      "https://sound.fish/settings?tab=billing",
+    expect(callback.status).toBe(200);
+    expect(callback.headers.get("location")).toBeNull();
+    expect(callback.headers.get("cache-control")).toBe("no-store");
+    expect(callback.headers.get("content-type")).toBe(
+      "text/html; charset=utf-8",
     );
+    expect(callback.headers.get("pragma")).toBe("no-cache");
+    expect(callback.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(callback.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(callback.headers.get("x-frame-options")).toBe("DENY");
+    const continuation = await callback.clone().text();
+    const contentSecurityPolicy = callback.headers.get(
+      "content-security-policy",
+    );
+    const continuationNonce = contentSecurityPolicy?.match(
+      /script-src 'nonce-([A-Za-z0-9_-]{32})'$/u,
+    )?.[1];
+    expect(continuationNonce).toHaveLength(32);
+    expect(contentSecurityPolicy).toBe(
+      `default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'nonce-${continuationNonce}'`,
+    );
+    expect(continuation).toContain(
+      `<a href="/settings?tab=billing&amp;continue=%3C%2Fscript%3E">Continue</a>`,
+    );
+    expect(continuation).toContain(
+      `<script nonce="${continuationNonce}">location.replace("/settings?tab=billing\\u0026continue=%3C%2Fscript%3E");</script>`,
+    );
+    expect(continuation).not.toContain("https://attacker.example");
+    expect(continuation).not.toContain("</script><script");
     const callbackCookies = getSetCookies(callback);
     const sessionCookie = cookiePair(
       callbackCookies.find(cookie =>
@@ -807,6 +833,22 @@ describe("suite OAuth relying party", () => {
     expect(tokenBodies[0]?.get("resource")).toBe(provider.resource);
     expect(tokenBodies[0]?.get("client_secret")).toBeNull();
     expect(receiptAuthorizations[0]).toStartWith("Bearer ey");
+
+    const continued = await relyingParty.serverSession(request(
+      returnPath,
+      {
+        headers: {
+          cookie: sessionCookie,
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "same-origin",
+        },
+      },
+    ));
+    expect(continued).not.toBeNull();
+    expect(continued?.accessToken).toStartWith("ey");
+    expect(continued?.suiteAccountId).toBe(accountId);
+    expect(String(continued?.username)).toBe("reader");
 
     const current = await relyingParty.currentSession(request(
       "/api/suite-auth/session",
@@ -992,6 +1034,13 @@ describe("suite OAuth relying party", () => {
       { headers: { cookie: tampered } },
     ));
     expect(badCookie.status).toBe(400);
+    for (const failureResponse of [wrongState, badCookie]) {
+      expect(failureResponse.headers.get("content-type")).toBe(
+        "application/json; charset=utf-8",
+      );
+      expect(failureResponse.headers.get("content-security-policy")).toBeNull();
+      expect(failureResponse.headers.get("location")).toBeNull();
+    }
     expect(calls).toBe(0);
   });
 

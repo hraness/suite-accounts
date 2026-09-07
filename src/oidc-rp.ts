@@ -48,6 +48,7 @@ import {
   type SuiteAccountsOidcProviderConfiguration,
 } from "./urls.js";
 import { deepFreeze } from "./immutable.js";
+import { createOidcContinuationResponse } from "./oidc-continuation.js";
 import { SUITE_OIDC_EARLY_REFRESH_WINDOW_MS } from "./oidc-session-policy.js";
 
 const TRANSACTION_TTL_MS = 10 * 60_000;
@@ -1644,18 +1645,19 @@ export function createSuiteOidcRelyingParty(
         "session",
         randomBytes,
       );
-      const headers = new Headers({
-        "cache-control": "no-store",
-        location: new URL(transaction.returnTo, siteUrl).href,
-      });
-      headers.append("set-cookie", clear);
-      headers.append("set-cookie", setCookie(
-        names.session,
-        sessionCookie,
-        names.secure,
-        SESSION_TTL_MS / 1_000,
-      ));
-      return new Response(null, { headers, status: 302 });
+      return createOidcContinuationResponse(
+        transaction.returnTo,
+        randomValue(24, randomBytes),
+        [
+          clear,
+          setCookie(
+            names.session,
+            sessionCookie,
+            names.secure,
+            SESSION_TTL_MS / 1_000,
+          ),
+        ],
+      );
     } catch {
       return failure("OIDC_UPSTREAM_FAILED", 502, [clear]);
     }
