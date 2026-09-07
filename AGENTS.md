@@ -5,7 +5,7 @@
 - `src/registry.ts`, `src/urls.ts`, and `src/client-configuration.ts` contain the frozen v1 registry, the separate current authority registry, and the validated product-binding factory.
 - `src/oidc-rp.ts`, `src/oidc-surface-server.ts`, `src/auth-proxy.ts`, `src/browser-session.ts`, and `src/bearer-verifier.ts` contain browser and server authentication transports.
 - `src/convex-browser-auth*.ts`, `src/receipt-verifier.ts`, and `src/entitlements.ts` contain bounded downstream token, receipt, replay, and authorization checks.
-- `src/react.tsx`, `src/profile-form.tsx`, and `src/profile-form.css` contain the optional React surface.
+- `src/react.tsx`, `src/profile-form.tsx`, `src/profile-form.stylex.ts`, and `src/profile-form.css` contain the optional React surface and precompiled presentation entry.
 - `src/*.test.ts`, `src/*.test.tsx`, and `src/*.property.test.ts` contain deterministic examples and arbitrary-input laws.
 - `scripts/` contains the portable inventory validator, ESM build, public-boundary scan, and clean-consumer package smoke.
 - `.github/workflows/` contains read-only branch validation and checks-gated immutable GitHub Release automation.
@@ -24,6 +24,8 @@
 - Pin Hraness dependencies to reviewed immutable releases or full commits. Never connect repositories through sibling paths, Git submodules, or coordinated `main` assumptions; upgrade each consumer independently.
 - Extract a shared package only after two concrete consumers require the same stable interface. Keep every shared package product-neutral and free of product imports.
 - Keep the optional React profile surface product-neutral. Shared interface composition may layer accessible primitives from `@hraness/ui`, stable optional composition from `@hraness/design-kit`, and product-owned layout and content in consumers; add either dependency only for a concrete shared need.
+- Compile profile recipes through the pinned public `@hraness/ui/stylex-build` collector. Keep the compiler development-only, preserve source-first types, and keep every root and non-React entry free of presentation imports. Do not copy compiler internals or add runtime injection.
+- Preserve native form controls, semantic hooks, all seven public profile variables, shorthand resets, physical-axis sizing, optional React peers, and profile save/revision behavior. Run canonical artifact, absolute-root determinism, packed-consumer, and real native-form browser checks before release. Browser fixtures exercise the built form and substitute only the external save transport.
 - Keep Direct deterministic compositions and adapters development-only and outside every production dependency graph and published export.
 - Freeze protocol and package interfaces before parallel lanes begin. Give registries, manifests, lockfiles, generated output, and other convergence surfaces one owner while lanes edit disjoint paths.
 - Keep mandatory rules in the closest `AGENTS.md`, current procedures in `docs/`, executable contracts in types and tests, and pull-based rationale, evidence, synthesis, and plans in `kb/`.

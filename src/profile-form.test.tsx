@@ -43,4 +43,7 @@ test("renders the shared profile contract without an editable email payload", ()
   expect(html).toContain("readOnly");
   expect(html).not.toContain('name="email"');
   expect(html).toContain(">Request access</button>");
+  expect(html).toMatch(/class="suite-profile-form [^"]+"/u);
+  expect(html).toMatch(/class="suite-profile-field [^"]+"/u);
+  expect(html).not.toContain("style=");
 });

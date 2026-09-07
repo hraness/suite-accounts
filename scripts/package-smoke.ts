@@ -1,6 +1,9 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { checkPrivateBoundary } from "./check-private-boundary.js";
+import { readStylexPackageManifest } from "@hraness/ui/stylex-build";
 
 const packageName = "@hraness/suite-accounts";
 const importSpecifiers = [
@@ -107,6 +110,13 @@ async function verifyReactLane(
     "-e",
     `await Promise.all(${JSON.stringify(importSpecifiers)}.map((specifier) => import(specifier)))`,
   ], consumer);
+  await run([
+    "node", "--input-type=module", "-e",
+    `import {createElement} from "react"; import {renderToStaticMarkup} from "react-dom/server";
+import {SuiteProfileForm} from "${packageName}/profile-form";
+const html=renderToStaticMarkup(createElement(SuiteProfileForm,{initialProfile:{name:"Reader",email:"reader@example.com",bio:"",revision:0,links:{x:null,linkedin:null,bluesky:null,instagram:null,telegram:null,website:null}},onSave:async()=>{throw new Error("unused")},submitLabel:"Save profile"}));
+if(!/class="suite-profile-form [^"]+"/.test(html)||html.includes('style='))throw new Error("Packed profile lost compiled classes or added inline style");`,
+  ], consumer);
 
   const imports = importSpecifiers
     .map((specifier, index) =>
@@ -199,6 +209,7 @@ async function verifyNextWebpackConsumer(archive: string): Promise<void> {
     [
       '"use client";',
       "",
+      `import ${JSON.stringify(`${packageName}/profile-form.css`)};`,
       `import * as ProfileForm from ${JSON.stringify(`${packageName}/profile-form`)};`,
       `import * as SuiteReact from ${JSON.stringify(`${packageName}/react`)};`,
       "",
@@ -234,12 +245,36 @@ try {
   ) {
     throw new Error("The package archive contains development-only files.");
   }
+  const unpacked = join(work, "unpacked");
+  await mkdir(unpacked);
+  await run(["tar", "-xzf", archive, "-C", unpacked], repository);
+  await checkPrivateBoundary(join(unpacked, "package"));
+  const manifest = await readStylexPackageManifest(join(unpacked, "package/dist/stylex-manifest.json"), join(unpacked, "package"));
+  if (manifest.rules.length === 0 || manifest.runtime.length !== 1) throw new Error("Packed StyleX manifest has an incomplete profile boundary.");
+  for (const required of ["dist/stylex.css", "dist/stylex-manifest.json", "compiler-foundation.css", "src/profile-form.stylex.ts"]) {
+    if (!archiveListing.includes(`package/${required}\n`)) throw new Error(`The package archive omitted ${required}.`);
+  }
 
   await writeFile(
     join(consumer, "package.json"),
     JSON.stringify({ private: true, type: "module" }),
   );
   await run([process.execPath, "add", archive, "--ignore-scripts"], consumer);
+  const publicManifestUrl = (await run([
+    "node",
+    "--input-type=module",
+    "-e",
+    `process.stdout.write(import.meta.resolve(${JSON.stringify(`${packageName}/stylex-manifest.json`)}))`,
+  ], consumer)).trim();
+  const installedManifest = await readStylexPackageManifest(fileURLToPath(publicManifestUrl));
+  if (
+    installedManifest.package.name !== manifest.package.name
+    || installedManifest.package.version !== manifest.package.version
+    || installedManifest.rulesSha256 !== manifest.rulesSha256
+    || installedManifest.rules.length !== manifest.rules.length
+  ) {
+    throw new Error("The public StyleX manifest export did not resolve the packed package manifest.");
+  }
   await run([
     "node",
     "--input-type=module",
@@ -286,6 +321,8 @@ try {
   if (
     bundledRoot.includes("convex/server")
     || bundledRoot.includes("better-auth")
+    || bundledRoot.includes("@stylexjs/")
+    || bundledRoot.includes("profile-form.stylex")
   ) {
     throw new Error("The root client-configuration bundle retained opt-in runtime dependencies.");
   }

@@ -1,4 +1,32 @@
 "use client";
+// src/profile-form.stylex.ts
+var profileFormClasses = {
+  button: {
+    className: "x1fdtg7e x1u7o2vf x1jfjhf8 x18o3ruo x12koezg x1y4qj14 x182nak8 x103pssi x9ox504 x1y0btm7 xmkeg23 x18sabzy x1jleocg x1pjjote x1e53mt7 xgkqhyc x1e6avla xz46ci x1ypdohk xjb0foi xjb2p0i x1qlqyl8 x1xh6y1q x1t35e8 x1aazh3f x1xlr1w8 x10rt0pk xvmqkbn x1rcybi7 x61gc8y xd4aj15 xkyhvkk x15bjb6t x1lqcxt8 xfqoyci x4odjur x9dzeaa x52dz5p x1flg24d xo8l03z x7s97pk x9v5kkp x784prv"
+  }.className,
+  control: {
+    className: "x1fdtg7e x1u7o2vf x1w9dvvm x18o3ruo x12koezg x1y4qj14 x182nak8 x103pssi xxut2h2 x1y0btm7 xmkeg23 x18sabzy x1jleocg x1pjjote x1e53mt7 xgkqhyc x5goj4r x1heor9g xjb2p0i x1qlqyl8 x1xh6y1q x1t35e8 x1aazh3f x1pd3egz x10rt0pk xvmqkbn x1rcybi7 x61gc8y xd4aj15 xkyhvkk x37zpob xeuugli xvgi8cs x79ra4s x33uob6 x15y8ph0 xh8yej3 xo8l03z x7s97pk x9v5kkp x784prv"
+  }.className,
+  email: {
+    className: "x1fdtg7e x1u7o2vf x1w9dvvm x18o3ruo x12koezg x1y4qj14 x182nak8 x103pssi xxut2h2 x1y0btm7 xmkeg23 x18sabzy x1jleocg x1pjjote x1e53mt7 xgkqhyc x5goj4r xjb2p0i x1qlqyl8 x1xh6y1q x1t35e8 x1aazh3f x1pd3egz x10rt0pk xvmqkbn x1rcybi7 x61gc8y xd4aj15 xkyhvkk x37zpob xeuugli xvgi8cs x79ra4s x33uob6 x15y8ph0 xh8yej3 xo8l03z x7s97pk x9v5kkp x784prv x5ee4ez xt0e3qv xf9vgkq"
+  }.className,
+  error: {
+    className: "xd5ouml x1nrrp6k xat24cr xj3b58b x1yf7rl7 xdj266r"
+  }.className,
+  field: {
+    className: "xrvj5dj x73f2yu"
+  }.className,
+  form: {
+    className: "xrvj5dj x8fetqu xh8yej3"
+  }.className,
+  label: {
+    className: "x1nrrp6k x1xlr1w8"
+  }.className,
+  textarea: {
+    className: "x1fdtg7e x1u7o2vf x1w9dvvm x18o3ruo x12koezg x1y4qj14 x182nak8 x103pssi xxut2h2 x1y0btm7 xmkeg23 x18sabzy x1jleocg x1pjjote x1e53mt7 xgkqhyc x5goj4r x1heor9g xjb2p0i x1qlqyl8 x1xh6y1q x1t35e8 x1aazh3f x1pd3egz x10rt0pk xvmqkbn x1rcybi7 x61gc8y xd4aj15 xkyhvkk x37zpob xeuugli xvgi8cs x79ra4s x33uob6 x15y8ph0 xh8yej3 xo8l03z x7s97pk x9v5kkp x784prv x288g5"
+  }.className
+};
+
 // src/identity/profiles.ts
 import { err, isRecord, ok } from "@hraness/result";
 
@@ -460,7 +488,7 @@ function SuiteProfileForm({
       setPending(false);
     }
   }
-  const formClassName = className === undefined ? "suite-profile-form" : `suite-profile-form ${className}`;
+  const formClassName = className === undefined ? `suite-profile-form ${profileFormClasses.form}` : `suite-profile-form ${profileFormClasses.form} ${className}`;
   return /* @__PURE__ */ jsxs("form", {
     "aria-busy": pending,
     className: formClassName,
@@ -469,13 +497,15 @@ function SuiteProfileForm({
     },
     children: [
       /* @__PURE__ */ jsxs("label", {
-        className: "suite-profile-field",
+        className: `suite-profile-field ${profileFormClasses.field}`,
         htmlFor: `${id}-name`,
         children: [
           /* @__PURE__ */ jsx("span", {
+            className: profileFormClasses.label,
             children: "Name"
           }),
           /* @__PURE__ */ jsx("input", {
+            className: profileFormClasses.control,
             "aria-describedby": fieldErrors.name === undefined ? undefined : `${id}-name-error`,
             "aria-invalid": fieldErrors.name === undefined ? undefined : "true",
             autoComplete: "name",
@@ -491,7 +521,7 @@ function SuiteProfileForm({
             value: name
           }),
           fieldErrors.name === undefined ? null : /* @__PURE__ */ jsx("span", {
-            className: "suite-profile-error",
+            className: `suite-profile-error ${profileFormClasses.error}`,
             id: `${id}-name-error`,
             role: "alert",
             children: fieldErrors.name
@@ -499,13 +529,15 @@ function SuiteProfileForm({
         ]
       }),
       /* @__PURE__ */ jsxs("label", {
-        className: "suite-profile-field",
+        className: `suite-profile-field ${profileFormClasses.field}`,
         htmlFor: `${id}-email`,
         children: [
           /* @__PURE__ */ jsx("span", {
+            className: profileFormClasses.label,
             children: "Email"
           }),
           /* @__PURE__ */ jsx("input", {
+            className: profileFormClasses.email,
             "aria-readonly": "true",
             autoComplete: "email",
             id: `${id}-email`,
@@ -516,13 +548,15 @@ function SuiteProfileForm({
         ]
       }),
       /* @__PURE__ */ jsxs("label", {
-        className: "suite-profile-field",
+        className: `suite-profile-field ${profileFormClasses.field}`,
         htmlFor: `${id}-bio`,
         children: [
           /* @__PURE__ */ jsx("span", {
+            className: profileFormClasses.label,
             children: "Bio"
           }),
           /* @__PURE__ */ jsx("textarea", {
+            className: profileFormClasses.textarea,
             "aria-describedby": fieldErrors.bio === undefined ? undefined : `${id}-bio-error`,
             "aria-invalid": fieldErrors.bio === undefined ? undefined : "true",
             disabled: pending,
@@ -537,7 +571,7 @@ function SuiteProfileForm({
             value: bio
           }),
           fieldErrors.bio === undefined ? null : /* @__PURE__ */ jsx("span", {
-            className: "suite-profile-error",
+            className: `suite-profile-error ${profileFormClasses.error}`,
             id: `${id}-bio-error`,
             role: "alert",
             children: fieldErrors.bio
@@ -547,13 +581,15 @@ function SuiteProfileForm({
       LINK_FIELDS.map(([key, label]) => {
         const error = fieldErrors[key];
         return /* @__PURE__ */ jsxs("label", {
-          className: "suite-profile-field",
+          className: `suite-profile-field ${profileFormClasses.field}`,
           htmlFor: `${id}-${key}`,
           children: [
             /* @__PURE__ */ jsx("span", {
+              className: profileFormClasses.label,
               children: label
             }),
             /* @__PURE__ */ jsx("input", {
+              className: profileFormClasses.control,
               "aria-describedby": error === undefined ? undefined : `${id}-${key}-error`,
               "aria-invalid": error === undefined ? undefined : "true",
               autoCapitalize: "none",
@@ -572,7 +608,7 @@ function SuiteProfileForm({
               value: links[key]
             }),
             error === undefined ? null : /* @__PURE__ */ jsx("span", {
-              className: "suite-profile-error",
+              className: `suite-profile-error ${profileFormClasses.error}`,
               id: `${id}-${key}-error`,
               role: "alert",
               children: error
@@ -581,11 +617,12 @@ function SuiteProfileForm({
         }, key);
       }),
       formError === null ? null : /* @__PURE__ */ jsx("p", {
-        className: "suite-profile-error",
+        className: `suite-profile-error ${profileFormClasses.error}`,
         role: "alert",
         children: formError
       }),
       /* @__PURE__ */ jsx("button", {
+        className: profileFormClasses.button,
         disabled: pending,
         type: "submit",
         children: submitLabel
