@@ -23,11 +23,11 @@ test("no arbitrary field can select a trust value", () => {
     (key, value) => {
       const result = createSuiteAccountsClientConfiguration({
         authMode: "oidc-rp",
-        callbackUrl: "https://hra.sh/api/suite-auth/callback",
+        callbackUrl: "https://oompa.dev/api/suite-auth/callback",
         clientId: "hraness:hra:production:v1",
         consumer: "hra",
         environment: "production",
-        origin: "https://hra.sh",
+        origin: "https://oompa.dev",
         [key]: value,
       });
       expect(result).toEqual({ error: "invalid-binding", ok: false });

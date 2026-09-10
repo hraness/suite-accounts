@@ -175,7 +175,7 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
-  hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
+  hra: currentOidcSite("hra", "Oompa", "https://oompa.dev"),
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
   slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com"),

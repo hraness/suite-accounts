@@ -100,14 +100,14 @@ describe("suite Accounts auth-mode registry", () => {
       .toBeNull();
   });
 
-  test("registers HRA as the canonical current client", () => {
+  test("registers Oompa as the canonical current client", () => {
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra).toEqual({
       auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "HRA",
+      displayName: "Oompa",
       environments: {
         production: {
           billingReturn: { kind: "unsupported" },
-          siteUrl: "https://hra.sh",
+          siteUrl: "https://oompa.dev",
         },
       },
       id: "hra",
@@ -121,7 +121,7 @@ describe("suite Accounts auth-mode registry", () => {
       "production",
     )).toEqual({
       billingReturn: { kind: "unsupported" },
-      siteUrl: "https://hra.sh",
+      siteUrl: "https://oompa.dev",
     });
     expect(isSuiteAccountsCurrentConsumerId("hra")).toBe(true);
     expect(isSuiteAccountsCurrentConsumerId("oprte")).toBe(false);
@@ -444,7 +444,7 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_ACCOUNTS_CONSUMERS.soundfish.environments.production.siteUrl)
       .toBe("https://sound.fish");
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production.siteUrl)
-      .toBe("https://hra.sh");
+      .toBe("https://oompa.dev");
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production.siteUrl,
     ).toBe("https://subcounter.com");

@@ -260,9 +260,9 @@ function currentOidcSite<const Consumer extends SuiteAccountsCurrentConsumerId>(
 /**
  * Current Accounts authority registrations.
  *
- * HRA is the canonical current registration. Historical predecessor
- * identities remain parseable, but neither current nor deprecated registration
- * helpers retain their browser origins or OAuth clients.
+ * Oompa (consumer ID `hra`) is the canonical current registration. Historical
+ * predecessor identities remain parseable, but neither current nor deprecated
+ * registration helpers retain their browser origins or OAuth clients.
  */
 export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
@@ -270,7 +270,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
-  hra: currentOidcSite("hra", "HRA", "https://hra.sh"),
+  hra: currentOidcSite("hra", "Oompa", "https://oompa.dev"),
   sponge: currentOidcSite(
     "sponge",
     "Sponge",

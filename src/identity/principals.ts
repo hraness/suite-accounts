@@ -145,8 +145,8 @@ export function parseSuiteProduct(
     case "pub":
       return ok(value);
     // OPRTE and Kitchen are predecessor product IDs. Parse them only at
-    // foreign or stored boundaries and immediately return HRA so new state
-    // cannot perpetuate either predecessor identity.
+    // foreign or stored boundaries and immediately return the Oompa product
+    // ID `hra` so new state cannot perpetuate either predecessor identity.
     case "oprte":
     case "kitchen":
       return ok("hra");
