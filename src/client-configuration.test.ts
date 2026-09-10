@@ -8,11 +8,11 @@ import {
 
 const hraBinding = {
   authMode: "oidc-rp",
-  callbackUrl: "https://oompa.dev/api/suite-auth/callback",
+  callbackUrl: "https://oompa.app/api/suite-auth/callback",
   clientId: "hraness:hra:production:v1",
   consumer: "hra",
   environment: "production",
-  origin: "https://oompa.dev",
+  origin: "https://oompa.app",
 } as const;
 
 const subcounterBinding = {
@@ -85,7 +85,7 @@ describe("suite Accounts client configuration", () => {
       "https://attacker.example",
     )).toBe(false);
     expect(result.value.provider.issuer).toBe("https://account.hraness.com");
-    expect(result.value.binding.origin).toBe("https://oompa.dev");
+    expect(result.value.binding.origin).toBe("https://oompa.app");
   });
 
   test("rejects every caller-selected trust value", () => {
@@ -174,11 +174,26 @@ describe("suite Accounts client configuration", () => {
     const mutations = [
       { ...hraBinding, origin: "https://example.com" },
       { ...hraBinding, clientId: "hraness:soundfish:production:v1" },
-      { ...hraBinding, callbackUrl: "https://oompa.dev/callback" },
+      { ...hraBinding, callbackUrl: "https://oompa.app/callback" },
       { ...hraBinding, authMode: "proxy" },
     ] as const;
     for (const mutation of mutations) {
       expect(createSuiteAccountsClientConfiguration(mutation).ok).toBe(false);
+    }
+  });
+
+  test("rejects the retired Oompa origin and callback without a compatibility binding", () => {
+    const retiredOrigin = "https://oompa.dev";
+    const retiredCallback = `${retiredOrigin}/api/suite-auth/callback`;
+    for (const [binding, error] of [
+      [{ ...hraBinding, origin: retiredOrigin }, "invalid-origin"],
+      [{ ...hraBinding, callbackUrl: retiredCallback }, "invalid-callback-url"],
+      [{ ...hraBinding, origin: retiredOrigin, callbackUrl: retiredCallback }, "invalid-origin"],
+    ] as const) {
+      expect(createSuiteAccountsClientConfiguration(binding)).toEqual({
+        error,
+        ok: false,
+      });
     }
   });
 
