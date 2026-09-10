@@ -107,7 +107,7 @@ describe("suite Accounts auth-mode registry", () => {
       environments: {
         production: {
           billingReturn: { kind: "unsupported" },
-          siteUrl: "https://oompa.dev",
+          siteUrl: "https://oompa.app",
         },
       },
       id: "hra",
@@ -121,7 +121,7 @@ describe("suite Accounts auth-mode registry", () => {
       "production",
     )).toEqual({
       billingReturn: { kind: "unsupported" },
-      siteUrl: "https://oompa.dev",
+      siteUrl: "https://oompa.app",
     });
     expect(isSuiteAccountsCurrentConsumerId("hra")).toBe(true);
     expect(isSuiteAccountsCurrentConsumerId("oprte")).toBe(false);
@@ -444,7 +444,7 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_ACCOUNTS_CONSUMERS.soundfish.environments.production.siteUrl)
       .toBe("https://sound.fish");
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production.siteUrl)
-      .toBe("https://oompa.dev");
+      .toBe("https://oompa.app");
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production.siteUrl,
     ).toBe("https://subcounter.com");

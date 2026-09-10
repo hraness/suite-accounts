@@ -13,14 +13,14 @@ import {
 } from "./oidc-surface-server";
 
 const configured = {
-  NEXT_PUBLIC_SITE_URL: "https://oompa.dev",
+  NEXT_PUBLIC_SITE_URL: "https://oompa.app",
   SUITE_IDENTITY_RECEIPT_KEY_VERSION: "test-v1",
   SUITE_OIDC_COOKIE_SECRET: "0123456789abcdef0123456789abcdef",
 } as const;
 
 describe("shared Suite OIDC surface server", () => {
   test("binds only an exact registered environment origin", () => {
-    expect(suiteEnvironmentForConsumerOrigin("hra", "https://oompa.dev"))
+    expect(suiteEnvironmentForConsumerOrigin("hra", "https://oompa.app"))
       .toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
       "subcounter",
@@ -76,11 +76,11 @@ describe("shared Suite OIDC surface server", () => {
   test("creates a public client only from complete checked configuration", () => {
     expect(createSurfaceSuiteRelyingParty("hra", {
       ...configured,
-      NEXT_PUBLIC_SITE_URL: "https://oompa.dev",
+      NEXT_PUBLIC_SITE_URL: "https://oompa.app",
     })?.configuration).toMatchObject({
-      callbackUrl: "https://oompa.dev/api/suite-auth/callback",
+      callbackUrl: "https://oompa.app/api/suite-auth/callback",
       clientId: "hraness:hra:production:v1",
-      siteUrl: "https://oompa.dev",
+      siteUrl: "https://oompa.app",
     });
     expect(createSurfaceSuiteRelyingParty("subcounter", {
       NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
@@ -128,7 +128,7 @@ describe("shared Suite OIDC surface server", () => {
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("hra", {
       ...configured,
-      NEXT_PUBLIC_SITE_URL: "https://oompa.dev.evil",
+      NEXT_PUBLIC_SITE_URL: "https://oompa.app.evil",
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("act60", {
       NEXT_PUBLIC_SITE_URL: "https://act60.me",
@@ -176,7 +176,7 @@ describe("shared Suite OIDC surface server", () => {
     if (!parsedAccountId.ok || !parsedUsername.ok) {
       throw new Error("Expected valid Suite identity values.");
     }
-    const request = new Request("https://oompa.dev/private-profile");
+    const request = new Request("https://oompa.app/private-profile");
 
     const accountVerifiedEmail =
       await suiteOidcSurfaceServerVerifiedAccountEmail(

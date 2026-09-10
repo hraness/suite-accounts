@@ -94,7 +94,7 @@ describe("suite Accounts URLs", () => {
     expect(
       suiteAccountsCurrentOidcClientRegistration("hra", "production"),
     ).toEqual({
-      callbackUrl: "https://oompa.dev/api/suite-auth/callback",
+      callbackUrl: "https://oompa.app/api/suite-auth/callback",
       clientId: "hraness:hra:production:v1",
     });
     expect(
