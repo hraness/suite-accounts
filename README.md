@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.1"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.2"
   }
 }
 ```
@@ -57,6 +57,13 @@ Applications that already join StyleX package rules can consume
 union instead of the standalone `profile-form.css` or `stylex.css` export.
 The profile form is the only styled runtime entry. Root authentication and
 protocol imports do not import React or StyleX presentation.
+
+Version 0.5.2 builds the profile manifest with UI v0.5.12 and its fail-fast
+property-validation contract. Compiler adopters must use compatible manifests
+for every registered package and start a fresh generation after upgrading.
+The prior rollback pair is Suite Accounts v0.5.1 with UI v0.5.3. This compiler
+change adds no runtime or peer dependency and does not change authentication,
+profile behavior, or the existing presentation recipes.
 
 ## First proof: bind one registered client
 
@@ -239,11 +246,12 @@ values.
 
 ## Current compatibility evidence
 
-The immutable `v0.5.1` release matches the install example and package
+The immutable `v0.5.2` release matches the install example and package
 manifest. Its current changes remain bounded:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.5.2` | Rebuilds the unchanged profile recipes and manifest against UI v0.5.12, binding fail-fast property validation while preserving presentation-free authentication entries and optional React peers. |
 | `v0.5.1` | Ends the verified OAuth callback with a nonce-locked same-origin continuation document, so the return page resolves its session without admitting a cross-site request. |
 | `v0.5.0` | Compiles the optional native profile form with StyleX, preserving public variables, semantic hooks, save behavior, and non-React authentication boundaries. Publishes a canonical compiler manifest and verifies standalone styles in a real browser. |
 | `v0.4.2` | Adds verified-account-email accessors for provisioning before optional username onboarding. Live userinfo must match subject, client, Suite account, and profile state; the accessor returns only an `email_verified` address. |

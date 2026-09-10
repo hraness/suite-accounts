@@ -14,6 +14,8 @@ const manifest = await readStylexPackageManifest(resolve("dist/stylex-manifest.j
 const packageData: unknown = JSON.parse(await readFile("package.json", "utf8"));
 assert.ok(typeof packageData === "object" && packageData !== null && "version" in packageData);
 assert.deepEqual(manifest.package, { name: "@hraness/suite-accounts", version: packageData.version });
+assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
+assert.equal(manifest.compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
 const collector = createStylexTransformCollector(repository);
 const recipe = resolve("src/profile-form.stylex.ts");
 await collector.transform(await readFile(recipe, "utf8"), recipe);

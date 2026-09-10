@@ -17,7 +17,7 @@
         "@babel/plugin-syntax-jsx": "7.29.7",
         "@babel/plugin-syntax-typescript": "7.29.7",
         "@eslint/js": "^9.39.2",
-        "@hraness/ui": "github:hraness/ui#v0.5.3",
+        "@hraness/ui": "github:hraness/ui#v0.5.12",
         "@stylexjs/babel-plugin": "0.19.0",
         "@types/babel__core": "7.20.5",
         "@types/bun": "^1.3.14",
@@ -176,7 +176,7 @@
 
     "@hraness/result": ["@hraness/result@github:hraness/result#17b311c", {}, "hraness-result-17b311c", "sha512-OzIzJ598pWxKqpuYO+Omki/LYlhZ+bg04u7N0DuhW9FoAruP3ocRs4eyCyWxEEa4gtpEG9AEaTlheYnDlXh2mQ=="],
 
-    "@hraness/ui": ["@hraness/ui@github:hraness/ui#67cf32b", { "dependencies": { "@hugeicons/core-free-icons": "^4.2.2", "@hugeicons/react": "^1.1.9", "@stylexjs/stylex": "0.19.0", "clsx": "^2.1.1", "parse5": "8.0.1", "react-aria": "3.50.0", "react-aria-components": "1.19.0" }, "peerDependencies": { "@babel/core": "7.29.7", "@stylexjs/babel-plugin": "0.19.0", "@types/babel__core": "7.20.5", "@types/bun": "1.3.14", "@types/node": "^20.19.0 || >=22.12.0", "lightningcss": "1.33.0", "react": ">=18 <20", "react-dom": ">=18 <20", "vite": ">=7 <8" }, "optionalPeers": ["@babel/core", "@stylexjs/babel-plugin", "@types/babel__core", "@types/bun", "@types/node", "lightningcss", "vite"] }, "hraness-ui-67cf32b", "sha512-d8wo0h8DCo8aPfeDAsbNayoOhco8tyzUeCp1nDziy9QS4FN+2LqJWPKQDdeD4OafKCNTB0UKPYpvyAnB4pa8Xw=="],
+    "@hraness/ui": ["@hraness/ui@github:hraness/ui#03a8eb2", { "dependencies": { "@hugeicons/core-free-icons": "^4.2.2", "@hugeicons/react": "^1.1.9", "@stylexjs/stylex": "0.19.0", "clsx": "^2.1.1", "parse5": "8.0.1", "react-aria": "3.50.0", "react-aria-components": "1.19.0" }, "peerDependencies": { "@babel/core": "7.29.7", "@stylexjs/babel-plugin": "0.19.0", "@types/babel__core": "7.20.5", "@types/bun": "1.3.14", "@types/node": "^20.19.0 || >=22.12.0", "lightningcss": "1.33.0", "next": "16.2.12 || 16.3.3", "react": ">=18 <20", "react-dom": ">=18 <20", "typescript": "6.0.3", "vite": "7.3.6 || 8.2.1" }, "optionalPeers": ["@babel/core", "@stylexjs/babel-plugin", "@types/babel__core", "@types/bun", "@types/node", "lightningcss", "next", "typescript", "vite"] }, "hraness-ui-03a8eb2", "sha512-efu5QVfUsegOGgvVaAF491g9P+07NjvQ8FOMIjUEyIKbc8IfuuP4WAtLGxWT5ZYdTIy/K1wX3xpo+DLzlRlO4A=="],
 
     "@hugeicons/core-free-icons": ["@hugeicons/core-free-icons@4.3.0", "", {}, "sha512-5DC5gq2psNDKBQThOjpuFCtMco8nl2FkrBzZgG15cFGM0kSwUoych/pw0DmjBygF9qRDITdBPtmzJqLsOeImMg=="],
 
