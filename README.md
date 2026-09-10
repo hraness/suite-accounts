@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.2"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.3"
   }
 }
 ```
@@ -58,6 +58,13 @@ union instead of the standalone `profile-form.css` or `stylex.css` export.
 The profile form is the only styled runtime entry. Root authentication and
 protocol imports do not import React or StyleX presentation.
 
+Version 0.5.3 renames the current `hra` registration to Oompa and moves its
+production surface to `https://oompa.dev`. The stable `hra` consumer ID and
+`hraness:hra:production:v1` client ID remain unchanged, so existing identity
+links, receipts, and stored evidence stay compatible. A product binding must
+now supply the `https://oompa.dev` origin and callback; `https://hra.sh`
+gains no current Accounts authority.
+
 Version 0.5.2 builds the profile manifest with UI v0.5.12 and its fail-fast
 property-validation contract. Compiler adopters must use compatible manifests
 for every registered package and start a fresh generation after upgrading.
@@ -76,11 +83,11 @@ import { createSuiteAccountsClientConfiguration } from
 
 const configuration = createSuiteAccountsClientConfiguration({
   authMode: "oidc-rp",
-  callbackUrl: "https://hra.sh/api/suite-auth/callback",
+  callbackUrl: "https://oompa.dev/api/suite-auth/callback",
   clientId: "hraness:hra:production:v1",
   consumer: "hra",
   environment: "production",
-  origin: "https://hra.sh",
+  origin: "https://oompa.dev",
 });
 
 if (!configuration.ok) {
@@ -91,7 +98,7 @@ configuration.value.provider.issuer;
 // "https://account.hraness.com"
 ```
 
-For the registered HRA production client, the checked result begins with:
+For the registered Oompa production client, the checked result begins with:
 
 ```json
 {
@@ -246,11 +253,12 @@ values.
 
 ## Current compatibility evidence
 
-The immutable `v0.5.2` release matches the install example and package
+The immutable `v0.5.3` release matches the install example and package
 manifest. Its current changes remain bounded:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.5.3` | Renames the current `hra` registration to Oompa and moves its production origin to `https://oompa.dev` without changing its client ID. `https://hra.sh` gains no current Accounts authority. |
 | `v0.5.2` | Rebuilds the unchanged profile recipes and manifest against UI v0.5.12, binding fail-fast property validation while preserving presentation-free authentication entries and optional React peers. |
 | `v0.5.1` | Ends the verified OAuth callback with a nonce-locked same-origin continuation document, so the return page resolves its session without admitting a cross-site request. |
 | `v0.5.0` | Compiles the optional native profile form with StyleX, preserving public variables, semantic hooks, save behavior, and non-React authentication boundaries. Publishes a canonical compiler manifest and verifies standalone styles in a real browser. |

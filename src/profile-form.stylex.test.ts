@@ -8,7 +8,7 @@ import { compilerContract, compilerSha256, createStylexTransformCollector } from
 test("profile compilation binds fail-fast validation without widening optional peers", async () => {
   const pkg: unknown = await Bun.file("package.json").json();
   assert(isRecord(pkg) && isRecord(pkg.devDependencies) && isRecord(pkg.dependencies));
-  expect(pkg.version).toBe("0.5.2");
+  expect(pkg.version).toBe("0.5.3");
   expect(pkg.devDependencies["@hraness/ui"]).toBe("github:hraness/ui#v0.5.12");
   expect(pkg.dependencies["@hraness/ui"]).toBeUndefined();
   expect(pkg.peerDependencies).toEqual({ react: ">=18.3.1 <20", "react-dom": ">=18.3.1 <20" });

@@ -273,7 +273,7 @@ describe("suite receipt server helpers", () => {
     )).toBe(false);
   });
 
-  test("verifies predecessor receipts with a canonical HRA key authority", async () => {
+  test("verifies predecessor receipts with a canonical Oompa key authority", async () => {
     const legacyKeyring = parseSuiteReceiptKeyring({
       keys: [{
         environment: "production",

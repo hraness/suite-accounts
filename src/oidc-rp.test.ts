@@ -214,9 +214,9 @@ describe("suite OAuth relying party", () => {
       receiptKeyVersion: "v1",
     });
     expect(hra.configuration).toMatchObject({
-      callbackUrl: "https://hra.sh/api/suite-auth/callback",
+      callbackUrl: "https://oompa.dev/api/suite-auth/callback",
       clientId: "hraness:hra:production:v1",
-      siteUrl: "https://hra.sh",
+      siteUrl: "https://oompa.dev",
     });
   });
 

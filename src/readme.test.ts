@@ -42,11 +42,11 @@ describe("README product contract", () => {
   test("derives the documented first proof from current authority", () => {
     const configuration = createSuiteAccountsClientConfiguration({
       authMode: "oidc-rp",
-      callbackUrl: "https://hra.sh/api/suite-auth/callback",
+      callbackUrl: "https://oompa.dev/api/suite-auth/callback",
       clientId: "hraness:hra:production:v1",
       consumer: "hra",
       environment: "production",
-      origin: "https://hra.sh",
+      origin: "https://oompa.dev",
     });
 
     expect(configuration.ok).toBe(true);

@@ -8,11 +8,11 @@ import {
 
 const hraBinding = {
   authMode: "oidc-rp",
-  callbackUrl: "https://hra.sh/api/suite-auth/callback",
+  callbackUrl: "https://oompa.dev/api/suite-auth/callback",
   clientId: "hraness:hra:production:v1",
   consumer: "hra",
   environment: "production",
-  origin: "https://hra.sh",
+  origin: "https://oompa.dev",
 } as const;
 
 const subcounterBinding = {
@@ -85,7 +85,7 @@ describe("suite Accounts client configuration", () => {
       "https://attacker.example",
     )).toBe(false);
     expect(result.value.provider.issuer).toBe("https://account.hraness.com");
-    expect(result.value.binding.origin).toBe("https://hra.sh");
+    expect(result.value.binding.origin).toBe("https://oompa.dev");
   });
 
   test("rejects every caller-selected trust value", () => {
@@ -174,7 +174,7 @@ describe("suite Accounts client configuration", () => {
     const mutations = [
       { ...hraBinding, origin: "https://example.com" },
       { ...hraBinding, clientId: "hraness:soundfish:production:v1" },
-      { ...hraBinding, callbackUrl: "https://hra.sh/callback" },
+      { ...hraBinding, callbackUrl: "https://oompa.dev/callback" },
       { ...hraBinding, authMode: "proxy" },
     ] as const;
     for (const mutation of mutations) {
