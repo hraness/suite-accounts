@@ -8,7 +8,7 @@
       "name": "@hraness/suite-accounts",
       "path": ".",
       "visibility": "public",
-      "version": "0.5.1"
+      "version": "0.5.2"
     }
   ],
   "dependencies": [
@@ -21,7 +21,7 @@
     {
       "from": "@hraness/suite-accounts",
       "scope": "development",
-      "specifier": "github:hraness/ui#v0.5.3",
+      "specifier": "github:hraness/ui#v0.5.12",
       "to": "@hraness/ui"
     }
   ],
