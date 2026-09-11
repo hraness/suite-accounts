@@ -3,6 +3,25 @@ import * as stylex from "@stylexjs/stylex";
 const styles = stylex.create({
   form: { display: "grid", gap: "1rem", width: "100%" },
   field: { display: "grid", gap: "0.35rem" },
+  visibility: {
+    borderWidth: 0, marginBottom: 0, marginLeft: 0, marginRight: 0,
+    marginTop: "0.5rem", minWidth: 0, paddingBottom: 0, paddingLeft: 0,
+    paddingRight: 0, paddingTop: "0.5rem",
+  },
+  note: {
+    color: "var(--suite-profile-muted, currentColor)", fontSize: "0.9rem",
+    lineHeight: 1.5, marginBottom: "0.5rem", marginLeft: 0,
+    marginRight: 0, marginTop: 0, overflowWrap: "anywhere",
+  },
+  choice: {
+    alignItems: "center", cursor: "pointer", display: "flex", gap: "0.65rem",
+    minHeight: "2.75rem",
+  },
+  radio: {
+    accentColor: "var(--suite-profile-focus, currentColor)", flexShrink: 0,
+    height: "1.1rem", marginBottom: 0, marginLeft: 0, marginRight: 0,
+    marginTop: 0, width: "1.1rem",
+  },
   label: { fontSize: "0.9rem", fontWeight: 700 },
   control: {
     backgroundAttachment: "scroll",
@@ -106,6 +125,7 @@ const styles = stylex.create({
 });
 
 export const profileFormClasses = {
+  choice: stylex.props(styles.choice).className,
   button: stylex.props(styles.button, styles.focus).className,
   control: stylex.props(styles.control, styles.focus).className,
   email: stylex.props(styles.control, styles.focus, styles.readonly).className,
@@ -113,5 +133,8 @@ export const profileFormClasses = {
   field: stylex.props(styles.field).className,
   form: stylex.props(styles.form).className,
   label: stylex.props(styles.label).className,
+  note: stylex.props(styles.note).className,
+  radio: stylex.props(styles.radio, styles.focus).className,
   textarea: stylex.props(styles.control, styles.focus, styles.textarea).className,
+  visibility: stylex.props(styles.visibility).className,
 } as const;

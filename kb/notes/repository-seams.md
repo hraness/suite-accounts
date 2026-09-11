@@ -23,6 +23,8 @@ Suite Accounts v0.5.2 pairs its profile manifest with UI v0.5.12 and the compile
 
 Freeze protocol and export contracts before parallel lanes. Give registries, manifests, generated output, and lockfiles one owner while independent lanes change disjoint implementation or test paths.
 
+The v2 public-profile form shares the existing optional presentation entry while leaving the released v1 form compatible. Explicit visibility and optimistic revisions belong in the shared interaction contract; authentication, username claiming, images, and product navigation remain consumer or Accounts authority concerns. A conflict preserves the user's draft until a deliberate replacement and never replays publication consent. Exact result validation checks consistency, not authentication. Server-rendered forms remain closed until hydration so native fallback submission cannot serialize private profile text. DOM detachment retires a pending save synchronously; Activity reconnection reports an unconfirmed outcome without resending it. These boundaries need built-form browser evidence, because static markup and pure parser tests cannot establish them.
+
 ## Related
 
 The normative rules remain in the root `AGENTS.md`. [[documentation-ownership|Documentation ownership]] explains how those rules relate to executable contracts and this pull-based context.

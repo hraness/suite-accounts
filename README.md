@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.7.0"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.8.0"
   }
 }
 ```
@@ -214,7 +214,7 @@ Import server-only modules only from server code.
 ## Public profile v2 contracts
 
 The `./profile` and `./identity` entries export additive v2 parsers. Existing
-six-link profile contracts and the React profile form keep their v1 behavior.
+six-link profile contracts and `SuiteProfileForm` keep their v1 behavior.
 
 | Parser | Exact fields |
 | --- | --- |
@@ -263,6 +263,57 @@ can stop serving an image; it cannot erase copies already downloaded.
 Profile and avatar contracts are separate from numeric usage data. Usage-upload
 credentials do not authorize profile or avatar changes. Installing these
 contracts does not activate profile publication, editing, or image hosting.
+
+### Optional public-profile form
+
+The existing `./profile-form` entry also exports `SuitePublicProfileForm`,
+`SuitePublicProfileFormProps`, and `SuitePublicProfileFormResult`. Import the
+same stylesheet as the v1 form. No new React, authentication, or styling
+dependency is required.
+
+```tsx
+<SuitePublicProfileForm
+  initialProfile={editor}
+  onSave={saveThroughAuthenticatedAccountTransport}
+  onSaved={handleConfirmedProfile}
+/>
+```
+
+`initialProfile` is a canonical `SuiteProfileEditorV2`. `onSave` receives only
+the exact revision-bound `SuiteProfileUpdateV2` and returns an unknown result
+for runtime validation. Successful and conflict results contain exactly
+`{ status, profile }`. The form also recognizes the exact singleton statuses
+`unauthorized`, `username_required`, and `invalid_avatar`. It rejects malformed,
+cross-account, mismatched-content, or impossible-revision results without
+echoing their contents. These checks do not authenticate the transport.
+
+The form edits name, biography, and all seven social links. It preserves the
+authority's avatar reference without rendering an upload control or fetching
+an image. Public text never defaults to sign-in name or email. Missing username
+disables publication but allows a private save. A saved profile needs a name.
+
+Visibility is a native radio choice applied on save. Buttons distinguish
+publishing, saving publicly, saving privately, and withdrawing publication.
+A conflict preserves the rejected draft until the user chooses **Load latest
+profile**. Loading replaces the draft and clears its visibility choice;
+another save requires a fresh choice. The form never retries automatically.
+An unconfirmed save preserves the draft and reports that uncertainty separately
+from the last confirmed state. Consumer callback failure cannot change a
+confirmed save into an unconfirmed one.
+
+Treat the initial snapshot and save callbacks as mount-scoped. Changing an
+account ID remounts the editor; same-account prop updates do not overwrite a
+draft or retarget its transport. The consumer must unmount on logout or a
+session change and explicitly remount when the user chooses to reload. Retired
+instances discard late results and callbacks. React Activity reconnection
+preserves the draft and marks an abandoned save unconfirmed without resending
+it. Transport promises still belong to the caller; retiring the form does not
+cancel an already-dispatched server operation.
+
+Server-rendered controls stay disabled until hydration. Private fields have no
+native submission names, and the form uses POST as a further URL-leak guard.
+JavaScript is required to edit and save. These browser controls complement,
+but never replace, server authentication, revision checks, and consent policy.
 
 ## Trust boundary
 
@@ -365,11 +416,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.7.0` release for this package version.
+Pin the immutable `v0.8.0` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.8.0` | Adds the optional public-profile form with explicit visibility, preserved conflict drafts, exact save-result validation, and hydration/lifetime guards. The v1 form remains compatible; consumers still own authenticated transport and activation. |
 | `v0.7.0` | Adds exact public, editor, and revision-bound update profile v2 contracts, GitHub URL normalization, and opaque avatar reference helpers. Existing six-link contracts and the React form remain unchanged; endpoint activation is separate. |
 | `v0.6.0` | Adds explicit server-only fresh authentication with sealed action context, signed authentication-time validation and separate transaction modes. Ordinary login and registered authority remain unchanged. |
 | `v0.5.5` | Adds AI Charts as a current-only, production-only, email-code browser client with an exact origin and callback. Frozen v1 identities and linked-product privileges remain unchanged. |
@@ -454,6 +506,11 @@ browser without downloading one; set `CHROMIUM_EXECUTABLE_PATH` to select its
 executable. It prints the retained temporary profile evidence directory and
 closes its own browsers and loopback servers. Branch and release verification
 both require this browser check.
+
+The public-profile browser fixture uses the same built optional entry. It
+checks pre-hydration closure, publication and withdrawal, conflicts, manual
+retry, double submission, account replacement during commit, and Activity
+hide/show recovery with synthetic save transport only.
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. Report
 suspected vulnerabilities privately as described in

@@ -123,9 +123,14 @@ if(completed.kind!=="rejected"||completed.response.status!==400)throw new Error(
   await run([
     "node", "--input-type=module", "-e",
     `import {createElement} from "react"; import {renderToStaticMarkup} from "react-dom/server";
-import {SuiteProfileForm} from "${packageName}/profile-form";
+import {SuiteProfileForm,SuitePublicProfileForm} from "${packageName}/profile-form";
+import {parseSuiteProfileEditorV2} from "${packageName}/profile";
 const html=renderToStaticMarkup(createElement(SuiteProfileForm,{initialProfile:{name:"Reader",email:"reader@example.com",bio:"",revision:0,links:{x:null,linkedin:null,bluesky:null,instagram:null,telegram:null,website:null}},onSave:async()=>{throw new Error("unused")},submitLabel:"Save profile"}));
-if(!/class="suite-profile-form [^"]+"/.test(html)||html.includes('style='))throw new Error("Packed profile lost compiled classes or added inline style");`,
+if(!/class="suite-profile-form [^"]+"/.test(html)||html.includes('style='))throw new Error("Packed profile lost compiled classes or added inline style");
+const parsed= parseSuiteProfileEditorV2({schemaVersion:2,accountId:"acct_11111111111111111111111111111111",username:null,name:"",bio:"",revision:0,links:{x:null,github:null,linkedin:null,bluesky:null,instagram:null,telegram:null,website:null},avatarRef:null,publication:"private"});
+if(!parsed.ok)throw new Error("Invalid packed editor fixture");
+const publicHtml=renderToStaticMarkup(createElement(SuitePublicProfileForm,{initialProfile:parsed.value,onSave:async()=>{throw new Error("unused")}}));
+if(!publicHtml.includes('suite-public-profile-form')||!publicHtml.includes('method="post"')||!publicHtml.includes('disabled')||publicHtml.includes('name="bio"')||publicHtml.includes('style='))throw new Error("Packed public editor lost its rendering or privacy contract");`,
   ], consumer);
   await run([
     "node", "--input-type=module", "-e",
@@ -172,6 +177,12 @@ async function useFresh(rp: ReturnType<typeof createSuiteOidcRelyingParty>, requ
 void useFresh;
 import { parseSuitePublicProfileV2, type SuitePublicProfileV2, type SuiteProfileEditorV2, type SuiteProfileUpdateV2, type SuiteAvatarRef } from "${packageName}/profile";
 import { parseSuiteProfileEditorV2, parseSuiteProfileUpdateV2, suiteProfileAvatarPublicUrl, suiteProfileAvatarEditorUrl, type SuitePublicProfileV2 as IdentityPublicProfileV2 } from "${packageName}/identity";
+import { SuitePublicProfileForm, type SuitePublicProfileFormProps, type SuitePublicProfileFormResult } from "${packageName}/profile-form";
+function usePublicProfileForm(editor: SuiteProfileEditorV2) {
+  const props: SuitePublicProfileFormProps = { initialProfile: editor, onSave: async (_request: SuiteProfileUpdateV2): Promise<SuitePublicProfileFormResult> => ({status:"unauthorized"}) };
+  return [SuitePublicProfileForm, props];
+}
+void usePublicProfileForm;
 function useProfileV2(value: unknown) {
   const profile = parseSuitePublicProfileV2(value);
   if (profile.ok) {
@@ -310,7 +321,7 @@ try {
   await run(["tar", "-xzf", archive, "-C", unpacked], repository);
   await checkPrivateBoundary(join(unpacked, "package"));
   const manifest = await readStylexPackageManifest(join(unpacked, "package/dist/stylex-manifest.json"), join(unpacked, "package"));
-  assert.deepEqual(manifest.package, { name: packageName, version: "0.7.0" });
+  assert.deepEqual(manifest.package, { name: packageName, version: "0.8.0" });
   assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
   assert.equal(manifest.compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   if (manifest.rules.length === 0 || manifest.runtime.length !== 1) throw new Error("Packed StyleX manifest has an incomplete profile boundary.");
