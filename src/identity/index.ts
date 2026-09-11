@@ -4,5 +4,6 @@ export * from "./identifiers.js";
 export * from "./links.js";
 export * from "./principals.js";
 export * from "./profiles.js";
+export * from "./profiles-v2.js";
 export * from "./usernames.js";
 export * from "./views.js";

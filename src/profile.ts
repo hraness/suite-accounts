@@ -9,6 +9,8 @@ import {
   parseSuiteProfileView,
 } from "./identity/profiles.js";
 
+export * from "./identity/profiles-v2.js";
+
 export {
   SUITE_COMMUNITY_APPLICATION_STATUSES,
   SUITE_PROFILE_BIO_MAX_LENGTH,

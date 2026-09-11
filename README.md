@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.6.0"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.7.0"
   }
 }
 ```
@@ -211,6 +211,59 @@ for authorization.
 
 Import server-only modules only from server code.
 
+## Public profile v2 contracts
+
+The `./profile` and `./identity` entries export additive v2 parsers. Existing
+six-link profile contracts and the React profile form keep their v1 behavior.
+
+| Parser | Exact fields |
+| --- | --- |
+| `parseSuitePublicProfileV2` | `schemaVersion`, `accountId`, `username`, `name`, `bio`, `links`, `avatarRef`, `revision` |
+| `parseSuiteProfileEditorV2` | Public fields plus `publication`; `username` can be `null` |
+| `parseSuiteProfileUpdateV2` | `schemaVersion`, `expectedRevision`, `name`, `bio`, `links`, `avatarRef`, `publication` |
+
+Every v2 object has `schemaVersion: 2`. Public and editor projections require
+canonical saved values. Edits normalize names, biographies, and the existing
+six social links, and add a seventh `github` link. All seven link keys are
+required; absent values are `null`. Results and nested links are owned and
+frozen. Unknown fields, symbols, accessors, and malformed values return fixed
+field/reason errors without echoing the input.
+
+Public names must be explicitly saved and nonempty. These parsers do not infer
+names from authentication data. Names allow 120 UTF-16 code units and biographies
+allow 1,000 after normalization; each raw text input is limited to 32,768 code
+units. URLs are limited to 2,048 code units before and after normalization.
+HTTP adapters must separately bound the full request body.
+
+Public revisions start at one. Editor revision zero is a private blank default:
+empty name and biography, null links and avatar, and either a claimed canonical
+username or `null`. Saved editor profiles require a nonempty name; published
+ones also require a username. Revisions are nonnegative safe integers. The
+authority must enforce optimistic revision matching and refuse overflow.
+Editor publication is `private` or `published`; edits request `private` or
+`publish`. Parsing a public projection does not authenticate its source or
+grant permission to publish it.
+
+`normalizeSuiteProfileLinkV2("github", value)` accepts an HTTPS URL on
+`github.com` or `www.github.com` with one ASCII profile path of one to 100
+letters, digits, underscores, or hyphens. It canonicalizes the host and path
+to lowercase and removes an optional trailing slash. It rejects ports,
+credentials, whitespace, escapes, queries, and fragments. This is a bounded
+URL policy, not proof that a GitHub account exists or belongs to the user.
+
+`parseSuiteAvatarRef` accepts `avref_` followed by 64 lowercase hexadecimal
+characters with a nonzero suffix. `suiteProfileAvatarPublicUrl` and
+`suiteProfileAvatarEditorUrl` derive distinct `.webp` paths from that reference
+at the fixed Accounts origin. These helpers perform no requests and establish
+neither ownership nor endpoint availability. The serving service must enforce
+owner access on the editor route and current publication consent on the public
+route, and serve only server-reencoded static WebP images. Withdrawing consent
+can stop serving an image; it cannot erase copies already downloaded.
+
+Profile and avatar contracts are separate from numeric usage data. Usage-upload
+credentials do not authorize profile or avatar changes. Installing these
+contracts does not activate profile publication, editing, or image hosting.
+
 ## Trust boundary
 
 The package preserves these checks across the public surface:
@@ -312,11 +365,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.6.0` release for this package version.
+Pin the immutable `v0.7.0` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.7.0` | Adds exact public, editor, and revision-bound update profile v2 contracts, GitHub URL normalization, and opaque avatar reference helpers. Existing six-link contracts and the React form remain unchanged; endpoint activation is separate. |
 | `v0.6.0` | Adds explicit server-only fresh authentication with sealed action context, signed authentication-time validation and separate transaction modes. Ordinary login and registered authority remain unchanged. |
 | `v0.5.5` | Adds AI Charts as a current-only, production-only, email-code browser client with an exact origin and callback. Frozen v1 identities and linked-product privileges remain unchanged. |
 | `v0.5.4` | Binds Oompa to `https://oompa.app` and its exact callback while preserving the `hra` consumer and client IDs. Previous production origins gain no current Accounts authority or redirect. |

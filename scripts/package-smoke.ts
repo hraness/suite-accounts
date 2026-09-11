@@ -127,6 +127,30 @@ import {SuiteProfileForm} from "${packageName}/profile-form";
 const html=renderToStaticMarkup(createElement(SuiteProfileForm,{initialProfile:{name:"Reader",email:"reader@example.com",bio:"",revision:0,links:{x:null,linkedin:null,bluesky:null,instagram:null,telegram:null,website:null}},onSave:async()=>{throw new Error("unused")},submitLabel:"Save profile"}));
 if(!/class="suite-profile-form [^"]+"/.test(html)||html.includes('style='))throw new Error("Packed profile lost compiled classes or added inline style");`,
   ], consumer);
+  await run([
+    "node", "--input-type=module", "-e",
+    `import assert from "node:assert/strict";
+import * as profile from "${packageName}/profile";
+import * as identity from "${packageName}/identity";
+const links={bluesky:null,github:null,instagram:null,linkedin:null,telegram:null,website:null,x:null};
+for(const surface of [profile,identity]) {
+  const draft={schemaVersion:2,accountId:"acct_11111111111111111111111111111111",username:"reader",name:"",bio:"",links,avatarRef:null,revision:0,publication:"private"};
+  const editor=surface.parseSuiteProfileEditorV2(draft);
+  assert.equal(editor.ok,true);
+  assert.equal(Object.isFrozen(editor.value.links),true);
+  const update=surface.parseSuiteProfileUpdateV2({schemaVersion:2,expectedRevision:0,name:"Reader",bio:"",links:{...links,github:"https://www.github.com/Reader/"},avatarRef:null,publication:"publish"});
+  assert.equal(update.ok,true);
+  assert.equal(update.value.links.github,"https://github.com/reader");
+  const publicValue={schemaVersion:2,accountId:draft.accountId,username:"reader",name:"Reader",bio:"",links:update.value.links,avatarRef:null,revision:1};
+  assert.equal(surface.parseSuitePublicProfileV2(publicValue).ok,true);
+  assert.equal(surface.parseSuitePublicProfileV2({...publicValue,email:"private@example.test"}).ok,false);
+  const avatar="avref_"+"1".repeat(64);
+  assert.equal(surface.parseSuiteAvatarRef(avatar).ok,true);
+  assert.equal(surface.suiteProfileAvatarPublicUrl(avatar).value,"https://account.hraness.com/suite/profile/avatar/v1/"+avatar+".webp");
+  assert.equal(surface.suiteProfileAvatarEditorUrl(avatar).value,"https://account.hraness.com/api/profile/avatar/v1/"+avatar+".webp");
+  assert.equal(surface.parseSuiteProfileView({name:"Reader",email:"reader@example.test",bio:"",revision:0,links}).ok,false);
+}`,
+  ], consumer);
 
   const imports = importSpecifiers
     .map((specifier, index) =>
@@ -146,6 +170,24 @@ async function useFresh(rp: ReturnType<typeof createSuiteOidcRelyingParty>, requ
   return result.response;
 }
 void useFresh;
+import { parseSuitePublicProfileV2, type SuitePublicProfileV2, type SuiteProfileEditorV2, type SuiteProfileUpdateV2, type SuiteAvatarRef } from "${packageName}/profile";
+import { parseSuiteProfileEditorV2, parseSuiteProfileUpdateV2, suiteProfileAvatarPublicUrl, suiteProfileAvatarEditorUrl, type SuitePublicProfileV2 as IdentityPublicProfileV2 } from "${packageName}/identity";
+function useProfileV2(value: unknown) {
+  const profile = parseSuitePublicProfileV2(value);
+  if (profile.ok) {
+    const publicProfile: SuitePublicProfileV2 = profile.value;
+    const identityProfile: IdentityPublicProfileV2 = publicProfile;
+    const avatar: SuiteAvatarRef | null = identityProfile.avatarRef;
+    if (avatar !== null) { suiteProfileAvatarPublicUrl(avatar); suiteProfileAvatarEditorUrl(avatar); }
+    // @ts-expect-error Public profiles never expose private account email.
+    void publicProfile.email;
+  }
+  const editor = parseSuiteProfileEditorV2(value);
+  if (editor.ok) { const owner: SuiteProfileEditorV2 = editor.value; void owner.publication; }
+  const update = parseSuiteProfileUpdateV2(value);
+  if (update.ok) { const edit: SuiteProfileUpdateV2 = update.value; void edit.expectedRevision; }
+}
+void useProfileV2;
 `,
   );
   const common = {
@@ -268,7 +310,7 @@ try {
   await run(["tar", "-xzf", archive, "-C", unpacked], repository);
   await checkPrivateBoundary(join(unpacked, "package"));
   const manifest = await readStylexPackageManifest(join(unpacked, "package/dist/stylex-manifest.json"), join(unpacked, "package"));
-  assert.deepEqual(manifest.package, { name: packageName, version: "0.6.0" });
+  assert.deepEqual(manifest.package, { name: packageName, version: "0.7.0" });
   assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
   assert.equal(manifest.compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   if (manifest.rules.length === 0 || manifest.runtime.length !== 1) throw new Error("Packed StyleX manifest has an incomplete profile boundary.");

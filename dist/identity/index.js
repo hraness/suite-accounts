@@ -1,4 +1,4 @@
-// src/identity/catalog.ts
+// src/identity/consumers.ts
 import { err, ok } from "@hraness/result";
 
 // src/immutable.ts
@@ -22,7 +22,244 @@ function deepFreeze(value) {
   return value;
 }
 
+// src/identity/consumers.ts
+var SUITE_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "draw-money",
+  "oprte",
+  "sponge"
+]);
+var LEGACY_SUITE_CONSUMER_IDS = deepFreeze([
+  "kitchen"
+]);
+function parseSuiteConsumerId(value) {
+  switch (value) {
+    case "accounts":
+    case "act60":
+    case "elders":
+    case "soundfish":
+    case "oh-computer":
+    case "draw-money":
+    case "oprte":
+    case "sponge":
+      return ok(value);
+    case "kitchen":
+      return ok("oprte");
+    default:
+      return err("invalid-consumer");
+  }
+}
+
+// src/registry.ts
+var SUITE_ACCOUNTS_REMOTE_ENVIRONMENTS = deepFreeze([
+  "production"
+]);
+var accountsCookies = deepFreeze({
+  chunked: ["account_data", "session_data"],
+  names: [
+    "account_data",
+    "convex_jwt",
+    "dont_remember",
+    "session_data",
+    "session_token"
+  ]
+});
+var consumerCookies = deepFreeze({
+  chunked: ["session_data"],
+  names: ["dont_remember", "session_data", "session_token"]
+});
+var SUITE_ACCOUNTS_DEPLOYMENTS = deepFreeze({
+  production: {
+    accountsOrigin: "https://account.hraness.com",
+    convexSiteUrl: "https://qualified-marmot-22.convex.site",
+    convexUrl: "https://qualified-marmot-22.convex.cloud"
+  }
+});
+function unsupported(siteUrl) {
+  return { billingReturn: { kind: "unsupported" }, siteUrl };
+}
+function oidcSite(id, displayName, productionSiteUrl) {
+  return {
+    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+    displayName,
+    environments: {
+      production: unsupported(productionSiteUrl)
+    },
+    id
+  };
+}
+var SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "draw-money",
+  "sponge"
+]);
+var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
+  accounts: {
+    auth: {
+      basePath: "/api/auth",
+      cookies: accountsCookies,
+      kind: "authority"
+    },
+    displayName: "Accounts",
+    environments: {
+      production: {
+        billingReturn: { kind: "supported", path: "/account" },
+        siteUrl: "https://account.hraness.com"
+      }
+    },
+    id: "accounts"
+  },
+  act60: oidcSite("act60", "ACT60", "https://act60.me"),
+  elders: oidcSite("elders", "Elders", "https://elders.hraness.com"),
+  soundfish: {
+    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+    displayName: "Soundfish",
+    environments: {
+      production: unsupported("https://sound.fish")
+    },
+    id: "soundfish"
+  },
+  "oh-computer": oidcSite("oh-computer", "Oh", "https://oh.computer"),
+  "draw-money": {
+    auth: {
+      basePath: "/api/auth",
+      cookies: consumerCookies,
+      kind: "proxy"
+    },
+    displayName: "Draw Money",
+    environments: {
+      production: unsupported("https://draw.money")
+    },
+    id: "draw-money"
+  },
+  sponge: oidcSite("sponge", "Sponge", "https://spongesearch.com")
+});
+var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
+  sponge: {
+    production: unsupported("https://sponge.computer")
+  }
+});
+var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "hra",
+  "sponge",
+  "subcounter",
+  "slackorgs",
+  "peopleblade",
+  "aicharts"
+]);
+function currentOidcSite(id, displayName, productionSiteUrl) {
+  return {
+    auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
+    displayName,
+    environments: {
+      production: unsupported(productionSiteUrl)
+    },
+    id
+  };
+}
+var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
+  accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
+  act60: SUITE_ACCOUNTS_CONSUMERS.act60,
+  elders: SUITE_ACCOUNTS_CONSUMERS.elders,
+  soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
+  "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
+  hra: currentOidcSite("hra", "Oompa", "https://oompa.app"),
+  sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
+  subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
+  slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com"),
+  peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
+  aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io")
+});
+var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
+  "accounts",
+  "act60",
+  "elders",
+  "soundfish",
+  "oh-computer",
+  "sponge"
+]);
+var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
+function suiteAccountsConsumerRequiresEmailOtp(consumer) {
+  return SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
+}
+var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
+  "soundfish"
+]);
+var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
+var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
+  "soundfish",
+  "hra",
+  "peopleblade"
+]);
+function isSuiteAccountsConsumerId(value) {
+  return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsRegisteredConsumerId(value) {
+  return typeof value === "string" && SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsOidcConsumerId(value) {
+  return isSuiteAccountsRegisteredConsumerId(value) && SUITE_ACCOUNTS_CONSUMERS[value].auth.kind === "oidc-rp";
+}
+function isSuiteAccountsLinkedOidcConsumerId(value) {
+  return SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsOAuthConsumerId(value) {
+  return isSuiteAccountsRegisteredConsumerId(value) && SUITE_ACCOUNTS_CONSUMERS[value].auth.kind === "oidc-rp";
+}
+function isSuiteAccountsCurrentConsumerId(value) {
+  return typeof value === "string" && SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsCurrentOidcConsumerId(value) {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+function isSuiteAccountsCurrentLinkedOidcConsumerId(value) {
+  return SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsCurrentOAuthConsumerId(value) {
+  return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+function suiteAccountsCurrentConsumerRequiresEmailOtp(consumer) {
+  return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
+}
+function getSuiteAccountsConsumer(consumer) {
+  return SUITE_ACCOUNTS_CONSUMERS[consumer];
+}
+function getSuiteAccountsConsumerEnvironment(consumer, environment) {
+  if (!isSuiteAccountsRegisteredConsumerId(consumer))
+    return null;
+  const registration = getSuiteAccountsConsumer(consumer);
+  return registration.environments[environment] ?? null;
+}
+function getSuiteAccountsCurrentConsumer(consumer) {
+  return SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer];
+}
+function getSuiteAccountsCurrentConsumerEnvironment(consumer, environment) {
+  if (!isSuiteAccountsCurrentConsumerId(consumer))
+    return null;
+  return getSuiteAccountsCurrentConsumer(consumer).environments[environment] ?? null;
+}
+function isSuiteAccountsActiveConsumerId(value) {
+  return SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS.includes(value);
+}
+function getSuiteAccountsDeployment(environment) {
+  return SUITE_ACCOUNTS_DEPLOYMENTS[environment];
+}
+
 // src/identity/catalog.ts
+import { err as err2, ok as ok2 } from "@hraness/result";
 var SUITE_CATALOG_REVISION = "cclrte-suite-v3";
 var PREVIOUS_SUITE_CATALOG_REVISION = "cclrte-suite-v2";
 var LEGACY_SUITE_CATALOG_REVISION = "cclrte-suite-v1";
@@ -54,54 +291,22 @@ var LEGACY_PLAN_FEATURES = deepFreeze({
   individual: ["suite.paid"]
 });
 function parseSuitePlanId(value) {
-  return value === "individual" || value === "business" ? ok(value) : err("invalid-plan");
+  return value === "individual" || value === "business" ? ok2(value) : err2("invalid-plan");
 }
 function parseCurrentSuiteFeatureId(value) {
-  return value === "suite.paid" || value === "suite.believer" ? ok(value) : err("invalid-feature");
+  return value === "suite.paid" || value === "suite.believer" ? ok2(value) : err2("invalid-feature");
 }
 function parseSuiteFeatureId(value) {
-  return typeof value === "string" && SUITE_FEATURE_IDS.includes(value) ? ok(value) : err("invalid-feature");
+  return typeof value === "string" && SUITE_FEATURE_IDS.includes(value) ? ok2(value) : err2("invalid-feature");
 }
 function parseSuiteCatalogRevision(value) {
-  return value === LEGACY_SUITE_CATALOG_REVISION || value === PREVIOUS_SUITE_CATALOG_REVISION || value === SUITE_CATALOG_REVISION ? ok(value) : err("invalid-catalog-revision");
+  return value === LEGACY_SUITE_CATALOG_REVISION || value === PREVIOUS_SUITE_CATALOG_REVISION || value === SUITE_CATALOG_REVISION ? ok2(value) : err2("invalid-catalog-revision");
 }
 function featuresForSuitePlan(plan, revision = SUITE_CATALOG_REVISION) {
   return revision === LEGACY_SUITE_CATALOG_REVISION ? [...LEGACY_PLAN_FEATURES[plan]] : [...CURRENT_PLAN_FEATURES[plan]];
 }
 function suitePlanIncludesFeature(plan, feature) {
   return plan !== null && featuresForSuitePlan(plan).includes(feature);
-}
-// src/identity/consumers.ts
-import { err as err2, ok as ok2 } from "@hraness/result";
-var SUITE_CONSUMER_IDS = deepFreeze([
-  "accounts",
-  "act60",
-  "elders",
-  "soundfish",
-  "oh-computer",
-  "draw-money",
-  "oprte",
-  "sponge"
-]);
-var LEGACY_SUITE_CONSUMER_IDS = deepFreeze([
-  "kitchen"
-]);
-function parseSuiteConsumerId(value) {
-  switch (value) {
-    case "accounts":
-    case "act60":
-    case "elders":
-    case "soundfish":
-    case "oh-computer":
-    case "draw-money":
-    case "oprte":
-    case "sponge":
-      return ok2(value);
-    case "kitchen":
-      return ok2("oprte");
-    default:
-      return err2("invalid-consumer");
-  }
 }
 // src/identity/identifiers.ts
 import { err as err3, ok as ok3 } from "@hraness/result";
@@ -812,8 +1017,278 @@ function parseSuiteCommunityProfileView(value) {
   const profile = parseSuiteProfileView(value["profile"]);
   return profile.ok ? ok7({ application: application.value, profile: profile.value }) : profile;
 }
+// src/identity/profiles-v2.ts
+import { err as err7, ok as ok8 } from "@hraness/result";
+var LINK_KEYS = [
+  "bluesky",
+  "github",
+  "instagram",
+  "linkedin",
+  "telegram",
+  "website",
+  "x"
+];
+var PUBLIC_KEYS = [
+  "schemaVersion",
+  "accountId",
+  "username",
+  "name",
+  "bio",
+  "links",
+  "avatarRef",
+  "revision"
+];
+var EDITOR_KEYS = [...PUBLIC_KEYS, "publication"];
+var UPDATE_KEYS = [
+  "schemaVersion",
+  "expectedRevision",
+  "name",
+  "bio",
+  "links",
+  "avatarRef",
+  "publication"
+];
+var MAX_INPUT_TEXT_LENGTH = 32768;
+var AVATAR_PATTERN = /^avref_(?!0{64}$)[0-9a-f]{64}$/u;
+function issue(field = "profile", reason = "invalid") {
+  return deepFreeze(err7({ field, reason }));
+}
+function success(value) {
+  return deepFreeze(ok8(value));
+}
+function snapshot(value, keys) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null)
+    return null;
+  const actual = Reflect.ownKeys(value);
+  if (actual.length !== keys.length)
+    return null;
+  const copy = Object.create(null);
+  for (const key of actual) {
+    if (typeof key !== "string" || !keys.includes(key))
+      return null;
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor === undefined || !descriptor.enumerable || !Object.hasOwn(descriptor, "value")) {
+      return null;
+    }
+    const field = descriptor.value;
+    copy[key] = field;
+  }
+  return copy;
+}
+function nonnegativeInteger2(value) {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+function parseSuiteAvatarRef(value) {
+  return typeof value === "string" && value.length === 70 && AVATAR_PATTERN.test(value) ? success(value) : issue("avatarRef");
+}
+function optionalAvatar(value) {
+  return value === null ? success(null) : parseSuiteAvatarRef(value);
+}
+function legacyIssue(error) {
+  const field = error.field === "application" || error.field === "email" ? "profile" : error.field;
+  return issue(field, error.reason);
+}
+function normalizeSuiteProfileLinkV2(key, value) {
+  if (typeof key !== "string" || !LINK_KEYS.some((candidate) => candidate === key)) {
+    return issue();
+  }
+  const field = key;
+  if (value !== null && typeof value !== "string")
+    return issue(field);
+  if (typeof value === "string" && value.length > SUITE_PROFILE_URL_MAX_LENGTH) {
+    return issue(field, "too_long");
+  }
+  if (field === "github") {
+    if (value === null || value === "")
+      return success(null);
+    if (/[^\x21-\x7e]/u.test(value))
+      return issue("github");
+    const match = /^https:\/\/(?:www\.)?github\.com\/([A-Za-z0-9_-]{1,100})\/?$/iu.exec(value);
+    return match === null || match[0] !== value ? issue("github") : success(`https://github.com/${match[1].toLowerCase()}`);
+  }
+  const parsed = normalizeSuiteProfileLink(field, value);
+  if (!parsed.ok)
+    return legacyIssue(parsed.error);
+  if (parsed.value !== null && parsed.value.length > SUITE_PROFILE_URL_MAX_LENGTH) {
+    return issue(field, "too_long");
+  }
+  return success(parsed.value);
+}
+function parsedContent(value, canonical) {
+  for (const field of ["name", "bio"]) {
+    if (typeof value[field] === "string" && value[field].length > MAX_INPUT_TEXT_LENGTH) {
+      return issue(field, "too_long");
+    }
+  }
+  const inputLinks = snapshot(value["links"], LINK_KEYS);
+  if (inputLinks === null)
+    return issue();
+  const links = {
+    bluesky: null,
+    github: null,
+    instagram: null,
+    linkedin: null,
+    telegram: null,
+    website: null,
+    x: null
+  };
+  for (const key of LINK_KEYS) {
+    const result = normalizeSuiteProfileLinkV2(key, inputLinks[key]);
+    if (!result.ok)
+      return result;
+    if (canonical && result.value !== inputLinks[key])
+      return issue(key);
+    links[key] = result.value;
+  }
+  const parsed = parseSuiteProfileUpdateRequest({
+    expectedRevision: 0,
+    name: value["name"],
+    bio: value["bio"],
+    links: {
+      bluesky: links.bluesky,
+      instagram: links.instagram,
+      linkedin: links.linkedin,
+      telegram: links.telegram,
+      website: links.website,
+      x: links.x
+    }
+  });
+  if (!parsed.ok)
+    return legacyIssue(parsed.error);
+  if (canonical && (parsed.value.name !== value["name"] || parsed.value.bio !== value["bio"])) {
+    return issue();
+  }
+  return success({ name: parsed.value.name, bio: parsed.value.bio, links });
+}
+function parseView(input, editor) {
+  try {
+    const value = snapshot(input, editor ? EDITOR_KEYS : PUBLIC_KEYS);
+    if (value === null)
+      return issue();
+    if (value["schemaVersion"] !== 2)
+      return issue("schemaVersion");
+    const accountId = parseSuiteAccountId(value["accountId"]);
+    if (!accountId.ok)
+      return issue("accountId");
+    const username = editor && value["username"] === null ? success(null) : parseSuiteUsername(value["username"]);
+    if (!username.ok)
+      return issue("username");
+    const revision = value["revision"];
+    if (!nonnegativeInteger2(revision) || !editor && revision === 0)
+      return issue("revision");
+    const avatarRef = optionalAvatar(value["avatarRef"]);
+    if (!avatarRef.ok)
+      return avatarRef;
+    const publication = value["publication"];
+    if (editor && publication !== "private" && publication !== "published") {
+      return issue("publication");
+    }
+    if (editor && publication === "published" && username.value === null)
+      return issue("username");
+    let content;
+    if (revision === 0) {
+      const links = snapshot(value["links"], LINK_KEYS);
+      if (value["name"] !== "" || value["bio"] !== "" || avatarRef.value !== null || publication !== "private" || links === null || LINK_KEYS.some((key) => links[key] !== null))
+        return issue();
+      content = {
+        name: "",
+        bio: "",
+        links: {
+          bluesky: null,
+          github: null,
+          instagram: null,
+          linkedin: null,
+          telegram: null,
+          website: null,
+          x: null
+        }
+      };
+    } else {
+      const parsed = parsedContent(value, true);
+      if (!parsed.ok)
+        return parsed;
+      content = parsed.value;
+    }
+    const profile = {
+      schemaVersion: 2,
+      accountId: accountId.value,
+      ...content,
+      avatarRef: avatarRef.value,
+      revision
+    };
+    if (editor && (publication === "private" || publication === "published")) {
+      return success({ ...profile, username: username.value, publication });
+    }
+    if (username.value === null)
+      return issue("username");
+    return success({ ...profile, username: username.value });
+  } catch {
+    return issue();
+  }
+}
+function parseSuitePublicProfileV2(value) {
+  const parsed = parseView(value, false);
+  if (!parsed.ok)
+    return parsed;
+  if (parsed.value.username === null || isEditor(parsed.value))
+    return issue();
+  return success({ ...parsed.value, username: parsed.value.username });
+}
+function parseSuiteProfileEditorV2(value) {
+  const parsed = parseView(value, true);
+  if (!parsed.ok)
+    return parsed;
+  return isEditor(parsed.value) ? success(parsed.value) : issue();
+}
+function isEditor(value) {
+  return Object.hasOwn(value, "publication");
+}
+function parseSuiteProfileUpdateV2(input) {
+  try {
+    const value = snapshot(input, UPDATE_KEYS);
+    if (value === null)
+      return issue();
+    if (value["schemaVersion"] !== 2)
+      return issue("schemaVersion");
+    const expectedRevision = value["expectedRevision"];
+    if (!nonnegativeInteger2(expectedRevision))
+      return issue("expectedRevision");
+    const publication = value["publication"];
+    if (publication !== "publish" && publication !== "private")
+      return issue("publication");
+    const avatarRef = optionalAvatar(value["avatarRef"]);
+    if (!avatarRef.ok)
+      return avatarRef;
+    const content = parsedContent(value, false);
+    if (!content.ok)
+      return content;
+    return success({
+      schemaVersion: 2,
+      expectedRevision,
+      ...content.value,
+      avatarRef: avatarRef.value,
+      publication
+    });
+  } catch {
+    return issue();
+  }
+}
+function avatarUrl(ref, path) {
+  const parsed = parseSuiteAvatarRef(ref);
+  return parsed.ok ? success(`${getSuiteAccountsDeployment("production").accountsOrigin}${path}/${parsed.value}.webp`) : parsed;
+}
+function suiteProfileAvatarPublicUrl(ref) {
+  return avatarUrl(ref, "/suite/profile/avatar/v1");
+}
+function suiteProfileAvatarEditorUrl(ref) {
+  return avatarUrl(ref, "/api/profile/avatar/v1");
+}
 // src/identity/views.ts
-import { err as err7, isRecord as isRecord3, ok as ok8 } from "@hraness/result";
+import { err as err8, isRecord as isRecord3, ok as ok9 } from "@hraness/result";
 var SUITE_SUBSCRIPTION_STATUSES = deepFreeze([
   "incomplete",
   "trialing",
@@ -859,14 +1334,14 @@ function isOneOf(values, value) {
 }
 function parseSuiteSubscriptionView(value) {
   if (!isRecord3(value))
-    return err7("invalid-subscription-view");
+    return err8("invalid-subscription-view");
   const plan = parseSuitePlanId(value["plan"]);
   const catalogRevision = parseSuiteCatalogRevision(value["catalogRevision"]);
   const currentPeriodEndMs = parseOptionalTimestamp(value["currentPeriodEndMs"]);
   if (!plan.ok || !catalogRevision.ok || !isOneOf(SUITE_SUBSCRIPTION_STATUSES, value["status"]) || typeof value["cancelAtPeriodEnd"] !== "boolean" || currentPeriodEndMs === undefined) {
-    return err7("invalid-subscription-view");
+    return err8("invalid-subscription-view");
   }
-  return ok8({
+  return ok9({
     cancelAtPeriodEnd: value["cancelAtPeriodEnd"],
     catalogRevision: catalogRevision.value,
     currentPeriodEndMs,
@@ -876,17 +1351,17 @@ function parseSuiteSubscriptionView(value) {
 }
 function parseSuiteInvoiceView(value) {
   if (!isRecord3(value) || !isOneOf(SUITE_INVOICE_STATUSES, value["status"]) || value["currency"] !== "usd") {
-    return err7("invalid-invoice-view");
+    return err8("invalid-invoice-view");
   }
   const amountDueCents = parseNonnegativeInteger(value["amountDueCents"]);
   const amountPaidCents = parseNonnegativeInteger(value["amountPaidCents"]);
   const createdAtMs = parseNonnegativeInteger(value["createdAtMs"]);
   const number = value["number"] === null ? null : typeof value["number"] === "string" && value["number"].length >= 1 && value["number"].length <= 80 && value["number"].trim() === value["number"] ? value["number"] : undefined;
-  const invoiceRef = value["invoiceRef"] === null ? ok8(null) : parseSuiteInvoiceRef(value["invoiceRef"]);
+  const invoiceRef = value["invoiceRef"] === null ? ok9(null) : parseSuiteInvoiceRef(value["invoiceRef"]);
   if (amountDueCents === null || amountPaidCents === null || createdAtMs === null || number === undefined || !invoiceRef.ok) {
-    return err7("invalid-invoice-view");
+    return err8("invalid-invoice-view");
   }
-  return ok8({
+  return ok9({
     amountDueCents,
     amountPaidCents,
     createdAtMs,
@@ -910,31 +1385,31 @@ function parseFeatures(value) {
 }
 function parseSuiteAccountView(value) {
   if (!isRecord3(value))
-    return err7("invalid-account-view");
+    return err8("invalid-account-view");
   const accountId = parseSuiteAccountId(value["accountId"]);
   const email = parseEmail(value["email"]);
   const name = parseOptionalName(value["name"]);
-  const username = value["username"] === null || value["username"] === undefined ? ok8(null) : parseSuiteUsername(value["username"]);
-  const subscription = value["subscription"] === null ? ok8(null) : parseSuiteSubscriptionView(value["subscription"]);
-  const plan = value["plan"] === null ? ok8(null) : parseSuitePlanId(value["plan"]);
+  const username = value["username"] === null || value["username"] === undefined ? ok9(null) : parseSuiteUsername(value["username"]);
+  const subscription = value["subscription"] === null ? ok9(null) : parseSuiteSubscriptionView(value["subscription"]);
+  const plan = value["plan"] === null ? ok9(null) : parseSuitePlanId(value["plan"]);
   const features = parseFeatures(value["features"]);
   if (!accountId.ok || value["catalogRevision"] !== SUITE_CATALOG_REVISION || email === null || name === undefined || !username.ok || !subscription.ok || !plan.ok || features === null || !Array.isArray(value["invoices"]) || value["invoices"].length > 100 || plan.value !== (subscription.value?.plan ?? null)) {
-    return err7("invalid-account-view");
+    return err8("invalid-account-view");
   }
   const statusCanGrant = subscription.value !== null && (subscription.value.status === "active" || subscription.value.status === "trialing");
   const planFeatures = subscription.value === null ? [] : featuresForSuitePlan(subscription.value.plan);
   const exactPositiveGrant = statusCanGrant && features.length === planFeatures.length && features.every((feature, index) => feature === planFeatures[index]);
   if (features.length > 0 && !exactPositiveGrant) {
-    return err7("invalid-account-view");
+    return err8("invalid-account-view");
   }
   const invoices = [];
   for (const entry of value["invoices"]) {
     const invoice = parseSuiteInvoiceView(entry);
     if (!invoice.ok)
-      return err7("invalid-account-view");
+      return err8("invalid-account-view");
     invoices.push(invoice.value);
   }
-  return ok8({
+  return ok9({
     accountId: accountId.value,
     catalogRevision: SUITE_CATALOG_REVISION,
     email,
@@ -951,14 +1426,19 @@ export {
   validateSuiteEntitlementsClaim,
   validateSuiteEntitlementReceipt,
   validateProductLinkProof,
+  suiteProfileAvatarPublicUrl,
+  suiteProfileAvatarEditorUrl,
   suitePlanIncludesFeature,
   suiteLinkReceiptMessage,
   suiteEntitlementReceiptMessage,
   productLinkProofMessage,
   parseSuiteUsername,
   parseSuiteSubscriptionView,
+  parseSuitePublicProfileV2,
   parseSuiteProfileView,
+  parseSuiteProfileUpdateV2,
   parseSuiteProfileUpdateRequest,
+  parseSuiteProfileEditorV2,
   parseSuiteProduct,
   parseSuitePlanId,
   parseSuiteLinkProduct,
@@ -970,6 +1450,7 @@ export {
   parseSuiteConsumerId,
   parseSuiteCommunityProfileView,
   parseSuiteCatalogRevision,
+  parseSuiteAvatarRef,
   parseSuiteAccountView,
   parseSuiteAccountId,
   parseLegacyPrincipalLink,
@@ -978,6 +1459,7 @@ export {
   parseIdentityIssuer,
   parseCurrentSuiteFeatureId,
   normalizeSuiteUsername,
+  normalizeSuiteProfileLinkV2,
   normalizeSuiteProfileLink,
   isSuiteIssuableEnvironment,
   generateSuiteInvoiceRef,
