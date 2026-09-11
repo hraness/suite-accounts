@@ -7,4 +7,11 @@ export {
   parseSuiteCommunityProfileView,
   parseSuiteProfileUpdateRequest,
   parseSuiteProfileView,
+  normalizeSuiteProfileLinkV2,
+  parseSuiteAvatarRef,
+  parseSuiteProfileEditorV2,
+  parseSuiteProfileUpdateV2,
+  parseSuitePublicProfileV2,
+  suiteProfileAvatarEditorUrl,
+  suiteProfileAvatarPublicUrl,
 } from "./identity/index.js";
