@@ -1,5 +1,8 @@
 "use client";
 
+export { SuitePublicProfileForm } from "./public-profile-form.js";
+export type { SuitePublicProfileFormProps, SuitePublicProfileFormResult } from "./public-profile-form.js";
+
 import { profileFormClasses } from "./profile-form.stylex.js";
 
 import {

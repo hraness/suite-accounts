@@ -25,6 +25,10 @@
     border-style: solid;
   }
 
+  .xc342km {
+    border-width: 0;
+  }
+
   .xmkeg23 {
     border-width: 1px;
   }
@@ -37,12 +41,24 @@
     gap: .35rem;
   }
 
+  .x5m0csh {
+    gap: .65rem;
+  }
+
   .x8fetqu {
     gap: 1rem;
   }
 }
 
 @layer components.hraness-suite-accounts.priority2 {
+  .x1c7drp3 {
+    accent-color: var(--suite-profile-focus, currentColor);
+  }
+
+  .x6s0dn4 {
+    align-items: center;
+  }
+
   .x1fdtg7e {
     background-attachment: scroll;
   }
@@ -119,8 +135,16 @@
     cursor: pointer;
   }
 
+  .x78zum5 {
+    display: flex;
+  }
+
   .xrvj5dj {
     display: grid;
+  }
+
+  .x2lah0s {
+    flex-shrink: 0;
   }
 
   .xjb2p0i {
@@ -183,12 +207,20 @@
     line-height: 1.4;
   }
 
+  .x1evy7pa {
+    line-height: 1.5;
+  }
+
   .x15bjb6t {
     line-height: inherit;
   }
 
   .xf9vgkq {
     opacity: .72;
+  }
+
+  .xj0a0fe {
+    overflow-wrap: anywhere;
   }
 
   .x288g5 {
@@ -221,6 +253,14 @@
 }
 
 @layer components.hraness-suite-accounts.priority3 {
+  .xhdxxi3 {
+    height: 1.1rem;
+  }
+
+  .xhbfen4 {
+    margin-bottom: .5rem;
+  }
+
   .xat24cr {
     margin-bottom: 0;
   }
@@ -233,8 +273,16 @@
     margin-right: 0;
   }
 
+  .x1mjqqkp {
+    margin-top: .5rem;
+  }
+
   .xdj266r {
     margin-top: 0;
+  }
+
+  .xgbkey0 {
+    min-height: 2.75rem;
   }
 
   .xeuugli {
@@ -249,8 +297,16 @@
     padding-bottom: .7rem;
   }
 
+  .x18d9i69 {
+    padding-bottom: 0;
+  }
+
   .x79ra4s {
     padding-left: .75rem;
+  }
+
+  .x1uhho1l {
+    padding-left: 0;
   }
 
   .x9dzeaa {
@@ -261,8 +317,16 @@
     padding-right: .75rem;
   }
 
+  .x1xpa7k {
+    padding-right: 0;
+  }
+
   .x52dz5p {
     padding-right: 1rem;
+  }
+
+  .x1b58sdr {
+    padding-top: .5rem;
   }
 
   .x1flg24d {
@@ -271,6 +335,10 @@
 
   .x15y8ph0 {
     padding-top: .7rem;
+  }
+
+  .xmh2cwo {
+    width: 1.1rem;
   }
 
   .xh8yej3 {
