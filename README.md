@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.4"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.5"
   }
 }
 ```
@@ -57,6 +57,13 @@ Applications that already join StyleX package rules can consume
 union instead of the standalone `profile-form.css` or `stylex.css` export.
 The profile form is the only styled runtime entry. Root authentication and
 protocol imports do not import React or StyleX presentation.
+
+Version 0.5.5 adds the current-only AI Charts browser registration at
+`https://aicharts.io`, with client `hraness:aicharts:production:v1` and callback
+`https://aicharts.io/api/suite-auth/callback`. It requires email-code sessions
+and adds no billing return, linked-product receipt, or native device grant.
+Accounts service adoption and product activation are separate from this
+package contract; a valid factory binding is not proof of live sign-in.
 
 Version 0.5.4 binds the current Oompa registration to
 `https://oompa.app`. The stable `hra` consumer ID and
@@ -253,11 +260,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.5.4` release for this package version.
+Pin the immutable `v0.5.5` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.5.5` | Adds AI Charts as a current-only, production-only, email-code browser client with an exact origin and callback. Frozen v1 identities and linked-product privileges remain unchanged. |
 | `v0.5.4` | Binds Oompa to `https://oompa.app` and its exact callback while preserving the `hra` consumer and client IDs. Previous production origins gain no current Accounts authority or redirect. |
 | `v0.5.3` | Renames the current `hra` registration to Oompa without changing its client ID. Its production origin is superseded by v0.5.4. |
 | `v0.5.2` | Rebuilds the unchanged profile recipes and manifest against UI v0.5.12, binding fail-fast property validation while preserving presentation-free authentication entries and optional React peers. |

@@ -230,6 +230,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "subcounter",
   "slackorgs",
   "peopleblade",
+  "aicharts",
 ] as const);
 
 export type SuiteAccountsCurrentConsumerId =
@@ -290,6 +291,11 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
     "peopleblade",
     "PeopleBlade",
     "https://peopleblade.com",
+  ),
+  aicharts: currentOidcSite(
+    "aicharts",
+    "AI Charts",
+    "https://aicharts.io",
   ),
 } as const satisfies Readonly<
   Record<

@@ -251,7 +251,7 @@ try {
   await run(["tar", "-xzf", archive, "-C", unpacked], repository);
   await checkPrivateBoundary(join(unpacked, "package"));
   const manifest = await readStylexPackageManifest(join(unpacked, "package/dist/stylex-manifest.json"), join(unpacked, "package"));
-  assert.deepEqual(manifest.package, { name: packageName, version: "0.5.4" });
+  assert.deepEqual(manifest.package, { name: packageName, version: "0.5.5" });
   assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
   assert.equal(manifest.compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   if (manifest.rules.length === 0 || manifest.runtime.length !== 1) throw new Error("Packed StyleX manifest has an incomplete profile boundary.");

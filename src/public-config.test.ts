@@ -228,6 +228,44 @@ describe("suite Accounts public configuration", () => {
     })).toThrow("same loopback host");
   });
 
+  test("rejects AI Charts loopback configuration without changing existing clients", () => {
+    const local = {
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: "http://127.0.0.1:3211",
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: "http://127.0.0.1:3210",
+      NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3000",
+    } as const;
+    const message = "AI Charts authentication requires its registered production origin.";
+    expect(() => parseSuiteAccountsPublicConfig("aicharts", local))
+      .toThrow(message);
+    expect(suiteAccountsPublicConfigFromEnvironment("aicharts", local))
+      .toEqual({ kind: "invalid", message });
+    for (const consumer of SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS) {
+      if (consumer === "aicharts") continue;
+      expect(parseSuiteAccountsPublicConfig(consumer, local)).toMatchObject({
+        consumer,
+        environment: "local",
+        kind: "ready",
+        siteUrl: local.NEXT_PUBLIC_SITE_URL,
+      });
+    }
+  });
+
+  test("keeps AI Charts authentication unavailable on generated Previews", () => {
+    const production = getSuiteAccountsDeployment("production");
+    expect(parseSuiteAccountsPublicConfig("aicharts", {
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: production.convexSiteUrl,
+      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: production.convexUrl,
+      NEXT_PUBLIC_SITE_URL: "https://aicharts.io",
+      NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN: "https://aicharts-change-123.vercel.app",
+    })).toEqual({
+      canonicalProductOrigin: "https://aicharts.io",
+      environment: "production",
+      kind: "unavailable",
+      message: "Suite authentication is unavailable on generated Vercel Preview origins.",
+      surfaceOrigin: "https://aicharts-change-123.vercel.app",
+    });
+  });
+
   test("makes Suite auth unavailable on a generated production-backed Preview", () => {
     const production = getSuiteAccountsDeployment("production");
     expect(parseSuiteAccountsPublicConfig("soundfish", {
