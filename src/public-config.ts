@@ -191,6 +191,13 @@ export function parseSuiteAccountsPublicConfig(
     LOOPBACK_HOSTS.has(url.hostname)
   );
   if (loopback.every(Boolean)) {
+    // This new registration has no local trust surface. Preserve existing
+    // consumers' released loopback behavior below.
+    if (consumer === "aicharts") {
+      throw new Error(
+        "AI Charts authentication requires its registered production origin.",
+      );
+    }
     if (
       deployment.transport !== "local"
       || site.hostname !== convex.hostname

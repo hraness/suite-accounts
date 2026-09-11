@@ -157,7 +157,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "sponge",
   "subcounter",
   "slackorgs",
-  "peopleblade"
+  "peopleblade",
+  "aicharts"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -179,7 +180,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
   slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com"),
-  peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com")
+  peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
+  aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -717,6 +719,9 @@ function parseSuiteAccountsPublicConfig(consumer, environment) {
   const convex = parseOrigin(deployment.url, "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL");
   const loopback = [site, convex, convexSite].map((url) => LOOPBACK_HOSTS.has(url.hostname));
   if (loopback.every(Boolean)) {
+    if (consumer === "aicharts") {
+      throw new Error("AI Charts authentication requires its registered production origin.");
+    }
     if (deployment.transport !== "local" || site.hostname !== convex.hostname || site.hostname !== convexSite.hostname) {
       throw new Error("Local consumer and Accounts endpoints must use the same loopback host.");
     }

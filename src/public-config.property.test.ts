@@ -1,7 +1,10 @@
 import { assertProperty, fc } from "./test-support";
 import { describe, expect, test } from "bun:test";
 
-import { parseSuiteAccountsPublicConfig } from "./public-config";
+import {
+  parseSuiteAccountsPublicConfig,
+  suiteAccountsPublicConfigFromEnvironment,
+} from "./public-config";
 
 const accounts = {
   NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL:
@@ -11,6 +14,31 @@ const accounts = {
 } as const;
 
 describe("suite Accounts public origin laws", () => {
+  test("AI Charts never admits loopback hosts or ports as production trust", () => {
+    assertProperty(fc.property(
+      fc.constantFrom("localhost", "127.0.0.1", "[::1]"),
+      fc.tuple(
+        fc.integer({ min: 1, max: 65_535 }),
+        fc.integer({ min: 1, max: 65_535 }),
+        fc.integer({ min: 1, max: 65_535 }),
+      ),
+      (host, [sitePort, convexPort, convexSitePort]) => {
+        const local = {
+          NEXT_PUBLIC_SITE_URL: `http://${host}:${sitePort}`,
+          NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: `http://${host}:${convexPort}`,
+          NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: `http://${host}:${convexSitePort}`,
+        };
+        const message = "AI Charts authentication requires its registered production origin.";
+        expect(() => parseSuiteAccountsPublicConfig("aicharts", local))
+          .toThrow(message);
+        expect(suiteAccountsPublicConfigFromEnvironment("aicharts", local))
+          .toEqual({ kind: "invalid", message });
+        expect(parseSuiteAccountsPublicConfig("soundfish", local))
+          .toMatchObject({ kind: "ready", environment: "local" });
+      },
+    ));
+  });
+
   test("never accepts decorated or insecure remote consumer origins", () => {
     assertProperty(fc.property(
       fc.constantFrom(
