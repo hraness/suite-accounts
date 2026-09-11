@@ -1079,10 +1079,27 @@ async function unsealCookie(value, key, purpose) {
   }
 }
 function parseTransaction(value, consumer, environment, nowMs) {
-  if (!isRecord3(value) || value["version"] !== 1 || value["consumer"] !== consumer || value["environment"] !== environment || !safeInteger2(value["issuedAtMs"]) || !safeInteger2(value["expiresAtMs"]) || value["expiresAtMs"] <= nowMs || value["issuedAtMs"] > nowMs + 30000 || value["expiresAtMs"] - value["issuedAtMs"] > TRANSACTION_TTL_MS || !boundedString(value["state"], 43, 128) || !boundedString(value["nonce"], 43, 128) || !boundedString(value["verifier"], 43, 128) || parseReturnPath(value["returnTo"], "") === null) {
+  if (!isRecord3(value) || value["version"] !== 1 && value["version"] !== 2 || value["consumer"] !== consumer || value["environment"] !== environment || !safeInteger2(value["issuedAtMs"]) || !safeInteger2(value["expiresAtMs"]) || value["expiresAtMs"] <= nowMs || value["issuedAtMs"] > nowMs + 30000 || value["expiresAtMs"] - value["issuedAtMs"] > TRANSACTION_TTL_MS || !boundedString(value["state"], 43, 128) || !boundedString(value["nonce"], 43, 128) || !boundedString(value["verifier"], 43, 128) || parseReturnPath(value["returnTo"], "") === null) {
     return null;
   }
+  if (value["version"] === 2 && (!safeInteger2(nowMs) || value["issuedAtMs"] > nowMs || value["expiresAtMs"] <= value["issuedAtMs"] || !validFreshContext(value["context"]) || Object.keys(value).length !== 10))
+    return null;
   return value;
+}
+function validFreshContext(value) {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{32,256}$/u.test(value);
+}
+function parseFreshAuthenticationInput(value, nowMs) {
+  if (!isRecord3(value) || !safeInteger2(nowMs) || !safeInteger2(nowMs + TRANSACTION_TTL_MS))
+    return null;
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  if (Reflect.ownKeys(descriptors).length !== 2 || !("value" in (descriptors["context"] ?? {})) || !("value" in (descriptors["expiresAtMs"] ?? {})))
+    return null;
+  const context = descriptors["context"].value;
+  const expiresAtMs = descriptors["expiresAtMs"].value;
+  if (!validFreshContext(context) || !safeInteger2(expiresAtMs) || expiresAtMs <= nowMs || expiresAtMs > nowMs + TRANSACTION_TTL_MS)
+    return null;
+  return { context, expiresAtMs };
 }
 function parseStoredEntitlements(value) {
   if (!isRecord3(value) || !Array.isArray(value["features"]))
@@ -1417,7 +1434,7 @@ async function verifiedIdToken(input) {
   const verified = await jwtVerify(input.idToken, createLocalJWKSet(input.jwks), {
     algorithms: [...ALLOWED_TOKEN_ALGORITHMS],
     audience: input.configuration.clientId,
-    clockTolerance: 30,
+    clockTolerance: input.freshStartedAtMs === undefined ? 30 : 0,
     currentDate: new Date(input.nowMs),
     issuer: input.configuration.provider.issuer,
     maxTokenAge: "20m"
@@ -1431,7 +1448,17 @@ async function verifiedIdToken(input) {
   const profile = profileFromClaims(claims.value);
   if (profile === null)
     return null;
+  let freshTimes = null;
+  if (input.freshStartedAtMs !== undefined) {
+    const authTime = verified.payload["auth_time"];
+    const issuedAt = verified.payload.iat;
+    const expiresAt = verified.payload.exp;
+    if (!safeInteger2(input.nowMs) || input.nowMs < input.freshStartedAtMs || !safeInteger2(authTime) || !safeInteger2(authTime * 1000) || !safeInteger2(issuedAt) || !safeInteger2(expiresAt) || !safeInteger2(expiresAt * 1000) || authTime < Math.floor(input.freshStartedAtMs / 1000) || authTime > Math.floor(input.nowMs / 1000) || authTime > issuedAt || issuedAt > Math.floor(input.nowMs / 1000) || expiresAt * 1000 <= input.nowMs || verified.payload.aud !== input.configuration.clientId || verified.payload["azp"] !== undefined && verified.payload["azp"] !== input.configuration.clientId)
+      return null;
+    freshTimes = { authenticatedAtMs: authTime * 1000, expiresAtMs: expiresAt * 1000 };
+  }
   return {
+    freshTimes,
     profile,
     subject: String(claims.value.principal.subject),
     suiteAccountId: claims.value.suiteAccountId
@@ -1453,7 +1480,7 @@ async function verifiedSessionFromAccessToken(input) {
     const verified = await jwtVerify(input.accessToken, createLocalJWKSet(input.jwks), {
       algorithms: [...ALLOWED_TOKEN_ALGORITHMS],
       audience: input.configuration.provider.resource,
-      clockTolerance: 30,
+      clockTolerance: input.requireFresh === true ? 0 : 30,
       currentDate: new Date(input.nowMs),
       issuer: input.configuration.provider.issuer,
       maxTokenAge: "20m"
@@ -1463,6 +1490,7 @@ async function verifiedSessionFromAccessToken(input) {
     return null;
   }
   const result = await verifySuiteEntitlementToken(input.accessToken, {
+    ...input.requireFresh === true ? { clockSkewMs: 0 } : {},
     expectedAudience: input.configuration.provider.resource,
     expectedIssuer: input.configuration.provider.issuer,
     nowMs: input.nowMs,
@@ -1700,7 +1728,7 @@ function createSuiteOidcRelyingParty(options) {
       return null;
     return parseSession(await unsealCookie(sealed, await key, "session"), configuration, consumer, environment, receiptKeyVersion, now());
   }
-  async function start(request) {
+  async function startAuthorization(request, freshInput, requireFresh = false) {
     if (!exactRequest(request, siteUrl, "/api/suite-auth/start", "GET")) {
       return failure("OIDC_START_REJECTED", 403);
     }
@@ -1709,26 +1737,31 @@ function createSuiteOidcRelyingParty(options) {
     if (returnTo === null)
       return failure("OIDC_RETURN_REJECTED", 400);
     const issuedAtMs = now();
+    const fresh = requireFresh ? parseFreshAuthenticationInput(freshInput, issuedAtMs) : null;
+    if (requireFresh && fresh === null)
+      return failure("OIDC_FRESH_INPUT_INVALID", 400);
     const verifier = randomValue(48, randomBytes);
     const transaction = {
       consumer,
       environment,
-      expiresAtMs: issuedAtMs + TRANSACTION_TTL_MS,
+      expiresAtMs: fresh?.expiresAtMs ?? issuedAtMs + TRANSACTION_TTL_MS,
       issuedAtMs,
       nonce: randomValue(32, randomBytes),
       returnTo,
       state: randomValue(32, randomBytes),
       verifier,
-      version: 1
+      ...fresh === null ? { version: 1 } : { version: 2, context: fresh.context }
     };
     const authorize = new URL(provider.authorizationEndpoint);
     authorize.searchParams.set("client_id", configuration.clientId);
     authorize.searchParams.set("code_challenge", await sha256Base64Url(verifier));
     authorize.searchParams.set("code_challenge_method", "S256");
     authorize.searchParams.set("nonce", transaction.nonce);
-    if (suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)) {
+    if (requireFresh || suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)) {
       authorize.searchParams.set("prompt", "login");
     }
+    if (requireFresh)
+      authorize.searchParams.set("max_age", "0");
     authorize.searchParams.set("redirect_uri", configuration.callbackUrl);
     authorize.searchParams.set("resource", provider.resource);
     authorize.searchParams.set("response_type", "code");
@@ -1739,27 +1772,41 @@ function createSuiteOidcRelyingParty(options) {
       headers: {
         "cache-control": "no-store",
         location: authorize.href,
-        "set-cookie": setCookie(names.transaction, sealed, names.secure, TRANSACTION_TTL_MS / 1000)
+        "set-cookie": setCookie(names.transaction, sealed, names.secure, Math.ceil((transaction.expiresAtMs - issuedAtMs) / 1000))
       },
       status: 302
     });
   }
-  async function callback(request) {
+  async function start(request) {
+    return await startAuthorization(request);
+  }
+  async function startFreshAuthentication(request, input) {
+    try {
+      return await startAuthorization(request, input, true);
+    } catch {
+      return failure("OIDC_FRESH_START_FAILED", 400);
+    }
+  }
+  async function completeAuthorization(request, requireFresh) {
     const clear = clearCookie(names.transaction, names.secure);
+    const reject = (code, status) => ({
+      kind: "rejected",
+      response: failure(code, status, [clear])
+    });
     if (!exactCallbackRequest(request, siteUrl)) {
-      return failure("OIDC_CALLBACK_REJECTED", 403, [clear]);
+      return reject("OIDC_CALLBACK_REJECTED", 403);
     }
     const sealed = requestCookie(request, names.transaction);
     const transaction = sealed === null ? null : parseTransaction(await unsealCookie(sealed, await key, "transaction"), consumer, environment, now());
-    if (transaction === null) {
-      return failure("OIDC_TRANSACTION_INVALID", 400, [clear]);
+    if (transaction === null || transaction.version === 2 !== requireFresh) {
+      return reject("OIDC_TRANSACTION_INVALID", 400);
     }
     const url = new URL(request.url);
     const states = url.searchParams.getAll("state");
     const codes = url.searchParams.getAll("code");
     const errors = url.searchParams.getAll("error");
     if (states.length !== 1 || states[0] !== transaction.state || errors.length > 0 || codes.length !== 1 || !boundedString(codes[0], 1, MAX_CODE_BYTES)) {
-      return failure("OIDC_CALLBACK_INVALID", 400, [clear]);
+      return reject("OIDC_CALLBACK_INVALID", 400);
     }
     try {
       await discovery();
@@ -1772,7 +1819,7 @@ function createSuiteOidcRelyingParty(options) {
         resource: provider.resource
       }), true);
       if (tokens.idToken === null) {
-        return failure("OIDC_TOKEN_INVALID", 502, [clear]);
+        return reject("OIDC_TOKEN_INVALID", 502);
       }
       const providerKeys = await jwks();
       const identity = await verifiedIdToken({
@@ -1780,10 +1827,11 @@ function createSuiteOidcRelyingParty(options) {
         expectedNonce: transaction.nonce,
         idToken: tokens.idToken,
         jwks: providerKeys,
-        nowMs: now()
+        nowMs: now(),
+        ...transaction.version === 2 ? { freshStartedAtMs: transaction.issuedAtMs } : {}
       });
       if (identity === null) {
-        return failure("OIDC_TOKEN_INVALID", 502, [clear]);
+        return reject("OIDC_TOKEN_INVALID", 502);
       }
       const verifiedSession = await verifiedSessionFromAccessToken({
         accessToken: tokens.accessToken,
@@ -1796,23 +1844,48 @@ function createSuiteOidcRelyingParty(options) {
         nonce: transaction.nonce,
         nowMs: now(),
         profileTransition: "exact",
-        refreshToken: tokens.refreshToken
+        refreshToken: tokens.refreshToken,
+        requireFresh
       });
       if (verifiedSession === null) {
-        return failure("OIDC_TOKEN_INVALID", 502, [clear]);
+        return reject("OIDC_TOKEN_INVALID", 502);
       }
       const session = {
         ...verifiedSession,
         pendingEntitlementReceipt: await entitlementReceipt(tokens.accessToken, verifiedSession.suiteAccountId)
       };
       const sessionCookie = await sealCookie(session, await key, "session", randomBytes);
-      return createOidcContinuationResponse(transaction.returnTo, randomValue(24, randomBytes), [
+      let authentication = null;
+      if (transaction.version === 2) {
+        const completedAtMs = now();
+        const times = identity.freshTimes;
+        const expiresAtMs = Math.min(transaction.expiresAtMs, times?.expiresAtMs ?? 0, session.accessTokenExpiresAtMs);
+        if (times === null || !safeInteger2(completedAtMs) || completedAtMs < transaction.issuedAtMs || times.authenticatedAtMs > completedAtMs || !safeInteger2(expiresAtMs) || expiresAtMs <= completedAtMs) {
+          return reject("OIDC_FRESH_AUTHENTICATION_INVALID", 502);
+        }
+        authentication = Object.freeze({
+          authenticatedAtMs: times.authenticatedAtMs,
+          context: transaction.context,
+          expiresAtMs,
+          startedAtMs: transaction.issuedAtMs,
+          suiteAccountId: identity.suiteAccountId
+        });
+      }
+      const response = createOidcContinuationResponse(transaction.returnTo, randomValue(24, randomBytes), [
         clear,
         setCookie(names.session, sessionCookie, names.secure, SESSION_TTL_MS / 1000)
       ]);
+      return authentication === null ? { kind: "ordinary", response } : Object.freeze({ kind: "authenticated", authentication, response });
     } catch {
-      return failure("OIDC_UPSTREAM_FAILED", 502, [clear]);
+      return reject("OIDC_UPSTREAM_FAILED", 502);
     }
+  }
+  async function callback(request) {
+    return (await completeAuthorization(request, false)).response;
+  }
+  async function completeFreshAuthentication(request) {
+    const result = await completeAuthorization(request, true);
+    return result.kind === "ordinary" ? { kind: "rejected", response: failure("OIDC_TRANSACTION_INVALID", 400) } : result;
   }
   async function currentSession(request) {
     if (!exactRequest(request, siteUrl, "/api/suite-auth/session", "GET")) {
@@ -2058,6 +2131,7 @@ function createSuiteOidcRelyingParty(options) {
   return Object.freeze({
     acknowledgeEntitlementReceipt,
     callback,
+    completeFreshAuthentication,
     configuration,
     currentSession,
     handle,
@@ -2068,7 +2142,8 @@ function createSuiteOidcRelyingParty(options) {
     serverSession,
     serverVerifiedEmail,
     signOut,
-    start
+    start,
+    startFreshAuthentication
   });
 }
 export {

@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.5.5"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.6.0"
   }
 }
 ```
@@ -234,6 +234,58 @@ The package preserves these checks across the public surface:
 Do not authorize from browser profile JSON, decoded JWT data, discovery
 destinations, billing plan membership, or an unverified receipt.
 
+## Fresh authentication for server-owned actions
+
+Use the explicit `startFreshAuthentication(request, input)` and
+`completeFreshAuthentication(request)` methods from `./oidc-rp` when a product
+action needs recently authenticated account evidence. Both methods are
+server-only. The existing surface handler does not opt into this flow.
+
+Pass exactly `{ context, expiresAtMs }` as the start input. `context` is an opaque
+32–256 character value using only ASCII letters, digits, `_` and `-`.
+Create it on the product server and bind it to a durable, short-lived action;
+do not copy browser parameters, personal data or credentials into it.
+`expiresAtMs` must be a safe integer after server time and no more than 10
+minutes ahead. The request still uses the exact registered start URL, method
+and same-origin rules. The context is encrypted in the transaction cookie and
+is not added to the authorization URL, continuation HTML or browser session.
+
+The fresh transaction uses a separate version. Ordinary `callback()` and
+`handle()` reject it, including when rolling back to an older package.
+`completeFreshAuthentication()` rejects ordinary login transactions. Route the
+callback explicitly on the product server; do not retry it through ordinary
+login after a rejection.
+
+A successful completion returns `{ kind: "authenticated", authentication,
+response }`. Its frozen `authentication` projection contains only `context`,
+`suiteAccountId`, `authenticatedAtMs`, `startedAtMs` and `expiresAtMs`.
+Authentication time comes from verified signed `auth_time`, not token issuance
+or session refresh. It must fall between the start's whole-second boundary and
+current server time, with no positive skew allowance. Same-second ordering
+cannot be inferred from a seconds-precision claim. Validity ends at the earliest
+transaction, ID-token or access-token expiry and is checked again after provider
+work. Missing or invalid evidence returns `{ kind: "rejected", response }` with
+a fixed error and cleared transaction cookie.
+
+Consume this result on the server. Never serialize the result or its context
+into browser JSON or an application URL. Recheck expiry and atomically bind the
+context, current account and intended action in product-owned durable state
+before returning `response`. The response carries the normal encrypted session
+cookie and same-origin continuation. A browser session, this evidence, or a
+recent OTP in another flow does not itself approve a device or authorize an
+action. Keep explicit user approval and replay protection separate.
+
+Completion has no exactly-once guarantee and invokes no product hook. A lost
+response may leave a consumed OAuth code; reconcile durable product state and
+start a new transaction instead of assuming the code can be replayed. Ordinary
+login, session access and refresh cannot produce fresh completion evidence.
+
+The SDK requests `prompt=login` and `max_age=0`, then independently checks the
+signed result. Request parameters alone are insufficient evidence. See
+[OIDC authentication-time validation](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation).
+Qualify the authority's authentication-time semantics and the product's durable
+approval flow before activating privileged actions.
+
 ## Frozen v1 protocol compatibility
 
 `SUITE_CONSUMER_IDS` preserves released identity values for historical parsing.
@@ -260,11 +312,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.5.5` release for this package version.
+Pin the immutable `v0.6.0` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.6.0` | Adds explicit server-only fresh authentication with sealed action context, signed authentication-time validation and separate transaction modes. Ordinary login and registered authority remain unchanged. |
 | `v0.5.5` | Adds AI Charts as a current-only, production-only, email-code browser client with an exact origin and callback. Frozen v1 identities and linked-product privileges remain unchanged. |
 | `v0.5.4` | Binds Oompa to `https://oompa.app` and its exact callback while preserving the `hra` consumer and client IDs. Previous production origins gain no current Accounts authority or redirect. |
 | `v0.5.3` | Renames the current `hra` registration to Oompa without changing its client ID. Its production origin is superseded by v0.5.4. |
