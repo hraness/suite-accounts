@@ -21,6 +21,7 @@ import {
 import type {
   SuiteOidcRelyingParty,
   SuiteOidcRelyingPartyOptions,
+  SuiteOidcFreshAuthentication,
 } from "../src/oidc-rp.js";
 import { suiteAccountsOidcProviderConfiguration } from "../src/urls.js";
 
@@ -84,6 +85,7 @@ let issuedAccessToken = "";
 let tokenExchangeCount = 0;
 async function idToken(): Promise<string> {
   return await new SignJWT({
+    auth_time: nowSeconds,
     nonce: authorizationNonce,
     profile_complete: true,
     profile_revision: "username-v1",
@@ -219,11 +221,17 @@ type BrowserTransaction = Readonly<{
 async function createBrowserTransaction(
   returnTo: string,
   code: string,
+  fresh = false,
 ): Promise<BrowserTransaction> {
-  const started = await relyingParty.start(new Request(
+  const request = new Request(
     `${siteUrl}/api/suite-auth/start?return_to=${encodeURIComponent(returnTo)}`,
     { headers: { "sec-fetch-site": "same-origin" } },
-  ));
+  );
+  const started = fresh
+    ? await relyingParty.startFreshAuthentication(request, {
+        context: "opaque-action-context-".repeat(3), expiresAtMs: nowMs + 10 * 60_000,
+      })
+    : await relyingParty.start(request);
   assert.equal(started.status, 302);
   const authorization = new URL(started.headers.get("location") ?? "");
   const nonce = authorization.searchParams.get("nonce");
@@ -271,6 +279,8 @@ const installCookies = new Map<string, string>([
   ["/__suite-oidc-browser/install-success", successTransaction.setCookie],
 ]);
 const callbackEvidence: CallbackEvidence[] = [];
+let freshMode = false;
+let freshAuthentication: SuiteOidcFreshAuthentication | undefined;
 let continuationEvidence: NavigationEvidence | undefined;
 let resolvedSession:
   | Awaited<ReturnType<typeof relyingParty.serverSession>>
@@ -326,7 +336,9 @@ try {
           });
         }
         if (url.pathname === "/api/suite-auth/callback") {
-          const response = await relyingParty.callback(request);
+          const fresh = freshMode ? await relyingParty.completeFreshAuthentication(request) : null;
+          if (fresh?.kind === "authenticated") freshAuthentication = fresh.authentication;
+          const response = fresh === null ? await relyingParty.callback(request) : fresh.response;
           const responseCookies = getSetCookies(response);
           assert.ok(responseCookies.some(cookie =>
             cookie.startsWith("__Host-hraness-suite-oidc-transaction=")
@@ -348,6 +360,7 @@ try {
           });
           return response;
         }
+        if (url.pathname === "/api/suite-auth/session") return await relyingParty.currentSession(request);
         if (url.pathname === "/settings") {
           continuationEvidence = navigationEvidence(request);
           resolvedSession = await relyingParty.serverSession(request);
@@ -545,9 +558,78 @@ try {
 
   assert.equal(callbackEvidence.length, 2);
   assert.equal(tokenExchangeCount, 1);
+  // A separate browser context exercises the built opt-in API and HttpOnly
+  // transaction without inheriting the ordinary flow's established session.
+  freshMode = true;
+  const freshTransaction = await createBrowserTransaction("/settings?from=fresh", "browser-fresh-code", true);
+  authorizationNonce = freshTransaction.nonce;
+  installCookies.set("/__suite-oidc-browser/install-fresh", freshTransaction.setCookie);
+  const freshContext = await browser.newContext({ ignoreHTTPSErrors: true });
+  const freshPage = await freshContext.newPage();
+  freshPage.on("framenavigated", frame => {
+    if (frame === freshPage.mainFrame()) lastUrl = frame.url();
+  });
+  freshPage.on("console", message => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  freshPage.on("pageerror", error => errors.push(error.message));
+  freshPage.on("requestfailed", request => {
+    errors.push(`${request.method()} ${request.url()}: ${request.failure()?.errorText ?? "unknown failure"}`);
+  });
+  await freshPage.route("**/*", async route => {
+    const url = new URL(route.request().url());
+    if (url.origin !== provider.issuer) return await route.continue();
+    if (url.href === providerPage) {
+      return await route.fulfill({
+        body: `<!doctype html><a href="${freshTransaction.callbackUrl.replaceAll("&", "&amp;")}">Authenticate</a>`,
+        contentType: "text/html; charset=utf-8", status: 200,
+      });
+    }
+    return await route.fulfill({ body: "Not found", status: 404 });
+  });
+  await freshPage.goto(`${siteUrl}/__suite-oidc-browser/install-fresh`);
+  await freshPage.goto(providerPage);
+  await freshPage.getByRole("link", { name: "Authenticate" }).click();
+  await freshPage.waitForURL(`${siteUrl}/settings?from=fresh`);
+  await freshPage.getByText("Session resolved", { exact: true }).waitFor();
+  assert.deepEqual(freshAuthentication, {
+    authenticatedAtMs: nowMs,
+    context: "opaque-action-context-".repeat(3),
+    expiresAtMs: nowMs + 10 * 60_000,
+    startedAtMs: nowMs,
+    suiteAccountId: accountId,
+  });
+  assert.equal(Object.isFrozen(freshAuthentication), true);
+  const freshCallback = callbackEvidence[2];
+  assert.ok(freshCallback !== undefined);
+  assert.equal(freshCallback.status, 200);
+  assert.equal(freshCallback.navigation.site, "cross-site");
+  assert.equal(continuationEvidence?.site, "same-origin");
+  assert.equal(freshCallback.headers["referrer-policy"], "no-referrer");
+  assert.ok(freshCallback.headers["content-security-policy"]?.includes("script-src 'nonce-"));
+  const sessionJson = await freshPage.evaluate(async () => {
+    const response = await fetch("/api/suite-auth/session");
+    return await response.text();
+  });
+  const browserSession: unknown = JSON.parse(sessionJson);
+  assert.ok(typeof browserSession === "object" && browserSession !== null && "kind" in browserSession);
+  assert.equal(browserSession.kind, "signed_in");
+  for (const value of [freshCallback.body, sessionJson, freshPage.url()]) {
+    assert.ok(!value.includes("opaque-action-context-"));
+    assert.ok(!value.includes(issuedAccessToken));
+    assert.ok(!value.includes("browser-refresh-token-value-0001"));
+    assert.ok(!value.includes("better-auth-browser-user-17"));
+    assert.ok(!value.includes("authenticatedAtMs"));
+  }
+  assert.equal((await freshContext.cookies(siteUrl)).some(cookie =>
+    cookie.name === "__Host-hraness-suite-oidc-transaction"
+  ), false);
+  await freshContext.close();
+  assert.equal(callbackEvidence.length, 3);
+  assert.equal(tokenExchangeCount, 2);
   assert.deepEqual(errors, []);
   console.log(
-    "OIDC navigation browser verification passed: real cross-site callback, nonce continuation, same-origin session resolution, history replacement, and fail-closed callback.",
+    "OIDC navigation browser verification passed: ordinary and explicit fresh cross-site callbacks, private server evidence, nonce continuation, same-origin session resolution, history replacement, and fail-closed callback.",
   );
 } catch (error) {
   console.error(JSON.stringify({

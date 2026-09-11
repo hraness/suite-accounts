@@ -113,6 +113,15 @@ async function verifyReactLane(
   ], consumer);
   await run([
     "node", "--input-type=module", "-e",
+    `import {createSuiteOidcRelyingParty} from "${packageName}/oidc-rp";
+const rp=createSuiteOidcRelyingParty({consumer:"aicharts",environment:"production",receiptKeyVersion:"v1",cookieSecret:"synthetic-packed-consumer-secret-at-least-32-bytes",fetch:async()=>{throw new Error("Unexpected provider access")}});
+const started=await rp.startFreshAuthentication(new Request("https://aicharts.io/api/suite-auth/start",{headers:{"sec-fetch-site":"same-origin"}}),{context:"opaque-context-for-packed-consumer-test",expiresAtMs:Date.now()+60000});
+if(started.status!==302||started.headers.get("location").includes("opaque-context"))throw new Error("Packed fresh start failed");
+const completed=await rp.completeFreshAuthentication(new Request("https://aicharts.io/api/suite-auth/callback"));
+if(completed.kind!=="rejected"||completed.response.status!==400)throw new Error("Packed fresh completion failed closed contract");`,
+  ], consumer);
+  await run([
+    "node", "--input-type=module", "-e",
     `import {createElement} from "react"; import {renderToStaticMarkup} from "react-dom/server";
 import {SuiteProfileForm} from "${packageName}/profile-form";
 const html=renderToStaticMarkup(createElement(SuiteProfileForm,{initialProfile:{name:"Reader",email:"reader@example.com",bio:"",revision:0,links:{x:null,linkedin:null,bluesky:null,instagram:null,telegram:null,website:null}},onSave:async()=>{throw new Error("unused")},submitLabel:"Save profile"}));
@@ -129,7 +138,15 @@ if(!/class="suite-profile-form [^"]+"/.test(html)||html.includes('style='))throw
     .join(", ");
   await writeFile(
     join(consumer, "index.ts"),
-    `${imports}\nvoid [${references}];\n`,
+    `${imports}\nvoid [${references}];
+import { createSuiteOidcRelyingParty, type SuiteOidcFreshAuthentication } from "${packageName}/oidc-rp";
+async function useFresh(rp: ReturnType<typeof createSuiteOidcRelyingParty>, request: Request) {
+  const result = await rp.completeFreshAuthentication(request);
+  if (result.kind === "authenticated") { const evidence: SuiteOidcFreshAuthentication = result.authentication; void evidence.context; }
+  return result.response;
+}
+void useFresh;
+`,
   );
   const common = {
     compilerOptions: {
@@ -251,7 +268,7 @@ try {
   await run(["tar", "-xzf", archive, "-C", unpacked], repository);
   await checkPrivateBoundary(join(unpacked, "package"));
   const manifest = await readStylexPackageManifest(join(unpacked, "package/dist/stylex-manifest.json"), join(unpacked, "package"));
-  assert.deepEqual(manifest.package, { name: packageName, version: "0.5.5" });
+  assert.deepEqual(manifest.package, { name: packageName, version: "0.6.0" });
   assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
   assert.equal(manifest.compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   if (manifest.rules.length === 0 || manifest.runtime.length !== 1) throw new Error("Packed StyleX manifest has an incomplete profile boundary.");

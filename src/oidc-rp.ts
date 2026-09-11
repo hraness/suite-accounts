@@ -77,7 +77,7 @@ function isReceiptConsumer(
   return isSuiteAccountsCurrentLinkedOidcConsumerId(consumer);
 }
 
-type Transaction = Readonly<{
+type TransactionBase = Readonly<{
   consumer: SuiteOidcConsumer;
   environment: SuiteAccountsRemoteEnvironment;
   expiresAtMs: number;
@@ -86,8 +86,38 @@ type Transaction = Readonly<{
   returnTo: string;
   state: string;
   verifier: string;
-  version: 1;
 }>;
+
+type Transaction = TransactionBase & (
+  | Readonly<{ version: 1 }>
+  | Readonly<{ version: 2; context: string }>
+);
+
+/** Opaque server-owned action context, never copied from browser parameters. */
+export type SuiteOidcFreshAuthenticationInput = Readonly<{
+  context: string;
+  expiresAtMs: number;
+}>;
+
+/** Verified evidence only. The product must durably consume it before authorizing. */
+export type SuiteOidcFreshAuthentication = Readonly<{
+  authenticatedAtMs: number;
+  context: string;
+  expiresAtMs: number;
+  startedAtMs: number;
+  suiteAccountId: SuiteAccountId;
+}>;
+
+export type SuiteOidcFreshAuthenticationResult =
+  | Readonly<{
+      kind: "authenticated";
+      authentication: SuiteOidcFreshAuthentication;
+      response: Response;
+    }>
+  | Readonly<{ kind: "rejected"; response: Response }>;
+
+type AuthorizationResult = SuiteOidcFreshAuthenticationResult
+  | Readonly<{ kind: "ordinary"; response: Response }>;
 
 type SuiteOidcProfile =
   | Readonly<{
@@ -177,6 +207,9 @@ export type SuiteOidcRelyingPartyOptions = Readonly<{
 
 export type SuiteOidcRelyingParty = Readonly<{
   callback(request: Request): Promise<Response>;
+  completeFreshAuthentication(
+    request: Request,
+  ): Promise<SuiteOidcFreshAuthenticationResult>;
   acknowledgeEntitlementReceipt(request: Request): Promise<Response>;
   configuration: Readonly<{
     callbackUrl: string;
@@ -200,6 +233,7 @@ export type SuiteOidcRelyingParty = Readonly<{
   ): Promise<SuiteOidcServerVerifiedEmail | null>;
   signOut(request: Request): Promise<Response>;
   start(request: Request): Promise<Response>;
+  startFreshAuthentication(request: Request, input: unknown): Promise<Response>;
 }>;
 
 type TokenResponse = Readonly<{
@@ -419,7 +453,7 @@ function parseTransaction(
 ): Transaction | null {
   if (
     !isRecord(value)
-    || value["version"] !== 1
+    || (value["version"] !== 1 && value["version"] !== 2)
     || value["consumer"] !== consumer
     || value["environment"] !== environment
     || !safeInteger(value["issuedAtMs"])
@@ -434,7 +468,35 @@ function parseTransaction(
   ) {
     return null;
   }
+  if (value["version"] === 2 && (
+    !safeInteger(nowMs)
+    || value["issuedAtMs"] > nowMs
+    || value["expiresAtMs"] <= value["issuedAtMs"]
+    || !validFreshContext(value["context"])
+    || Object.keys(value).length !== 10
+  )) return null;
   return value as Transaction;
+}
+
+function validFreshContext(value: unknown): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{32,256}$/u.test(value);
+}
+
+function parseFreshAuthenticationInput(
+  value: unknown,
+  nowMs: number,
+): SuiteOidcFreshAuthenticationInput | null {
+  if (!isRecord(value) || !safeInteger(nowMs)
+    || !safeInteger(nowMs + TRANSACTION_TTL_MS)) return null;
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  if (Reflect.ownKeys(descriptors).length !== 2
+    || !("value" in (descriptors["context"] ?? {}))
+    || !("value" in (descriptors["expiresAtMs"] ?? {}))) return null;
+  const context: unknown = descriptors["context"]!.value;
+  const expiresAtMs: unknown = descriptors["expiresAtMs"]!.value;
+  if (!validFreshContext(context) || !safeInteger(expiresAtMs)
+    || expiresAtMs <= nowMs || expiresAtMs > nowMs + TRANSACTION_TTL_MS) return null;
+  return { context, expiresAtMs };
 }
 
 function parseStoredEntitlements(value: unknown): VerifiedSuiteEntitlements | null {
@@ -1018,6 +1080,7 @@ function parseJwks(value: unknown): JSONWebKeySet | null {
 }
 
 type VerifiedIdToken = Readonly<{
+  freshTimes: Readonly<{ authenticatedAtMs: number; expiresAtMs: number }> | null;
   profile: SuiteOidcProfile;
   subject: string;
   suiteAccountId: SuiteAccountId;
@@ -1029,6 +1092,7 @@ async function verifiedIdToken(input: {
   idToken: string;
   jwks: JSONWebKeySet;
   nowMs: number;
+  freshStartedAtMs?: number;
 }): Promise<VerifiedIdToken | null> {
   const header = decodeProtectedHeader(input.idToken);
   if (
@@ -1043,7 +1107,7 @@ async function verifiedIdToken(input: {
     {
       algorithms: [...ALLOWED_TOKEN_ALGORITHMS],
       audience: input.configuration.clientId,
-      clockTolerance: 30,
+      clockTolerance: input.freshStartedAtMs === undefined ? 30 : 0,
       currentDate: new Date(input.nowMs),
       issuer: input.configuration.provider.issuer,
       maxTokenAge: "20m",
@@ -1059,7 +1123,26 @@ async function verifiedIdToken(input: {
   if (!claims.ok) return null;
   const profile = profileFromClaims(claims.value);
   if (profile === null) return null;
+  let freshTimes: VerifiedIdToken["freshTimes"] = null;
+  if (input.freshStartedAtMs !== undefined) {
+    const authTime = verified.payload["auth_time"];
+    const issuedAt = verified.payload.iat;
+    const expiresAt = verified.payload.exp;
+    if (!safeInteger(input.nowMs) || input.nowMs < input.freshStartedAtMs
+      || !safeInteger(authTime) || !safeInteger(authTime * 1_000)
+      || !safeInteger(issuedAt) || !safeInteger(expiresAt)
+      || !safeInteger(expiresAt * 1_000)
+      || authTime < Math.floor(input.freshStartedAtMs / 1_000)
+      || authTime > Math.floor(input.nowMs / 1_000)
+      || authTime > issuedAt || issuedAt > Math.floor(input.nowMs / 1_000)
+      || expiresAt * 1_000 <= input.nowMs
+      || verified.payload.aud !== input.configuration.clientId
+      || (verified.payload["azp"] !== undefined
+        && verified.payload["azp"] !== input.configuration.clientId)) return null;
+    freshTimes = { authenticatedAtMs: authTime * 1_000, expiresAtMs: expiresAt * 1_000 };
+  }
   return {
+    freshTimes,
     profile,
     subject: String(claims.value.principal.subject),
     suiteAccountId: claims.value.suiteAccountId,
@@ -1089,6 +1172,7 @@ async function verifiedSessionFromAccessToken(input: {
   nonce: string;
   nowMs: number;
   refreshToken: string;
+  requireFresh?: boolean;
 }): Promise<StoredSession | null> {
   const header = decodeProtectedHeader(input.accessToken);
   if (!boundedString(header.kid, 1, 128) || header.alg !== "ES256") {
@@ -1102,7 +1186,7 @@ async function verifiedSessionFromAccessToken(input: {
       {
         algorithms: [...ALLOWED_TOKEN_ALGORITHMS],
         audience: input.configuration.provider.resource,
-        clockTolerance: 30,
+        clockTolerance: input.requireFresh === true ? 0 : 30,
         currentDate: new Date(input.nowMs),
         issuer: input.configuration.provider.issuer,
         maxTokenAge: "20m",
@@ -1113,6 +1197,7 @@ async function verifiedSessionFromAccessToken(input: {
     return null;
   }
   const result = await verifySuiteEntitlementToken(input.accessToken, {
+    ...(input.requireFresh === true ? { clockSkewMs: 0 } : {}),
     expectedAudience: input.configuration.provider.resource,
     expectedIssuer: input.configuration.provider.issuer,
     nowMs: input.nowMs,
@@ -1497,7 +1582,11 @@ export function createSuiteOidcRelyingParty(
     );
   }
 
-  async function start(request: Request): Promise<Response> {
+  async function startAuthorization(
+    request: Request,
+    freshInput?: unknown,
+    requireFresh = false,
+  ): Promise<Response> {
     if (!exactRequest(request, siteUrl, "/api/suite-auth/start", "GET")) {
       return failure("OIDC_START_REJECTED", 403);
     }
@@ -1507,17 +1596,21 @@ export function createSuiteOidcRelyingParty(
     );
     if (returnTo === null) return failure("OIDC_RETURN_REJECTED", 400);
     const issuedAtMs = now();
+    const fresh = requireFresh
+      ? parseFreshAuthenticationInput(freshInput, issuedAtMs)
+      : null;
+    if (requireFresh && fresh === null) return failure("OIDC_FRESH_INPUT_INVALID", 400);
     const verifier = randomValue(48, randomBytes);
     const transaction: Transaction = {
       consumer,
       environment,
-      expiresAtMs: issuedAtMs + TRANSACTION_TTL_MS,
+      expiresAtMs: fresh?.expiresAtMs ?? issuedAtMs + TRANSACTION_TTL_MS,
       issuedAtMs,
       nonce: randomValue(32, randomBytes),
       returnTo,
       state: randomValue(32, randomBytes),
       verifier,
-      version: 1,
+      ...(fresh === null ? { version: 1 as const } : { version: 2 as const, context: fresh.context }),
     };
     const authorize = new URL(provider.authorizationEndpoint);
     authorize.searchParams.set("client_id", configuration.clientId);
@@ -1525,10 +1618,11 @@ export function createSuiteOidcRelyingParty(
     authorize.searchParams.set("code_challenge_method", "S256");
     authorize.searchParams.set("nonce", transaction.nonce);
     if (
-      suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)
+      requireFresh || suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)
     ) {
       authorize.searchParams.set("prompt", "login");
     }
+    if (requireFresh) authorize.searchParams.set("max_age", "0");
     authorize.searchParams.set("redirect_uri", configuration.callbackUrl);
     authorize.searchParams.set("resource", provider.resource);
     authorize.searchParams.set("response_type", "code");
@@ -1553,19 +1647,37 @@ export function createSuiteOidcRelyingParty(
           names.transaction,
           sealed,
           names.secure,
-          TRANSACTION_TTL_MS / 1_000,
+          Math.ceil((transaction.expiresAtMs - issuedAtMs) / 1_000),
         ),
       },
       status: 302,
     });
   }
 
-  async function callback(request: Request): Promise<Response> {
+  async function start(request: Request): Promise<Response> {
+    return await startAuthorization(request);
+  }
+
+  async function startFreshAuthentication(request: Request, input: unknown): Promise<Response> {
+    try {
+      return await startAuthorization(request, input, true);
+    } catch {
+      return failure("OIDC_FRESH_START_FAILED", 400);
+    }
+  }
+
+  async function completeAuthorization(
+    request: Request,
+    requireFresh: boolean,
+  ): Promise<AuthorizationResult> {
     const clear = clearCookie(names.transaction, names.secure);
+    const reject = (code: string, status: number): AuthorizationResult => ({
+      kind: "rejected", response: failure(code, status, [clear]),
+    });
     if (
       !exactCallbackRequest(request, siteUrl)
     ) {
-      return failure("OIDC_CALLBACK_REJECTED", 403, [clear]);
+      return reject("OIDC_CALLBACK_REJECTED", 403);
     }
     const sealed = requestCookie(request, names.transaction);
     const transaction = sealed === null
@@ -1576,8 +1688,8 @@ export function createSuiteOidcRelyingParty(
           environment,
           now(),
         );
-    if (transaction === null) {
-      return failure("OIDC_TRANSACTION_INVALID", 400, [clear]);
+    if (transaction === null || (transaction.version === 2) !== requireFresh) {
+      return reject("OIDC_TRANSACTION_INVALID", 400);
     }
     const url = new URL(request.url);
     const states = url.searchParams.getAll("state");
@@ -1590,7 +1702,7 @@ export function createSuiteOidcRelyingParty(
       || codes.length !== 1
       || !boundedString(codes[0], 1, MAX_CODE_BYTES)
     ) {
-      return failure("OIDC_CALLBACK_INVALID", 400, [clear]);
+      return reject("OIDC_CALLBACK_INVALID", 400);
     }
     try {
       await discovery();
@@ -1603,7 +1715,7 @@ export function createSuiteOidcRelyingParty(
         resource: provider.resource,
       }), true);
       if (tokens.idToken === null) {
-        return failure("OIDC_TOKEN_INVALID", 502, [clear]);
+        return reject("OIDC_TOKEN_INVALID", 502);
       }
       const providerKeys = await jwks();
       const identity = await verifiedIdToken({
@@ -1612,9 +1724,10 @@ export function createSuiteOidcRelyingParty(
         idToken: tokens.idToken,
         jwks: providerKeys,
         nowMs: now(),
+        ...(transaction.version === 2 ? { freshStartedAtMs: transaction.issuedAtMs } : {}),
       });
       if (identity === null) {
-        return failure("OIDC_TOKEN_INVALID", 502, [clear]);
+        return reject("OIDC_TOKEN_INVALID", 502);
       }
       const verifiedSession = await verifiedSessionFromAccessToken({
         accessToken: tokens.accessToken,
@@ -1628,9 +1741,10 @@ export function createSuiteOidcRelyingParty(
         nowMs: now(),
         profileTransition: "exact",
         refreshToken: tokens.refreshToken,
+        requireFresh,
       });
       if (verifiedSession === null) {
-        return failure("OIDC_TOKEN_INVALID", 502, [clear]);
+        return reject("OIDC_TOKEN_INVALID", 502);
       }
       const session: StoredSession = {
         ...verifiedSession,
@@ -1645,7 +1759,32 @@ export function createSuiteOidcRelyingParty(
         "session",
         randomBytes,
       );
-      return createOidcContinuationResponse(
+      // Recheck after every provider call and cookie operation. Token clock skew
+      // allowed for ordinary login never extends fresh-action validity.
+      let authentication: SuiteOidcFreshAuthentication | null = null;
+      if (transaction.version === 2) {
+        const completedAtMs = now();
+        const times = identity.freshTimes;
+        const expiresAtMs = Math.min(
+          transaction.expiresAtMs,
+          times?.expiresAtMs ?? 0,
+          session.accessTokenExpiresAtMs,
+        );
+        if (times === null || !safeInteger(completedAtMs)
+          || completedAtMs < transaction.issuedAtMs
+          || times.authenticatedAtMs > completedAtMs
+          || !safeInteger(expiresAtMs) || expiresAtMs <= completedAtMs) {
+          return reject("OIDC_FRESH_AUTHENTICATION_INVALID", 502);
+        }
+        authentication = Object.freeze({
+          authenticatedAtMs: times.authenticatedAtMs,
+          context: transaction.context,
+          expiresAtMs,
+          startedAtMs: transaction.issuedAtMs,
+          suiteAccountId: identity.suiteAccountId,
+        });
+      }
+      const response = createOidcContinuationResponse(
         transaction.returnTo,
         randomValue(24, randomBytes),
         [
@@ -1658,9 +1797,23 @@ export function createSuiteOidcRelyingParty(
           ),
         ],
       );
+      return authentication === null
+        ? { kind: "ordinary", response }
+        : Object.freeze({ kind: "authenticated", authentication, response });
     } catch {
-      return failure("OIDC_UPSTREAM_FAILED", 502, [clear]);
+      return reject("OIDC_UPSTREAM_FAILED", 502);
     }
+  }
+
+  async function callback(request: Request): Promise<Response> {
+    return (await completeAuthorization(request, false)).response;
+  }
+
+  async function completeFreshAuthentication(request: Request): Promise<SuiteOidcFreshAuthenticationResult> {
+    const result = await completeAuthorization(request, true);
+    return result.kind === "ordinary"
+      ? { kind: "rejected", response: failure("OIDC_TRANSACTION_INVALID", 400) }
+      : result;
   }
 
   async function currentSession(request: Request): Promise<Response> {
@@ -2024,6 +2177,7 @@ export function createSuiteOidcRelyingParty(
   return Object.freeze({
     acknowledgeEntitlementReceipt,
     callback,
+    completeFreshAuthentication,
     configuration,
     currentSession,
     handle,
@@ -2035,5 +2189,6 @@ export function createSuiteOidcRelyingParty(
     serverVerifiedEmail,
     signOut,
     start,
+    startFreshAuthentication,
   });
 }
