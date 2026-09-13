@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.0"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.1"
   }
 }
 ```
@@ -416,7 +416,7 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.9.0` release for this package version.
+Pin the immutable `v0.9.1` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |

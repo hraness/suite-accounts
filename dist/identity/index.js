@@ -727,6 +727,149 @@ function validateSuiteEntitlementReceipt(input, now) {
   }
   return input.expiresAtMs <= now ? "expired" : null;
 }
+// src/identity/membership.ts
+var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
+  {
+    description: "personal site",
+    emoji: "\uD83E\uDEA2",
+    href: "https://hraness.com",
+    id: "hraness",
+    name: "HRNSS"
+  },
+  {
+    description: "pareto frontier charts",
+    emoji: "\uD83D\uDC40",
+    href: "https://aicharts.io",
+    id: "aicharts",
+    name: "AI Charts"
+  },
+  {
+    description: "software factories, in practice",
+    emoji: "\uD83C\uDFED",
+    href: "https://swft.io",
+    id: "swft",
+    name: "SWFT"
+  },
+  {
+    description: "personal life timeline maker",
+    emoji: "⏳",
+    href: "https://lifecharts.io",
+    id: "lifedaysleft",
+    name: "Lifecharts"
+  },
+  {
+    description: "sleep research and a calming sound machine",
+    emoji: "\uD83D\uDCA4",
+    href: "https://sleepy.land",
+    id: "sleepyland",
+    name: "Sleepyland"
+  },
+  {
+    description: "news aggregator",
+    emoji: "\uD83C\uDF27️",
+    href: "https://rough.day",
+    id: "roughday",
+    name: "Rough Day"
+  },
+  {
+    description: "history of a generational co",
+    emoji: "\uD83D\uDCDA",
+    href: "https://hraness.com/stripe",
+    id: "stripe-history",
+    name: "Stripe History"
+  },
+  {
+    description: "move to puerto rico",
+    emoji: "⏱️",
+    href: "https://act60.me",
+    id: "act60",
+    name: "ACT60"
+  },
+  {
+    description: "precise web capabilities for agents",
+    emoji: "\uD83D\uDC7B",
+    href: "https://ghostget.com",
+    id: "wrench",
+    name: "Ghostget"
+  },
+  {
+    description: "relationship-aware drafting",
+    emoji: "\uD83D\uDCAC",
+    href: "https://messagelikeme.com",
+    id: "message-like-me",
+    name: "Message Like Me"
+  },
+  {
+    description: "visual studio for coding agents",
+    emoji: "\uD83D\uDCF7",
+    href: "https://slopcamera.com",
+    id: "slopcamera",
+    name: "Slopcamera"
+  },
+  {
+    description: "local-first contact book and evidence-backed enrichment for people and agents",
+    emoji: "\uD83D\uDDE1️",
+    href: "https://peopleblade.com",
+    id: "peopleblade",
+    name: "PeopleBlade"
+  },
+  {
+    description: "absorb knowledge",
+    emoji: "\uD83E\uDDFD",
+    href: "https://sponge.computer",
+    id: "sponge",
+    name: "Sponge"
+  },
+  {
+    description: "markdown knowledge base for coding agents",
+    emoji: "\uD83D\uDCDA",
+    href: "https://wordcell.io",
+    id: "kb",
+    name: "Wordcell"
+  },
+  {
+    description: "evidence-backed working models of people",
+    emoji: "\uD83D\uDC40",
+    href: "https://soulscrape.com",
+    id: "soulscrape",
+    name: "Soulscrape"
+  },
+  {
+    description: "browser experiments for a game of algorithmic organisms",
+    emoji: "\uD83E\uDDA0",
+    href: "https://platonik.space",
+    id: "platonik",
+    name: "Platonik"
+  },
+  {
+    description: "repeatable app states for browser agents",
+    emoji: "\uD83C\uDFAF",
+    href: "https://hraness.com/direct",
+    id: "direct",
+    name: "Direct"
+  },
+  {
+    description: "one workspace for coding agents",
+    emoji: "⌨️",
+    href: "https://oompa.app",
+    id: "hra",
+    name: "Oompa"
+  },
+  {
+    description: "content-addressable music",
+    emoji: "\uD83C\uDF0A",
+    href: "https://sound.fish",
+    id: "soundfish",
+    name: "Soundfish"
+  },
+  {
+    description: "open-source tools for agentic research",
+    emoji: "\uD83D\uDCDA",
+    href: "https://oh.computer",
+    id: "oh-computer",
+    name: "oh.computer"
+  }
+]);
 // src/identity/profiles.ts
 import { err as err6, isRecord as isRecord2, ok as ok7 } from "@hraness/result";
 var SUITE_PROFILE_NAME_MAX_LENGTH = 120;
@@ -1516,6 +1659,7 @@ export {
   SUITE_PRODUCTS,
   SUITE_PREVIOUS_FEATURE_IDS,
   SUITE_PLAN_IDS,
+  SUITE_MEMBERSHIP_PRODUCTS,
   SUITE_LINK_PRODUCTS,
   SUITE_LEGACY_FEATURE_IDS,
   SUITE_ISSUABLE_ENVIRONMENTS,
