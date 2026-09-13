@@ -40,7 +40,7 @@ describe("suite entitlement JWT authorization", () => {
         suite_entitlements: {
           catalogRevision: SUITE_CATALOG_REVISION,
           expiresAtMs: 1_800_000_600_000,
-          features: ["suite.paid", "suite.believer"],
+          features: ["suite.paid", "suite.community"],
           observedAtMs: 1_800_000_290_000,
           projectionRevision: 7,
           version: "suite-entitlements-v1",
@@ -49,7 +49,8 @@ describe("suite entitlement JWT authorization", () => {
     });
     expect(result.kind).toBe("verified");
     expect(suiteTokenGrantsFeature(result, "suite.paid")).toBe(true);
-    expect(suiteTokenGrantsFeature(result, "suite.believer")).toBe(true);
+    expect(suiteTokenGrantsFeature(result, "suite.community")).toBe(true);
+    expect(suiteTokenGrantsFeature(result, "suite.pro")).toBe(false);
   });
 
   test("legacy identity tokens verify but grant no features", async () => {
@@ -72,7 +73,7 @@ describe("suite entitlement JWT authorization", () => {
         suite_entitlements: {
           catalogRevision: SUITE_CATALOG_REVISION,
           expiresAtMs: 1_800_000_600_000,
-          features: ["suite.paid"],
+          features: ["suite.paid", "suite.community"],
           observedAtMs: 1_800_000_000_000,
           projectionRevision: 1,
           version: "suite-entitlements-v1",
@@ -93,7 +94,7 @@ describe("suite entitlement JWT authorization", () => {
         suite_entitlements: {
           catalogRevision: SUITE_CATALOG_REVISION,
           expiresAtMs: 1_800_000_600_000,
-          features: ["suite.paid"],
+          features: ["suite.paid", "suite.community"],
           observedAtMs: nowMs - 27 * 60 * 60_000,
           projectionRevision: 4,
           version: "suite-entitlements-v1",
@@ -138,8 +139,9 @@ describe("suite entitlement JWT authorization", () => {
 
 describe("signed entitlement receipt projection ordering", () => {
   const projection = {
+    catalogRevision: SUITE_CATALOG_REVISION,
     expiresAtMs: nowMs + 600_000,
-    features: ["suite.paid"] as const,
+    features: ["suite.paid", "suite.community"] as const,
     observedAtMs: nowMs - 60_000,
     projectionRevision: 7,
     receiptIssuedAtMs: nowMs,

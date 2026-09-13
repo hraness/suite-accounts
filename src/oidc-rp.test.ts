@@ -49,7 +49,7 @@ function entitlementReceipt(
     entitlements: {
       catalogRevision: SUITE_CATALOG_REVISION,
       expiresAtMs: nowMs + 8 * 60_000,
-      features: ["suite.paid", "suite.believer"],
+      features: ["suite.paid", "suite.community", "suite.pro"],
       observedAtMs: nowMs - 1_000,
       projectionRevision: 7,
       version: "suite-entitlements-v1",
@@ -140,7 +140,7 @@ async function signingFixture(targetClientId = clientId) {
       suite_entitlements: {
         catalogRevision: SUITE_CATALOG_REVISION,
         expiresAtMs: nowMs + 8 * 60_000,
-        features: ["suite.paid", "suite.believer"],
+        features: ["suite.paid", "suite.community", "suite.pro"],
         observedAtMs: nowMs - 1_000,
         projectionRevision: 7,
         version: "suite-entitlements-v1",
@@ -862,7 +862,7 @@ describe("suite OAuth relying party", () => {
       session: {
         entitlementReceipt: { signature: "R".repeat(43) },
         entitlements: {
-          features: ["suite.paid", "suite.believer"],
+          features: ["suite.paid", "suite.community", "suite.pro"],
           kind: "fresh",
         },
         profileComplete: true,

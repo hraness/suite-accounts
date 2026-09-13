@@ -24,16 +24,27 @@ function deepFreeze(value) {
 
 // src/identity/catalog.ts
 import { err, ok } from "@hraness/result";
-var SUITE_CATALOG_REVISION = "cclrte-suite-v3";
-var PREVIOUS_SUITE_CATALOG_REVISION = "cclrte-suite-v2";
-var LEGACY_SUITE_CATALOG_REVISION = "cclrte-suite-v1";
+var SUITE_CATALOG_REVISION = "hraness-suite-v4";
+var PREVIOUS_SUITE_CATALOG_REVISION = "cclrte-suite-v3";
+var LEGACY_SUITE_CATALOG_REVISION = "cclrte-suite-v2";
+var ARCHIVED_SUITE_CATALOG_REVISION = "cclrte-suite-v1";
 var SUITE_CATALOG_REVISIONS = deepFreeze([
+  ARCHIVED_SUITE_CATALOG_REVISION,
   LEGACY_SUITE_CATALOG_REVISION,
   PREVIOUS_SUITE_CATALOG_REVISION,
   SUITE_CATALOG_REVISION
 ]);
-var SUITE_PLAN_IDS = deepFreeze(["individual", "business"]);
+var SUITE_PLAN_IDS = deepFreeze(["community", "pro"]);
+var SUITE_HISTORICAL_PLAN_IDS = deepFreeze([
+  "individual",
+  "business"
+]);
 var SUITE_CURRENT_FEATURE_IDS = deepFreeze([
+  "suite.paid",
+  "suite.community",
+  "suite.pro"
+]);
+var SUITE_PREVIOUS_FEATURE_IDS = deepFreeze([
   "suite.paid",
   "suite.believer"
 ]);
@@ -43,10 +54,16 @@ var SUITE_LEGACY_FEATURE_IDS = deepFreeze([
 ]);
 var SUITE_FEATURE_IDS = deepFreeze([
   "suite.paid",
+  "suite.community",
+  "suite.pro",
   "suite.believer",
   "suite.business"
 ]);
 var CURRENT_PLAN_FEATURES = deepFreeze({
+  community: ["suite.paid", "suite.community"],
+  pro: ["suite.paid", "suite.community", "suite.pro"]
+});
+var PREVIOUS_PLAN_FEATURES = deepFreeze({
   business: ["suite.paid", "suite.believer"],
   individual: ["suite.paid"]
 });
@@ -54,20 +71,41 @@ var LEGACY_PLAN_FEATURES = deepFreeze({
   business: ["suite.paid", "suite.business"],
   individual: ["suite.paid"]
 });
-function parseSuitePlanId(value) {
-  return value === "individual" || value === "business" ? ok(value) : err("invalid-plan");
+function parseSuitePlanId(value, revision = SUITE_CATALOG_REVISION) {
+  const ids = revision === SUITE_CATALOG_REVISION ? SUITE_PLAN_IDS : SUITE_HISTORICAL_PLAN_IDS;
+  return typeof value === "string" && ids.includes(value) ? ok(value) : err("invalid-plan");
+}
+function parseAnySuitePlanId(value) {
+  return typeof value === "string" && [...SUITE_PLAN_IDS, ...SUITE_HISTORICAL_PLAN_IDS].includes(value) ? ok(value) : err("invalid-plan");
 }
 function parseCurrentSuiteFeatureId(value) {
-  return value === "suite.paid" || value === "suite.believer" ? ok(value) : err("invalid-feature");
+  return value === "suite.paid" || value === "suite.community" || value === "suite.pro" ? ok(value) : err("invalid-feature");
 }
 function parseSuiteFeatureId(value) {
   return typeof value === "string" && SUITE_FEATURE_IDS.includes(value) ? ok(value) : err("invalid-feature");
 }
 function parseSuiteCatalogRevision(value) {
-  return value === LEGACY_SUITE_CATALOG_REVISION || value === PREVIOUS_SUITE_CATALOG_REVISION || value === SUITE_CATALOG_REVISION ? ok(value) : err("invalid-catalog-revision");
+  return typeof value === "string" && SUITE_CATALOG_REVISIONS.includes(value) ? ok(value) : err("invalid-catalog-revision");
 }
 function featuresForSuitePlan(plan, revision = SUITE_CATALOG_REVISION) {
-  return revision === LEGACY_SUITE_CATALOG_REVISION ? [...LEGACY_PLAN_FEATURES[plan]] : [...CURRENT_PLAN_FEATURES[plan]];
+  const table = revision === SUITE_CATALOG_REVISION ? CURRENT_PLAN_FEATURES : revision === ARCHIVED_SUITE_CATALOG_REVISION ? LEGACY_PLAN_FEATURES : PREVIOUS_PLAN_FEATURES;
+  const features = table[plan];
+  return features === undefined ? [] : [...features];
+}
+function grantedSuiteFeatureSets(revision) {
+  if (revision === SUITE_CATALOG_REVISION) {
+    return deepFreeze([
+      [],
+      CURRENT_PLAN_FEATURES.community,
+      CURRENT_PLAN_FEATURES.pro
+    ]);
+  }
+  const table = revision === ARCHIVED_SUITE_CATALOG_REVISION ? LEGACY_PLAN_FEATURES : PREVIOUS_PLAN_FEATURES;
+  return deepFreeze([
+    [],
+    table.individual,
+    table.business
+  ]);
 }
 function suitePlanIncludesFeature(plan, feature) {
   return plan !== null && featuresForSuitePlan(plan).includes(feature);
@@ -408,20 +446,21 @@ function validateSuiteLinkReceipt(input, now) {
   }
   return null;
 }
-function exactCurrentFeatures(values) {
-  if (values.length > 2)
+function exactGrantedFeatures(revision, values) {
+  if (values.length > SUITE_FEATURE_IDS.length)
     return false;
   const parsed = [];
   for (const value of values) {
-    const feature = parseCurrentSuiteFeatureId(value);
+    const feature = parseSuiteFeatureId(value);
     if (!feature.ok || parsed.includes(feature.value))
       return false;
     parsed.push(feature.value);
   }
-  return parsed.length === 0 || parsed.length === 1 && parsed[0] === "suite.paid" || parsed.length === 2 && parsed[0] === "suite.paid" && parsed[1] === "suite.believer";
+  return grantedSuiteFeatureSets(revision).some((set) => set.length === parsed.length && set.every((feature, index) => feature === parsed[index]));
 }
 function validateSuiteEntitlementsClaim(input) {
-  return input.version === SUITE_ENTITLEMENTS_CLAIM_VERSION && input.catalogRevision === SUITE_CATALOG_REVISION && safeInteger(input.observedAtMs) && safeInteger(input.expiresAtMs) && input.expiresAtMs > input.observedAtMs && safeInteger(input.projectionRevision) && Array.isArray(input.features) && exactCurrentFeatures(input.features);
+  const catalogRevision = parseSuiteCatalogRevision(input.catalogRevision);
+  return input.version === SUITE_ENTITLEMENTS_CLAIM_VERSION && catalogRevision.ok && safeInteger(input.observedAtMs) && safeInteger(input.expiresAtMs) && input.expiresAtMs > input.observedAtMs && safeInteger(input.projectionRevision) && Array.isArray(input.features) && exactGrantedFeatures(catalogRevision.value, input.features);
 }
 function suiteEntitlementReceiptMessage(input) {
   return JSON.stringify([

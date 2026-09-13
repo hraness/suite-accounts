@@ -1,7 +1,10 @@
 import {
-  parseCurrentSuiteFeatureId,
-  SUITE_CATALOG_REVISION,
-  type CurrentSuiteFeatureId,
+  grantedSuiteFeatureSets,
+  parseSuiteCatalogRevision,
+  parseSuiteFeatureId,
+  SUITE_FEATURE_IDS,
+  type SuiteCatalogRevision,
+  type SuiteFeatureId,
 } from "./identity/catalog.js";
 import {
   parseSuiteJwtClaims,
@@ -14,9 +17,9 @@ export const SUITE_ENTITLEMENTS_CLAIM_VERSION =
 export const SUITE_ENTITLEMENT_MAX_PROVIDER_AGE_MS = 26 * 60 * 60_000;
 
 export type SuiteEntitlementsClaim = Readonly<{
-  catalogRevision: typeof SUITE_CATALOG_REVISION;
+  catalogRevision: SuiteCatalogRevision;
   expiresAtMs: number;
-  features: readonly CurrentSuiteFeatureId[];
+  features: readonly SuiteFeatureId[];
   observedAtMs: number;
   projectionRevision: number;
   version: typeof SUITE_ENTITLEMENTS_CLAIM_VERSION;
@@ -30,7 +33,7 @@ export type VerifiedSuiteEntitlements =
     }>
   | Readonly<{
       claim: SuiteEntitlementsClaim;
-      features: readonly CurrentSuiteFeatureId[];
+      features: readonly SuiteFeatureId[];
       kind: "fresh";
     }>
   | Readonly<{
@@ -60,8 +63,9 @@ export type SuiteJwtCryptographicVerifier =
   (compactToken: string) => Promise<unknown>;
 
 export type SuiteEntitlementReceiptProjection = Readonly<{
+  catalogRevision: SuiteCatalogRevision;
   expiresAtMs: number;
-  features: readonly CurrentSuiteFeatureId[];
+  features: readonly SuiteFeatureId[];
   observedAtMs: number;
   projectionRevision: number;
   receiptDigest?: string;
@@ -94,26 +98,23 @@ function nonNegativeInteger(value: unknown): value is number {
 }
 
 function canonicalFeatures(
-  features: readonly CurrentSuiteFeatureId[],
+  revision: SuiteCatalogRevision,
+  features: readonly SuiteFeatureId[],
 ): boolean {
-  return features.length === 0
-    || (
-      features.length === 1
-      && features[0] === "suite.paid"
-    )
-    || (
-      features.length === 2
-      && features[0] === "suite.paid"
-      && features[1] === "suite.believer"
-    );
+  return grantedSuiteFeatureSets(revision).some(set =>
+    set.length === features.length
+    && set.every((feature, index) => feature === features[index])
+  );
 }
 
 function validReceiptProjection(
   projection: SuiteEntitlementReceiptProjection,
 ): boolean {
-  return projection.suiteAccountId.length >= 1
+  const revision = parseSuiteCatalogRevision(projection.catalogRevision);
+  return revision.ok
+    && projection.suiteAccountId.length >= 1
     && projection.suiteAccountId.length <= 128
-    && canonicalFeatures(projection.features)
+    && canonicalFeatures(revision.value, projection.features)
     && nonNegativeInteger(projection.observedAtMs)
     && nonNegativeInteger(projection.expiresAtMs)
     && projection.expiresAtMs > projection.observedAtMs
@@ -127,8 +128,8 @@ function validReceiptProjection(
 }
 
 function sameFeatures(
-  left: readonly CurrentSuiteFeatureId[],
-  right: readonly CurrentSuiteFeatureId[],
+  left: readonly SuiteFeatureId[],
+  right: readonly SuiteFeatureId[],
 ): boolean {
   return left.length === right.length
     && left.every((feature, index) => feature === right[index]);
@@ -164,7 +165,8 @@ export function decideSuiteEntitlementReceiptProjection(
     return "replace";
   }
   return (
-      incoming.expiresAtMs === current.expiresAtMs
+      incoming.catalogRevision === current.catalogRevision
+      && incoming.expiresAtMs === current.expiresAtMs
       && incoming.observedAtMs === current.observedAtMs
       && sameFeatures(incoming.features, current.features)
       && incoming.receiptDigest === current.receiptDigest
@@ -177,26 +179,30 @@ function parseEntitlements(
   value: unknown,
 ): SuiteEntitlementsClaim | null {
   if (!isRecord(value)) return null;
+  const catalogRevision = parseSuiteCatalogRevision(value["catalogRevision"]);
   if (
     value["version"] !== SUITE_ENTITLEMENTS_CLAIM_VERSION
-    || value["catalogRevision"] !== SUITE_CATALOG_REVISION
+    || !catalogRevision.ok
     || !nonNegativeInteger(value["observedAtMs"])
     || !nonNegativeInteger(value["expiresAtMs"])
     || !nonNegativeInteger(value["projectionRevision"])
     || !Array.isArray(value["features"])
-    || value["features"].length > 16
+    || value["features"].length > SUITE_FEATURE_IDS.length
   ) {
     return null;
   }
-  const features: CurrentSuiteFeatureId[] = [];
+  const features: SuiteFeatureId[] = [];
   for (const valueFeature of value["features"]) {
-    const feature = parseCurrentSuiteFeatureId(valueFeature);
+    const feature = parseSuiteFeatureId(valueFeature);
     if (!feature.ok || features.includes(feature.value)) return null;
     features.push(feature.value);
   }
-  if (value["expiresAtMs"] <= value["observedAtMs"]) return null;
+  if (
+    value["expiresAtMs"] <= value["observedAtMs"]
+    || !canonicalFeatures(catalogRevision.value, features)
+  ) return null;
   return {
-    catalogRevision: SUITE_CATALOG_REVISION,
+    catalogRevision: catalogRevision.value,
     expiresAtMs: value["expiresAtMs"],
     features,
     observedAtMs: value["observedAtMs"],
@@ -303,7 +309,7 @@ export async function verifySuiteEntitlementToken(
 
 export function suiteTokenGrantsFeature(
   result: SuiteEntitlementTokenResult,
-  feature: CurrentSuiteFeatureId,
+  feature: SuiteFeatureId,
 ): boolean {
   return result.kind === "verified"
     && result.entitlements.kind === "fresh"

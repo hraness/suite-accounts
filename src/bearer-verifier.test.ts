@@ -60,7 +60,7 @@ async function signingFixture(kid = "accounts-es256-soundfish-1") {
       suite_entitlements: {
         catalogRevision: SUITE_CATALOG_REVISION,
         expiresAtMs: nowMs + 8 * 60_000,
-        features: ["suite.paid"],
+        features: ["suite.paid", "suite.community"],
         observedAtMs: nowMs - 1_000,
         projectionRevision: 7,
         version: "suite-entitlements-v1",
@@ -157,7 +157,7 @@ describe("suite bearer verifier", () => {
         username: "reader",
       },
       entitlements: {
-        features: ["suite.paid"],
+        features: ["suite.paid", "suite.community"],
         kind: "fresh",
       },
       kind: "verified",
