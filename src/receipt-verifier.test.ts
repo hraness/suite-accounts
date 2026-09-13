@@ -242,7 +242,7 @@ describe("suite receipt server helpers", () => {
       entitlements: {
         catalogRevision: SUITE_CATALOG_REVISION,
         expiresAtMs: nowMs + 8 * 60_000,
-        features: ["suite.paid"] as const,
+        features: ["suite.paid", "suite.community"] as const,
         observedAtMs: nowMs - 1_000,
         projectionRevision: 9,
         version: "suite-entitlements-v1",
@@ -318,7 +318,7 @@ describe("suite receipt server helpers", () => {
       entitlements: {
         catalogRevision: SUITE_CATALOG_REVISION,
         expiresAtMs: nowMs + 8 * 60_000,
-        features: ["suite.paid"] as const,
+        features: ["suite.paid", "suite.community"] as const,
         observedAtMs: nowMs - 1_000,
         projectionRevision: 9,
         version: "suite-entitlements-v1",

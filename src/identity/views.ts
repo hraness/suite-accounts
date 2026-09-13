@@ -3,14 +3,16 @@ import { deepFreeze } from "../immutable.js";
 
 import {
   featuresForSuitePlan,
+  parseAnySuitePlanId,
   parseSuiteCatalogRevision,
-  parseCurrentSuiteFeatureId,
+  parseSuiteFeatureId,
   parseSuitePlanId,
   SUITE_CATALOG_REVISION,
+  SUITE_FEATURE_IDS,
+  type AnySuitePlanId,
   type CurrentSuiteCatalogRevision,
-  type CurrentSuiteFeatureId,
   type SuiteCatalogRevision,
-  type SuitePlanId,
+  type SuiteFeatureId,
 } from "./catalog.js";
 import {
   parseSuiteAccountId,
@@ -48,7 +50,7 @@ export type SuiteSubscriptionView = {
   readonly cancelAtPeriodEnd: boolean;
   readonly catalogRevision: SuiteCatalogRevision;
   readonly currentPeriodEndMs: number | null;
-  readonly plan: SuitePlanId;
+  readonly plan: AnySuitePlanId;
   readonly status: SuiteSubscriptionStatus;
 };
 
@@ -66,10 +68,10 @@ export type SuiteAccountView = {
   readonly accountId: SuiteAccountId;
   readonly catalogRevision: CurrentSuiteCatalogRevision;
   readonly email: string;
-  readonly features: CurrentSuiteFeatureId[];
+  readonly features: SuiteFeatureId[];
   readonly invoices: SuiteInvoiceView[];
   readonly name: string | null;
-  readonly plan: SuitePlanId | null;
+  readonly plan: AnySuitePlanId | null;
   readonly subscription: SuiteSubscriptionView | null;
   readonly username: SuiteUsername | null;
 };
@@ -131,8 +133,10 @@ export function parseSuiteSubscriptionView(
   value: unknown,
 ): Result<SuiteSubscriptionView, "invalid-subscription-view"> {
   if (!isRecord(value)) return err("invalid-subscription-view");
-  const plan = parseSuitePlanId(value["plan"]);
   const catalogRevision = parseSuiteCatalogRevision(value["catalogRevision"]);
+  const plan = catalogRevision.ok
+    ? parseSuitePlanId(value["plan"], catalogRevision.value)
+    : catalogRevision;
   const currentPeriodEndMs = parseOptionalTimestamp(value["currentPeriodEndMs"]);
   if (
     !plan.ok ||
@@ -198,11 +202,13 @@ export function parseSuiteInvoiceView(
   });
 }
 
-function parseFeatures(value: unknown): CurrentSuiteFeatureId[] | null {
-  if (!Array.isArray(value) || value.length > 2) return null;
-  const parsed: CurrentSuiteFeatureId[] = [];
+function parseFeatures(value: unknown): SuiteFeatureId[] | null {
+  if (!Array.isArray(value) || value.length > SUITE_FEATURE_IDS.length) {
+    return null;
+  }
+  const parsed: SuiteFeatureId[] = [];
   for (const entry of value) {
-    const feature = parseCurrentSuiteFeatureId(entry);
+    const feature = parseSuiteFeatureId(entry);
     if (!feature.ok || parsed.includes(feature.value)) return null;
     parsed.push(feature.value);
   }
@@ -224,7 +230,7 @@ export function parseSuiteAccountView(
       ? ok(null)
       : parseSuiteSubscriptionView(value["subscription"]);
   const plan =
-    value["plan"] === null ? ok(null) : parseSuitePlanId(value["plan"]);
+    value["plan"] === null ? ok(null) : parseAnySuitePlanId(value["plan"]);
   const features = parseFeatures(value["features"]);
   if (
     !accountId.ok ||
@@ -248,7 +254,10 @@ export function parseSuiteAccountView(
   const planFeatures =
     subscription.value === null
       ? []
-      : featuresForSuitePlan(subscription.value.plan);
+      : featuresForSuitePlan(
+          subscription.value.plan,
+          subscription.value.catalogRevision,
+        );
   const exactPositiveGrant =
     statusCanGrant &&
     features.length === planFeatures.length &&

@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 
 import {
+  ARCHIVED_SUITE_CATALOG_REVISION,
   LEGACY_SUITE_CATALOG_REVISION,
   LEGACY_SUITE_CONSUMER_IDS,
   LEGACY_SUITE_LINK_PRODUCTS,
@@ -43,8 +44,9 @@ const exportedPolicyArrays = [
 ] as const;
 
 test("exported identity policy arrays cannot mutate canonical state", () => {
-  expect(LEGACY_SUITE_CATALOG_REVISION).toBe("cclrte-suite-v1");
-  expect(PREVIOUS_SUITE_CATALOG_REVISION).toBe("cclrte-suite-v2");
+  expect(ARCHIVED_SUITE_CATALOG_REVISION).toBe("cclrte-suite-v1");
+  expect(LEGACY_SUITE_CATALOG_REVISION).toBe("cclrte-suite-v2");
+  expect(PREVIOUS_SUITE_CATALOG_REVISION).toBe("cclrte-suite-v3");
   expect(SUITE_LEGACY_FEATURE_IDS.length).toBeGreaterThan(0);
 
   for (const policy of exportedPolicyArrays) {

@@ -260,16 +260,27 @@ function getSuiteAccountsDeployment(environment) {
 
 // src/identity/catalog.ts
 import { err as err2, ok as ok2 } from "@hraness/result";
-var SUITE_CATALOG_REVISION = "cclrte-suite-v3";
-var PREVIOUS_SUITE_CATALOG_REVISION = "cclrte-suite-v2";
-var LEGACY_SUITE_CATALOG_REVISION = "cclrte-suite-v1";
+var SUITE_CATALOG_REVISION = "hraness-suite-v4";
+var PREVIOUS_SUITE_CATALOG_REVISION = "cclrte-suite-v3";
+var LEGACY_SUITE_CATALOG_REVISION = "cclrte-suite-v2";
+var ARCHIVED_SUITE_CATALOG_REVISION = "cclrte-suite-v1";
 var SUITE_CATALOG_REVISIONS = deepFreeze([
+  ARCHIVED_SUITE_CATALOG_REVISION,
   LEGACY_SUITE_CATALOG_REVISION,
   PREVIOUS_SUITE_CATALOG_REVISION,
   SUITE_CATALOG_REVISION
 ]);
-var SUITE_PLAN_IDS = deepFreeze(["individual", "business"]);
+var SUITE_PLAN_IDS = deepFreeze(["community", "pro"]);
+var SUITE_HISTORICAL_PLAN_IDS = deepFreeze([
+  "individual",
+  "business"
+]);
 var SUITE_CURRENT_FEATURE_IDS = deepFreeze([
+  "suite.paid",
+  "suite.community",
+  "suite.pro"
+]);
+var SUITE_PREVIOUS_FEATURE_IDS = deepFreeze([
   "suite.paid",
   "suite.believer"
 ]);
@@ -279,10 +290,16 @@ var SUITE_LEGACY_FEATURE_IDS = deepFreeze([
 ]);
 var SUITE_FEATURE_IDS = deepFreeze([
   "suite.paid",
+  "suite.community",
+  "suite.pro",
   "suite.believer",
   "suite.business"
 ]);
 var CURRENT_PLAN_FEATURES = deepFreeze({
+  community: ["suite.paid", "suite.community"],
+  pro: ["suite.paid", "suite.community", "suite.pro"]
+});
+var PREVIOUS_PLAN_FEATURES = deepFreeze({
   business: ["suite.paid", "suite.believer"],
   individual: ["suite.paid"]
 });
@@ -290,20 +307,41 @@ var LEGACY_PLAN_FEATURES = deepFreeze({
   business: ["suite.paid", "suite.business"],
   individual: ["suite.paid"]
 });
-function parseSuitePlanId(value) {
-  return value === "individual" || value === "business" ? ok2(value) : err2("invalid-plan");
+function parseSuitePlanId(value, revision = SUITE_CATALOG_REVISION) {
+  const ids = revision === SUITE_CATALOG_REVISION ? SUITE_PLAN_IDS : SUITE_HISTORICAL_PLAN_IDS;
+  return typeof value === "string" && ids.includes(value) ? ok2(value) : err2("invalid-plan");
+}
+function parseAnySuitePlanId(value) {
+  return typeof value === "string" && [...SUITE_PLAN_IDS, ...SUITE_HISTORICAL_PLAN_IDS].includes(value) ? ok2(value) : err2("invalid-plan");
 }
 function parseCurrentSuiteFeatureId(value) {
-  return value === "suite.paid" || value === "suite.believer" ? ok2(value) : err2("invalid-feature");
+  return value === "suite.paid" || value === "suite.community" || value === "suite.pro" ? ok2(value) : err2("invalid-feature");
 }
 function parseSuiteFeatureId(value) {
   return typeof value === "string" && SUITE_FEATURE_IDS.includes(value) ? ok2(value) : err2("invalid-feature");
 }
 function parseSuiteCatalogRevision(value) {
-  return value === LEGACY_SUITE_CATALOG_REVISION || value === PREVIOUS_SUITE_CATALOG_REVISION || value === SUITE_CATALOG_REVISION ? ok2(value) : err2("invalid-catalog-revision");
+  return typeof value === "string" && SUITE_CATALOG_REVISIONS.includes(value) ? ok2(value) : err2("invalid-catalog-revision");
 }
 function featuresForSuitePlan(plan, revision = SUITE_CATALOG_REVISION) {
-  return revision === LEGACY_SUITE_CATALOG_REVISION ? [...LEGACY_PLAN_FEATURES[plan]] : [...CURRENT_PLAN_FEATURES[plan]];
+  const table = revision === SUITE_CATALOG_REVISION ? CURRENT_PLAN_FEATURES : revision === ARCHIVED_SUITE_CATALOG_REVISION ? LEGACY_PLAN_FEATURES : PREVIOUS_PLAN_FEATURES;
+  const features = table[plan];
+  return features === undefined ? [] : [...features];
+}
+function grantedSuiteFeatureSets(revision) {
+  if (revision === SUITE_CATALOG_REVISION) {
+    return deepFreeze([
+      [],
+      CURRENT_PLAN_FEATURES.community,
+      CURRENT_PLAN_FEATURES.pro
+    ]);
+  }
+  const table = revision === ARCHIVED_SUITE_CATALOG_REVISION ? LEGACY_PLAN_FEATURES : PREVIOUS_PLAN_FEATURES;
+  return deepFreeze([
+    [],
+    table.individual,
+    table.business
+  ]);
 }
 function suitePlanIncludesFeature(plan, feature) {
   return plan !== null && featuresForSuitePlan(plan).includes(feature);
@@ -645,20 +683,21 @@ function validateSuiteLinkReceipt(input, now) {
   }
   return null;
 }
-function exactCurrentFeatures(values) {
-  if (values.length > 2)
+function exactGrantedFeatures(revision, values) {
+  if (values.length > SUITE_FEATURE_IDS.length)
     return false;
   const parsed = [];
   for (const value of values) {
-    const feature = parseCurrentSuiteFeatureId(value);
+    const feature = parseSuiteFeatureId(value);
     if (!feature.ok || parsed.includes(feature.value))
       return false;
     parsed.push(feature.value);
   }
-  return parsed.length === 0 || parsed.length === 1 && parsed[0] === "suite.paid" || parsed.length === 2 && parsed[0] === "suite.paid" && parsed[1] === "suite.believer";
+  return grantedSuiteFeatureSets(revision).some((set) => set.length === parsed.length && set.every((feature, index) => feature === parsed[index]));
 }
 function validateSuiteEntitlementsClaim(input) {
-  return input.version === SUITE_ENTITLEMENTS_CLAIM_VERSION && input.catalogRevision === SUITE_CATALOG_REVISION && safeInteger(input.observedAtMs) && safeInteger(input.expiresAtMs) && input.expiresAtMs > input.observedAtMs && safeInteger(input.projectionRevision) && Array.isArray(input.features) && exactCurrentFeatures(input.features);
+  const catalogRevision = parseSuiteCatalogRevision(input.catalogRevision);
+  return input.version === SUITE_ENTITLEMENTS_CLAIM_VERSION && catalogRevision.ok && safeInteger(input.observedAtMs) && safeInteger(input.expiresAtMs) && input.expiresAtMs > input.observedAtMs && safeInteger(input.projectionRevision) && Array.isArray(input.features) && exactGrantedFeatures(catalogRevision.value, input.features);
 }
 function suiteEntitlementReceiptMessage(input) {
   return JSON.stringify([
@@ -1335,8 +1374,8 @@ function isOneOf(values, value) {
 function parseSuiteSubscriptionView(value) {
   if (!isRecord3(value))
     return err8("invalid-subscription-view");
-  const plan = parseSuitePlanId(value["plan"]);
   const catalogRevision = parseSuiteCatalogRevision(value["catalogRevision"]);
+  const plan = catalogRevision.ok ? parseSuitePlanId(value["plan"], catalogRevision.value) : catalogRevision;
   const currentPeriodEndMs = parseOptionalTimestamp(value["currentPeriodEndMs"]);
   if (!plan.ok || !catalogRevision.ok || !isOneOf(SUITE_SUBSCRIPTION_STATUSES, value["status"]) || typeof value["cancelAtPeriodEnd"] !== "boolean" || currentPeriodEndMs === undefined) {
     return err8("invalid-subscription-view");
@@ -1372,11 +1411,12 @@ function parseSuiteInvoiceView(value) {
   });
 }
 function parseFeatures(value) {
-  if (!Array.isArray(value) || value.length > 2)
+  if (!Array.isArray(value) || value.length > SUITE_FEATURE_IDS.length) {
     return null;
+  }
   const parsed = [];
   for (const entry of value) {
-    const feature = parseCurrentSuiteFeatureId(entry);
+    const feature = parseSuiteFeatureId(entry);
     if (!feature.ok || parsed.includes(feature.value))
       return null;
     parsed.push(feature.value);
@@ -1391,13 +1431,13 @@ function parseSuiteAccountView(value) {
   const name = parseOptionalName(value["name"]);
   const username = value["username"] === null || value["username"] === undefined ? ok9(null) : parseSuiteUsername(value["username"]);
   const subscription = value["subscription"] === null ? ok9(null) : parseSuiteSubscriptionView(value["subscription"]);
-  const plan = value["plan"] === null ? ok9(null) : parseSuitePlanId(value["plan"]);
+  const plan = value["plan"] === null ? ok9(null) : parseAnySuitePlanId(value["plan"]);
   const features = parseFeatures(value["features"]);
   if (!accountId.ok || value["catalogRevision"] !== SUITE_CATALOG_REVISION || email === null || name === undefined || !username.ok || !subscription.ok || !plan.ok || features === null || !Array.isArray(value["invoices"]) || value["invoices"].length > 100 || plan.value !== (subscription.value?.plan ?? null)) {
     return err8("invalid-account-view");
   }
   const statusCanGrant = subscription.value !== null && (subscription.value.status === "active" || subscription.value.status === "trialing");
-  const planFeatures = subscription.value === null ? [] : featuresForSuitePlan(subscription.value.plan);
+  const planFeatures = subscription.value === null ? [] : featuresForSuitePlan(subscription.value.plan, subscription.value.catalogRevision);
   const exactPositiveGrant = statusCanGrant && features.length === planFeatures.length && features.every((feature, index) => feature === planFeatures[index]);
   if (features.length > 0 && !exactPositiveGrant) {
     return err8("invalid-account-view");
@@ -1458,10 +1498,12 @@ export {
   parseIdentitySubject,
   parseIdentityIssuer,
   parseCurrentSuiteFeatureId,
+  parseAnySuitePlanId,
   normalizeSuiteUsername,
   normalizeSuiteProfileLinkV2,
   normalizeSuiteProfileLink,
   isSuiteIssuableEnvironment,
+  grantedSuiteFeatureSets,
   generateSuiteInvoiceRef,
   generateSuiteAccountId,
   featuresForSuitePlan,
@@ -1472,11 +1514,13 @@ export {
   SUITE_PROFILE_NAME_MAX_LENGTH,
   SUITE_PROFILE_BIO_MAX_LENGTH,
   SUITE_PRODUCTS,
+  SUITE_PREVIOUS_FEATURE_IDS,
   SUITE_PLAN_IDS,
   SUITE_LINK_PRODUCTS,
   SUITE_LEGACY_FEATURE_IDS,
   SUITE_ISSUABLE_ENVIRONMENTS,
   SUITE_INVOICE_STATUSES,
+  SUITE_HISTORICAL_PLAN_IDS,
   SUITE_FEATURE_IDS,
   SUITE_ENVIRONMENTS,
   SUITE_ENTITLEMENT_RECEIPT_VERSION,
@@ -1495,5 +1539,6 @@ export {
   IDENTITY_LINK_RECEIPT_VERSION,
   IDENTITY_LINK_PROOF_VERSION,
   IDENTITY_LINK_MAX_TTL_MS,
-  IDENTITY_LINK_CLOCK_SKEW_MS
+  IDENTITY_LINK_CLOCK_SKEW_MS,
+  ARCHIVED_SUITE_CATALOG_REVISION
 };

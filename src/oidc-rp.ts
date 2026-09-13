@@ -1,7 +1,7 @@
 import {
-  parseCurrentSuiteFeatureId,
-  SUITE_CATALOG_REVISION,
-  type CurrentSuiteFeatureId,
+  parseSuiteCatalogRevision,
+  parseSuiteFeatureId,
+  type SuiteFeatureId,
 } from "./identity/catalog.js";
 import {
   parseSuiteAccountId,
@@ -150,7 +150,7 @@ type StoredSession = Readonly<{
 type SuiteOidcSessionViewBase = Readonly<{
   entitlementReceipt: SuiteEntitlementReceipt | null;
   entitlements: Readonly<{
-    features: readonly ("suite.believer" | "suite.paid")[];
+    features: readonly SuiteFeatureId[];
     kind: "fresh" | "legacy" | "stale";
   }>;
   suiteAccountId: SuiteAccountId;
@@ -501,9 +501,9 @@ function parseFreshAuthenticationInput(
 
 function parseStoredEntitlements(value: unknown): VerifiedSuiteEntitlements | null {
   if (!isRecord(value) || !Array.isArray(value["features"])) return null;
-  const features: CurrentSuiteFeatureId[] = [];
+  const features: SuiteFeatureId[] = [];
   for (const rawFeature of value["features"]) {
-    const feature = parseCurrentSuiteFeatureId(rawFeature);
+    const feature = parseSuiteFeatureId(rawFeature);
     if (!feature.ok || features.includes(feature.value)) return null;
     features.push(feature.value);
   }
@@ -514,10 +514,14 @@ function parseStoredEntitlements(value: unknown): VerifiedSuiteEntitlements | nu
   }
   if (value["kind"] !== "fresh" && value["kind"] !== "stale") return null;
   const claim = value["claim"];
+  const catalogRevision = isRecord(claim)
+    ? parseSuiteCatalogRevision(claim["catalogRevision"])
+    : null;
   if (
     !isRecord(claim)
     || claim["version"] !== "suite-entitlements-v1"
-    || claim["catalogRevision"] !== SUITE_CATALOG_REVISION
+    || catalogRevision === null
+    || !catalogRevision.ok
     || !safeInteger(claim["observedAtMs"])
     || !safeInteger(claim["expiresAtMs"])
     || !safeInteger(claim["projectionRevision"])
@@ -525,9 +529,9 @@ function parseStoredEntitlements(value: unknown): VerifiedSuiteEntitlements | nu
   ) {
     return null;
   }
-  const claimFeatures: CurrentSuiteFeatureId[] = [];
+  const claimFeatures: SuiteFeatureId[] = [];
   for (const rawFeature of claim["features"]) {
-    const feature = parseCurrentSuiteFeatureId(rawFeature);
+    const feature = parseSuiteFeatureId(rawFeature);
     if (!feature.ok || claimFeatures.includes(feature.value)) return null;
     claimFeatures.push(feature.value);
   }
@@ -544,7 +548,7 @@ function parseStoredEntitlements(value: unknown): VerifiedSuiteEntitlements | nu
     return null;
   }
   const parsedClaim: SuiteEntitlementsClaim = {
-    catalogRevision: SUITE_CATALOG_REVISION,
+    catalogRevision: catalogRevision.value,
     expiresAtMs: claim["expiresAtMs"],
     features: claimFeatures,
     observedAtMs: claim["observedAtMs"],

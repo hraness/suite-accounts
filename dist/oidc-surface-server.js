@@ -328,16 +328,27 @@ var SUITE_OIDC_EARLY_REFRESH_WINDOW_MS = 30000;
 
 // src/identity/catalog.ts
 import { err as err2, ok as ok2 } from "@hraness/result";
-var SUITE_CATALOG_REVISION = "cclrte-suite-v3";
-var PREVIOUS_SUITE_CATALOG_REVISION = "cclrte-suite-v2";
-var LEGACY_SUITE_CATALOG_REVISION = "cclrte-suite-v1";
+var SUITE_CATALOG_REVISION = "hraness-suite-v4";
+var PREVIOUS_SUITE_CATALOG_REVISION = "cclrte-suite-v3";
+var LEGACY_SUITE_CATALOG_REVISION = "cclrte-suite-v2";
+var ARCHIVED_SUITE_CATALOG_REVISION = "cclrte-suite-v1";
 var SUITE_CATALOG_REVISIONS = deepFreeze([
+  ARCHIVED_SUITE_CATALOG_REVISION,
   LEGACY_SUITE_CATALOG_REVISION,
   PREVIOUS_SUITE_CATALOG_REVISION,
   SUITE_CATALOG_REVISION
 ]);
-var SUITE_PLAN_IDS = deepFreeze(["individual", "business"]);
+var SUITE_PLAN_IDS = deepFreeze(["community", "pro"]);
+var SUITE_HISTORICAL_PLAN_IDS = deepFreeze([
+  "individual",
+  "business"
+]);
 var SUITE_CURRENT_FEATURE_IDS = deepFreeze([
+  "suite.paid",
+  "suite.community",
+  "suite.pro"
+]);
+var SUITE_PREVIOUS_FEATURE_IDS = deepFreeze([
   "suite.paid",
   "suite.believer"
 ]);
@@ -347,10 +358,16 @@ var SUITE_LEGACY_FEATURE_IDS = deepFreeze([
 ]);
 var SUITE_FEATURE_IDS = deepFreeze([
   "suite.paid",
+  "suite.community",
+  "suite.pro",
   "suite.believer",
   "suite.business"
 ]);
 var CURRENT_PLAN_FEATURES = deepFreeze({
+  community: ["suite.paid", "suite.community"],
+  pro: ["suite.paid", "suite.community", "suite.pro"]
+});
+var PREVIOUS_PLAN_FEATURES = deepFreeze({
   business: ["suite.paid", "suite.believer"],
   individual: ["suite.paid"]
 });
@@ -358,20 +375,41 @@ var LEGACY_PLAN_FEATURES = deepFreeze({
   business: ["suite.paid", "suite.business"],
   individual: ["suite.paid"]
 });
-function parseSuitePlanId(value) {
-  return value === "individual" || value === "business" ? ok2(value) : err2("invalid-plan");
+function parseSuitePlanId(value, revision = SUITE_CATALOG_REVISION) {
+  const ids = revision === SUITE_CATALOG_REVISION ? SUITE_PLAN_IDS : SUITE_HISTORICAL_PLAN_IDS;
+  return typeof value === "string" && ids.includes(value) ? ok2(value) : err2("invalid-plan");
+}
+function parseAnySuitePlanId(value) {
+  return typeof value === "string" && [...SUITE_PLAN_IDS, ...SUITE_HISTORICAL_PLAN_IDS].includes(value) ? ok2(value) : err2("invalid-plan");
 }
 function parseCurrentSuiteFeatureId(value) {
-  return value === "suite.paid" || value === "suite.believer" ? ok2(value) : err2("invalid-feature");
+  return value === "suite.paid" || value === "suite.community" || value === "suite.pro" ? ok2(value) : err2("invalid-feature");
 }
 function parseSuiteFeatureId(value) {
   return typeof value === "string" && SUITE_FEATURE_IDS.includes(value) ? ok2(value) : err2("invalid-feature");
 }
 function parseSuiteCatalogRevision(value) {
-  return value === LEGACY_SUITE_CATALOG_REVISION || value === PREVIOUS_SUITE_CATALOG_REVISION || value === SUITE_CATALOG_REVISION ? ok2(value) : err2("invalid-catalog-revision");
+  return typeof value === "string" && SUITE_CATALOG_REVISIONS.includes(value) ? ok2(value) : err2("invalid-catalog-revision");
 }
 function featuresForSuitePlan(plan, revision = SUITE_CATALOG_REVISION) {
-  return revision === LEGACY_SUITE_CATALOG_REVISION ? [...LEGACY_PLAN_FEATURES[plan]] : [...CURRENT_PLAN_FEATURES[plan]];
+  const table = revision === SUITE_CATALOG_REVISION ? CURRENT_PLAN_FEATURES : revision === ARCHIVED_SUITE_CATALOG_REVISION ? LEGACY_PLAN_FEATURES : PREVIOUS_PLAN_FEATURES;
+  const features = table[plan];
+  return features === undefined ? [] : [...features];
+}
+function grantedSuiteFeatureSets(revision) {
+  if (revision === SUITE_CATALOG_REVISION) {
+    return deepFreeze([
+      [],
+      CURRENT_PLAN_FEATURES.community,
+      CURRENT_PLAN_FEATURES.pro
+    ]);
+  }
+  const table = revision === ARCHIVED_SUITE_CATALOG_REVISION ? LEGACY_PLAN_FEATURES : PREVIOUS_PLAN_FEATURES;
+  return deepFreeze([
+    [],
+    table.individual,
+    table.business
+  ]);
 }
 function suitePlanIncludesFeature(plan, feature) {
   return plan !== null && featuresForSuitePlan(plan).includes(feature);
@@ -642,11 +680,12 @@ function isRecord2(value) {
 function nonNegativeInteger(value) {
   return Number.isSafeInteger(value) && typeof value === "number" && value >= 0;
 }
-function canonicalFeatures(features) {
-  return features.length === 0 || features.length === 1 && features[0] === "suite.paid" || features.length === 2 && features[0] === "suite.paid" && features[1] === "suite.believer";
+function canonicalFeatures(revision, features) {
+  return grantedSuiteFeatureSets(revision).some((set) => set.length === features.length && set.every((feature, index) => feature === features[index]));
 }
 function validReceiptProjection(projection) {
-  return projection.suiteAccountId.length >= 1 && projection.suiteAccountId.length <= 128 && canonicalFeatures(projection.features) && nonNegativeInteger(projection.observedAtMs) && nonNegativeInteger(projection.expiresAtMs) && projection.expiresAtMs > projection.observedAtMs && nonNegativeInteger(projection.projectionRevision) && nonNegativeInteger(projection.receiptIssuedAtMs) && projection.receiptIssuedAtMs < projection.expiresAtMs && (projection.receiptDigest === undefined || /^[a-f0-9]{64}$/u.test(projection.receiptDigest));
+  const revision = parseSuiteCatalogRevision(projection.catalogRevision);
+  return revision.ok && projection.suiteAccountId.length >= 1 && projection.suiteAccountId.length <= 128 && canonicalFeatures(revision.value, projection.features) && nonNegativeInteger(projection.observedAtMs) && nonNegativeInteger(projection.expiresAtMs) && projection.expiresAtMs > projection.observedAtMs && nonNegativeInteger(projection.projectionRevision) && nonNegativeInteger(projection.receiptIssuedAtMs) && projection.receiptIssuedAtMs < projection.expiresAtMs && (projection.receiptDigest === undefined || /^[a-f0-9]{64}$/u.test(projection.receiptDigest));
 }
 function sameFeatures(left, right) {
   return left.length === right.length && left.every((feature, index) => feature === right[index]);
@@ -662,25 +701,26 @@ function decideSuiteEntitlementReceiptProjection(current, incoming) {
   if (incoming.projectionRevision > current.projectionRevision || incoming.receiptIssuedAtMs > current.receiptIssuedAtMs) {
     return "replace";
   }
-  return incoming.expiresAtMs === current.expiresAtMs && incoming.observedAtMs === current.observedAtMs && sameFeatures(incoming.features, current.features) && incoming.receiptDigest === current.receiptDigest ? "replay" : "conflict";
+  return incoming.catalogRevision === current.catalogRevision && incoming.expiresAtMs === current.expiresAtMs && incoming.observedAtMs === current.observedAtMs && sameFeatures(incoming.features, current.features) && incoming.receiptDigest === current.receiptDigest ? "replay" : "conflict";
 }
 function parseEntitlements(value) {
   if (!isRecord2(value))
     return null;
-  if (value["version"] !== SUITE_ENTITLEMENTS_CLAIM_VERSION || value["catalogRevision"] !== SUITE_CATALOG_REVISION || !nonNegativeInteger(value["observedAtMs"]) || !nonNegativeInteger(value["expiresAtMs"]) || !nonNegativeInteger(value["projectionRevision"]) || !Array.isArray(value["features"]) || value["features"].length > 16) {
+  const catalogRevision = parseSuiteCatalogRevision(value["catalogRevision"]);
+  if (value["version"] !== SUITE_ENTITLEMENTS_CLAIM_VERSION || !catalogRevision.ok || !nonNegativeInteger(value["observedAtMs"]) || !nonNegativeInteger(value["expiresAtMs"]) || !nonNegativeInteger(value["projectionRevision"]) || !Array.isArray(value["features"]) || value["features"].length > SUITE_FEATURE_IDS.length) {
     return null;
   }
   const features = [];
   for (const valueFeature of value["features"]) {
-    const feature = parseCurrentSuiteFeatureId(valueFeature);
+    const feature = parseSuiteFeatureId(valueFeature);
     if (!feature.ok || features.includes(feature.value))
       return null;
     features.push(feature.value);
   }
-  if (value["expiresAtMs"] <= value["observedAtMs"])
+  if (value["expiresAtMs"] <= value["observedAtMs"] || !canonicalFeatures(catalogRevision.value, features))
     return null;
   return {
-    catalogRevision: SUITE_CATALOG_REVISION,
+    catalogRevision: catalogRevision.value,
     expiresAtMs: value["expiresAtMs"],
     features,
     observedAtMs: value["observedAtMs"],
@@ -837,20 +877,21 @@ function validateSuiteLinkReceipt(input, now) {
   }
   return null;
 }
-function exactCurrentFeatures(values) {
-  if (values.length > 2)
+function exactGrantedFeatures(revision, values) {
+  if (values.length > SUITE_FEATURE_IDS.length)
     return false;
   const parsed = [];
   for (const value of values) {
-    const feature = parseCurrentSuiteFeatureId(value);
+    const feature = parseSuiteFeatureId(value);
     if (!feature.ok || parsed.includes(feature.value))
       return false;
     parsed.push(feature.value);
   }
-  return parsed.length === 0 || parsed.length === 1 && parsed[0] === "suite.paid" || parsed.length === 2 && parsed[0] === "suite.paid" && parsed[1] === "suite.believer";
+  return grantedSuiteFeatureSets(revision).some((set) => set.length === parsed.length && set.every((feature, index) => feature === parsed[index]));
 }
 function validateSuiteEntitlementsClaim(input) {
-  return input.version === SUITE_ENTITLEMENTS_CLAIM_VERSION2 && input.catalogRevision === SUITE_CATALOG_REVISION && safeInteger(input.observedAtMs) && safeInteger(input.expiresAtMs) && input.expiresAtMs > input.observedAtMs && safeInteger(input.projectionRevision) && Array.isArray(input.features) && exactCurrentFeatures(input.features);
+  const catalogRevision = parseSuiteCatalogRevision(input.catalogRevision);
+  return input.version === SUITE_ENTITLEMENTS_CLAIM_VERSION2 && catalogRevision.ok && safeInteger(input.observedAtMs) && safeInteger(input.expiresAtMs) && input.expiresAtMs > input.observedAtMs && safeInteger(input.projectionRevision) && Array.isArray(input.features) && exactGrantedFeatures(catalogRevision.value, input.features);
 }
 function suiteEntitlementReceiptMessage(input) {
   return JSON.stringify([
@@ -1106,7 +1147,7 @@ function parseStoredEntitlements(value) {
     return null;
   const features = [];
   for (const rawFeature of value["features"]) {
-    const feature = parseCurrentSuiteFeatureId(rawFeature);
+    const feature = parseSuiteFeatureId(rawFeature);
     if (!feature.ok || features.includes(feature.value))
       return null;
     features.push(feature.value);
@@ -1117,12 +1158,13 @@ function parseStoredEntitlements(value) {
   if (value["kind"] !== "fresh" && value["kind"] !== "stale")
     return null;
   const claim = value["claim"];
-  if (!isRecord3(claim) || claim["version"] !== "suite-entitlements-v1" || claim["catalogRevision"] !== SUITE_CATALOG_REVISION || !safeInteger2(claim["observedAtMs"]) || !safeInteger2(claim["expiresAtMs"]) || !safeInteger2(claim["projectionRevision"]) || !Array.isArray(claim["features"])) {
+  const catalogRevision = isRecord3(claim) ? parseSuiteCatalogRevision(claim["catalogRevision"]) : null;
+  if (!isRecord3(claim) || claim["version"] !== "suite-entitlements-v1" || catalogRevision === null || !catalogRevision.ok || !safeInteger2(claim["observedAtMs"]) || !safeInteger2(claim["expiresAtMs"]) || !safeInteger2(claim["projectionRevision"]) || !Array.isArray(claim["features"])) {
     return null;
   }
   const claimFeatures = [];
   for (const rawFeature of claim["features"]) {
-    const feature = parseCurrentSuiteFeatureId(rawFeature);
+    const feature = parseSuiteFeatureId(rawFeature);
     if (!feature.ok || claimFeatures.includes(feature.value))
       return null;
     claimFeatures.push(feature.value);
@@ -1131,7 +1173,7 @@ function parseStoredEntitlements(value) {
     return null;
   }
   const parsedClaim = {
-    catalogRevision: SUITE_CATALOG_REVISION,
+    catalogRevision: catalogRevision.value,
     expiresAtMs: claim["expiresAtMs"],
     features: claimFeatures,
     observedAtMs: claim["observedAtMs"],

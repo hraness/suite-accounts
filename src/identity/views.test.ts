@@ -26,7 +26,7 @@ const view: SuiteAccountView = {
   accountId: parsedAccountId.value,
   catalogRevision: SUITE_CATALOG_REVISION,
   email: "reader@example.com",
-  features: ["suite.paid"],
+  features: ["suite.paid", "suite.community"],
   invoices: [
     {
       amountDueCents: 1_000,
@@ -39,12 +39,12 @@ const view: SuiteAccountView = {
     },
   ],
   name: null,
-  plan: "individual",
+  plan: "community",
   subscription: {
     cancelAtPeriodEnd: false,
     catalogRevision: SUITE_CATALOG_REVISION,
     currentPeriodEndMs: 1_802_678_400_000,
-    plan: "individual",
+    plan: "community",
     status: "active",
   },
   username: parsedUsername.value,
@@ -90,9 +90,12 @@ describe("suite account views", () => {
   test("retains the exact subscription catalog while projecting current grants", () => {
     const previousSubscription: SuiteAccountView = {
       ...view,
+      features: ["suite.paid"],
+      plan: "individual",
       subscription: {
         ...view.subscription!,
         catalogRevision: "cclrte-suite-v2",
+        plan: "individual",
       },
     };
     expect(parseSuiteAccountView(previousSubscription)).toEqual({
@@ -106,13 +109,28 @@ describe("suite account views", () => {
       plan: "business",
       subscription: {
         ...view.subscription!,
-        catalogRevision: "cclrte-suite-v1",
+        catalogRevision: "cclrte-suite-v3",
         plan: "business",
       },
     };
     expect(parseSuiteAccountView(legacyFan)).toEqual({
       ok: true,
       value: legacyFan,
+    });
+
+    const archivedBusiness: SuiteAccountView = {
+      ...view,
+      features: ["suite.paid", "suite.business"],
+      plan: "business",
+      subscription: {
+        ...view.subscription!,
+        catalogRevision: "cclrte-suite-v1",
+        plan: "business",
+      },
+    };
+    expect(parseSuiteAccountView(archivedBusiness)).toEqual({
+      ok: true,
+      value: archivedBusiness,
     });
   });
 

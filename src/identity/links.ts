@@ -2,10 +2,12 @@ import { ok, type Result } from "@hraness/result";
 import { deepFreeze } from "../immutable.js";
 
 import {
-  parseCurrentSuiteFeatureId,
-  SUITE_CATALOG_REVISION,
-  type CurrentSuiteCatalogRevision,
-  type CurrentSuiteFeatureId,
+  grantedSuiteFeatureSets,
+  parseSuiteCatalogRevision,
+  parseSuiteFeatureId,
+  SUITE_FEATURE_IDS,
+  type SuiteCatalogRevision,
+  type SuiteFeatureId,
 } from "./catalog.js";
 import { parseSuiteAccountId, type SuiteAccountId } from "./identifiers.js";
 import {
@@ -84,9 +86,9 @@ export type SuiteLinkReceipt = SuiteLinkReceiptPayload & Readonly<{
 }>;
 
 export type SuiteEntitlementsClaim = Readonly<{
-  catalogRevision: CurrentSuiteCatalogRevision;
+  catalogRevision: SuiteCatalogRevision;
   expiresAtMs: number;
-  features: readonly CurrentSuiteFeatureId[];
+  features: readonly SuiteFeatureId[];
   observedAtMs: number;
   projectionRevision: number;
   version: typeof SUITE_ENTITLEMENTS_CLAIM_VERSION;
@@ -189,42 +191,36 @@ export function validateSuiteLinkReceipt(
   return null;
 }
 
-function exactCurrentFeatures(
-  values: readonly CurrentSuiteFeatureId[],
+function exactGrantedFeatures(
+  revision: SuiteCatalogRevision,
+  values: readonly SuiteFeatureId[],
 ): boolean {
-  if (values.length > 2) return false;
-  const parsed: CurrentSuiteFeatureId[] = [];
+  if (values.length > SUITE_FEATURE_IDS.length) return false;
+  const parsed: SuiteFeatureId[] = [];
   for (const value of values) {
-    const feature = parseCurrentSuiteFeatureId(value);
+    const feature = parseSuiteFeatureId(value);
     if (!feature.ok || parsed.includes(feature.value)) return false;
     parsed.push(feature.value);
   }
-  return (
-    parsed.length === 0
-    || (
-      parsed.length === 1
-      && parsed[0] === "suite.paid"
-    )
-    || (
-      parsed.length === 2
-      && parsed[0] === "suite.paid"
-      && parsed[1] === "suite.believer"
-    )
+  return grantedSuiteFeatureSets(revision).some(set =>
+    set.length === parsed.length
+    && set.every((feature, index) => feature === parsed[index])
   );
 }
 
 export function validateSuiteEntitlementsClaim(
   input: SuiteEntitlementsClaim,
 ): boolean {
+  const catalogRevision = parseSuiteCatalogRevision(input.catalogRevision);
   return (
     input.version === SUITE_ENTITLEMENTS_CLAIM_VERSION
-    && input.catalogRevision === SUITE_CATALOG_REVISION
+    && catalogRevision.ok
     && safeInteger(input.observedAtMs)
     && safeInteger(input.expiresAtMs)
     && input.expiresAtMs > input.observedAtMs
     && safeInteger(input.projectionRevision)
     && Array.isArray(input.features)
-    && exactCurrentFeatures(input.features)
+    && exactGrantedFeatures(catalogRevision.value, input.features)
   );
 }
 
