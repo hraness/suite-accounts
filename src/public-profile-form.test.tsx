@@ -33,6 +33,27 @@ test("public editor uses native labeled fields without sign-in or avatar control
   expect(html).toContain("suite-public-profile-form");
 });
 
+test("link fields render prefixed icon affordances behind a closed group when empty", () => {
+  const html = render();
+  for (const prefix of ["x.com/", "github.com/", "linkedin.com/in/", "bsky.app/profile/", "instagram.com/", "t.me/", "https://"]) {
+    expect(html).toContain(`>${prefix}</span>`);
+  }
+  expect(html).toContain('placeholder="Ada Lovelace"');
+  expect(html).toContain('placeholder="A short introduction."');
+  expect(html).toContain("optional — a handle is enough");
+  expect(html).toContain("<summary");
+  expect(html).not.toMatch(/<details[^>]*\bopen\b/u);
+  expect(html).not.toContain("style=");
+});
+
+test("saved link values render the link group open", () => {
+  const html = render(profile({
+    links: { x: "https://x.com/reader", github: null, linkedin: null, website: null, bluesky: null, instagram: null, telegram: null },
+  }));
+  expect(html).toMatch(/<details[^>]*\bopen\b/u);
+  expect(html).toContain('value="https://x.com/reader"');
+});
+
 test("SSR is hydration-closed and has no native private-field submission names", () => {
   const html = render(profile({ name: "PRIVATE_DRAFT_CANARY", bio: "PRIVATE_BIO_CANARY" }));
   expect(html).toContain('method="post"');
@@ -42,7 +63,7 @@ test("SSR is hydration-closed and has no native private-field submission names",
   for (const field of ["name", "bio", "x", "github", "linkedin", "website", "bluesky", "instagram", "telegram"]) {
     expect(html).not.toContain(`name="${field}"`);
   }
-  const textControls = html.match(/<(?:input|textarea)\b[^>]*(?:type="text"|rows="4")[^>]*>/gu) ?? [];
+  const textControls = html.match(/<(?:input|textarea)\b[^>]*(?:type="text"|rows="3")[^>]*>/gu) ?? [];
   expect(textControls).toHaveLength(9);
   for (const control of textControls) expect(control).toContain("disabled");
   expect(html).toMatch(/<fieldset[^>]*disabled/u);

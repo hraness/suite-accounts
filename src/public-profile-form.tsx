@@ -12,6 +12,11 @@ import {
 } from "./identity/profiles-v2.js";
 import { profileFormClasses as classes } from "./profile-form.stylex.js";
 import { parsePublicProfileFormResult } from "./public-profile-form-result.js";
+import {
+  expandSuiteProfileLinkInput,
+  SUITE_PROFILE_LINK_AFFORDANCES,
+  type SuiteProfileLinkGlyph,
+} from "./public-profile-links.js";
 
 export type { PublicProfileFormResult as SuitePublicProfileFormResult } from "./public-profile-form-result.js";
 
@@ -30,9 +35,36 @@ type FieldErrors = Partial<Record<SuiteProfileV2Issue["field"], string>>;
 
 const LINK_FIELDS = [
   ["x", "X"], ["github", "GitHub"], ["linkedin", "LinkedIn"],
-  ["website", "Website"], ["bluesky", "Bluesky"],
-  ["instagram", "Instagram"], ["telegram", "Telegram"],
+  ["bluesky", "Bluesky"], ["instagram", "Instagram"],
+  ["telegram", "Telegram"], ["website", "Website"],
 ] as const satisfies readonly (readonly [SuiteProfileLinkKeyV2, string])[];
+
+function expandedLinks(links: LinkInputs): LinkInputs {
+  const expanded = { ...links };
+  for (const key of Object.keys(expanded) as SuiteProfileLinkKeyV2[]) {
+    expanded[key] = expandSuiteProfileLinkInput(key, links[key]);
+  }
+  return expanded;
+}
+
+function LinkMark({ glyph }: { readonly glyph: SuiteProfileLinkGlyph }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={classes.mark}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      viewBox="0 0 24 24"
+    >
+      {glyph.map(([tag, attrs], index) => tag === "circle"
+        ? <circle key={index} {...attrs} />
+        : <path key={index} {...attrs} />)}
+    </svg>
+  );
+}
 
 function linkInputs(profile: SuiteProfileEditorV2): LinkInputs {
   return {
@@ -73,6 +105,8 @@ function PublicProfileEditor({ className, initialProfile, onSave, onSaved }: Sui
   const [name, setName] = useState(initialProfile.name);
   const [bio, setBio] = useState(initialProfile.bio);
   const [links, setLinks] = useState(() => linkInputs(initialProfile));
+  const [linksOpen, setLinksOpen] = useState(() =>
+    Object.values(linkInputs(initialProfile)).some(value => value !== ""));
   const [visibility, setVisibility] = useState<Visibility>(initialProfile.publication === "published" ? "publish" : "private");
   const [pending, setPending] = useState(false);
   const [ready, setReady] = useState(false);
@@ -86,6 +120,7 @@ function PublicProfileEditor({ className, initialProfile, onSave, onSaved }: Sui
   const abandoned = useRef(false);
   const nameControl = useRef<HTMLInputElement>(null);
   const focusLoadedProfile = useRef(false);
+  const pendingFocus = useRef<SuiteProfileV2Issue["field"] | null>(null);
   // A DOM ref detaches during commit, before a retired transport can resolve
   // in the gap before passive-effect cleanup. Reconnection never resends it.
   const attachForm = useCallback((node: HTMLFormElement | null) => {
@@ -109,6 +144,12 @@ function PublicProfileEditor({ className, initialProfile, onSave, onSaved }: Sui
       nameControl.current?.focus();
     }
   }, [conflict]);
+  useEffect(() => {
+    const field = pendingFocus.current;
+    if (field === null) return;
+    pendingFocus.current = null;
+    liveForm.current?.querySelector<HTMLElement>(`[id="${id}-${field}"]`)?.focus();
+  });
 
   function clearField(field: SuiteProfileV2Issue["field"]) {
     setFieldErrors(current => { const next = { ...current }; delete next[field]; return next; });
@@ -132,11 +173,13 @@ function PublicProfileEditor({ className, initialProfile, onSave, onSaved }: Sui
     setFieldErrors({});
     const parsed = parseSuiteProfileUpdateV2({
       schemaVersion: 2, expectedRevision: profile.revision,
-      name, bio, links, avatarRef: profile.avatarRef, publication: visibility,
+      name, bio, links: expandedLinks(links),
+      avatarRef: profile.avatarRef, publication: visibility,
     });
     if (!parsed.ok) {
       setFieldErrors({ [parsed.error.field]: issueMessage(parsed.error) });
-      event.currentTarget.querySelector<HTMLElement>(`[id="${id}-${parsed.error.field}"]`)?.focus();
+      if (parsed.error.field in SUITE_PROFILE_LINK_AFFORDANCES) setLinksOpen(true);
+      pendingFocus.current = parsed.error.field;
       return;
     }
     if (parsed.value.publication === "publish" && profile.username === null) {
@@ -214,26 +257,43 @@ function PublicProfileEditor({ className, initialProfile, onSave, onSaved }: Sui
         <input aria-describedby={describedBy("name")} aria-invalid={fieldErrors.name === undefined ? undefined : true}
           autoComplete="off" className={classes.control} disabled={disabled} id={`${id}-name`}
           maxLength={SUITE_PROFILE_NAME_MAX_LENGTH} onChange={event => { setName(event.currentTarget.value); clearField("name"); }}
-          ref={nameControl} required type="text" value={name} />
+          placeholder="Ada Lovelace" ref={nameControl} required type="text" value={name} />
         {fieldError("name")}
       </div>
       <div className={`suite-profile-field ${classes.field}`}>
         <label className={classes.label} htmlFor={`${id}-bio`}>Bio</label>
         <textarea aria-describedby={describedBy("bio")} aria-invalid={fieldErrors.bio === undefined ? undefined : true}
           className={classes.textarea} disabled={disabled} id={`${id}-bio`} maxLength={SUITE_PROFILE_BIO_MAX_LENGTH}
-          onChange={event => { setBio(event.currentTarget.value); clearField("bio"); }} rows={4} value={bio} />
+          onChange={event => { setBio(event.currentTarget.value); clearField("bio"); }}
+          placeholder="A short introduction." rows={3} value={bio} />
         {fieldError("bio")}
       </div>
-      {LINK_FIELDS.map(([key, label]) => <div className={`suite-profile-field ${classes.field}`} key={key}>
-        <label className={classes.label} htmlFor={`${id}-${key}`}>{label}</label>
-        <input aria-describedby={describedBy(key)} aria-invalid={fieldErrors[key] === undefined ? undefined : true}
-          autoCapitalize="none" autoComplete="off" className={classes.control} disabled={disabled} id={`${id}-${key}`}
-          inputMode="url" maxLength={SUITE_PROFILE_URL_MAX_LENGTH} onChange={event => {
-            const value = event.currentTarget.value;
-            setLinks(current => ({ ...current, [key]: value })); clearField(key);
-          }} spellCheck={false} type="text" value={links[key]} />
-        {fieldError(key)}
-      </div>)}
+      <details className={`suite-profile-links ${classes.links}`} onToggle={event => { setLinksOpen(event.currentTarget.open); }} open={linksOpen}>
+        <summary className={classes.linksSummary}>Links <span className={classes.linksHint}>optional — a handle is enough</span></summary>
+        <div className={classes.linksBody}>
+          {LINK_FIELDS.map(([key, label]) => {
+            const affordance = SUITE_PROFILE_LINK_AFFORDANCES[key];
+            return (
+              <div className={`suite-profile-field ${classes.field}`} key={key}>
+                <label className={classes.label} htmlFor={`${id}-${key}`}>{label}</label>
+                <div className={classes.affix}>
+                  <span aria-hidden="true" className={classes.affixLead}>
+                    <LinkMark glyph={affordance.glyph} />
+                    <span>{affordance.prefix}</span>
+                  </span>
+                  <input aria-describedby={describedBy(key)} aria-invalid={fieldErrors[key] === undefined ? undefined : true}
+                    autoCapitalize="none" autoComplete="off" className={classes.affixInput} disabled={disabled} id={`${id}-${key}`}
+                    inputMode="url" maxLength={SUITE_PROFILE_URL_MAX_LENGTH} onChange={event => {
+                      const value = event.currentTarget.value;
+                      setLinks(current => ({ ...current, [key]: value })); clearField(key);
+                    }} placeholder={affordance.placeholder} spellCheck={false} type="text" value={links[key]} />
+                </div>
+                {fieldError(key)}
+              </div>
+            );
+          })}
+        </div>
+      </details>
       <fieldset aria-describedby={`${id}-visibility-note${fieldErrors.publication === undefined ? "" : ` ${id}-publication-error`}`}
         aria-invalid={fieldErrors.publication === undefined ? undefined : true}
         className={`suite-profile-visibility ${classes.visibility}`} disabled={disabled} id={`${id}-publication`} tabIndex={-1}>
