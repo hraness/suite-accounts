@@ -738,7 +738,7 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "pareto frontier charts",
-    emoji: "\uD83D\uDC40",
+    emoji: "\uD83D\uDCC8",
     href: "https://aicharts.io",
     id: "aicharts",
     name: "AI Charts"
@@ -752,7 +752,7 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "personal life timeline maker",
-    emoji: "⏳",
+    emoji: "\uD83D\uDCCA",
     href: "https://lifecharts.io",
     id: "lifedaysleft",
     name: "Lifecharts"
@@ -773,7 +773,7 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "history of a generational co",
-    emoji: "\uD83D\uDCDA",
+    emoji: "\uD83E\uDD93",
     href: "https://hraness.com/stripe",
     id: "stripe-history",
     name: "Stripe History"
@@ -793,22 +793,22 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "Ghostget"
   },
   {
-    description: "relationship-aware drafting",
-    emoji: "\uD83D\uDCAC",
-    href: "https://messagelikeme.com",
+    description: "personal message butler",
+    emoji: "\uD83E\uDD16",
+    href: "https://textbutler.app",
     id: "message-like-me",
-    name: "Message Like Me"
+    name: "Textbutler"
   },
   {
     description: "visual studio for coding agents",
-    emoji: "\uD83D\uDCF7",
+    emoji: "\uD83D\uDCF8",
     href: "https://slopcamera.com",
     id: "slopcamera",
     name: "Slopcamera"
   },
   {
     description: "local-first contact book and evidence-backed enrichment for people and agents",
-    emoji: "\uD83D\uDDE1️",
+    emoji: "\uD83D\uDCC7",
     href: "https://peopleblade.com",
     id: "peopleblade",
     name: "PeopleBlade"
@@ -822,14 +822,14 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "markdown knowledge base for coding agents",
-    emoji: "\uD83D\uDCDA",
+    emoji: "\uD83D\uDCDD",
     href: "https://wordcell.io",
     id: "kb",
     name: "Wordcell"
   },
   {
     description: "evidence-backed working models of people",
-    emoji: "\uD83D\uDC40",
+    emoji: "\uD83E\uDDBE",
     href: "https://soulscrape.com",
     id: "soulscrape",
     name: "Soulscrape"
@@ -850,14 +850,14 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "one workspace for coding agents",
-    emoji: "⌨️",
+    emoji: "\uD83D\uDFE0",
     href: "https://oompa.app",
     id: "hra",
     name: "Oompa"
   },
   {
     description: "content-addressable music",
-    emoji: "\uD83C\uDF0A",
+    emoji: "\uD83D\uDC1F",
     href: "https://sound.fish",
     id: "soundfish",
     name: "Soundfish"

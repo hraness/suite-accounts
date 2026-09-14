@@ -26,7 +26,7 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "pareto frontier charts",
-    emoji: "👀",
+    emoji: "📈",
     href: "https://aicharts.io",
     id: "aicharts",
     name: "AI Charts",
@@ -40,7 +40,7 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "personal life timeline maker",
-    emoji: "⏳",
+    emoji: "📊",
     href: "https://lifecharts.io",
     id: "lifedaysleft",
     name: "Lifecharts",
@@ -61,7 +61,7 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "history of a generational co",
-    emoji: "📚",
+    emoji: "🦓",
     href: "https://hraness.com/stripe",
     id: "stripe-history",
     name: "Stripe History",
@@ -81,15 +81,15 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "Ghostget",
   },
   {
-    description: "relationship-aware drafting",
-    emoji: "💬",
-    href: "https://messagelikeme.com",
+    description: "personal message butler",
+    emoji: "🤖",
+    href: "https://textbutler.app",
     id: "message-like-me",
-    name: "Message Like Me",
+    name: "Textbutler",
   },
   {
     description: "visual studio for coding agents",
-    emoji: "📷",
+    emoji: "📸",
     href: "https://slopcamera.com",
     id: "slopcamera",
     name: "Slopcamera",
@@ -97,7 +97,7 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   {
     description:
       "local-first contact book and evidence-backed enrichment for people and agents",
-    emoji: "🗡️",
+    emoji: "📇",
     href: "https://peopleblade.com",
     id: "peopleblade",
     name: "PeopleBlade",
@@ -111,14 +111,14 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "markdown knowledge base for coding agents",
-    emoji: "📚",
+    emoji: "📝",
     href: "https://wordcell.io",
     id: "kb",
     name: "Wordcell",
   },
   {
     description: "evidence-backed working models of people",
-    emoji: "👀",
+    emoji: "🦾",
     href: "https://soulscrape.com",
     id: "soulscrape",
     name: "Soulscrape",
@@ -139,14 +139,14 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   },
   {
     description: "one workspace for coding agents",
-    emoji: "⌨️",
+    emoji: "🟠",
     href: "https://oompa.app",
     id: "hra",
     name: "Oompa",
   },
   {
     description: "content-addressable music",
-    emoji: "🌊",
+    emoji: "🐟",
     href: "https://sound.fish",
     id: "soundfish",
     name: "Soundfish",
