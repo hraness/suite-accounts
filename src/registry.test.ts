@@ -31,6 +31,20 @@ import {
 } from "./registry";
 
 describe("suite Accounts auth-mode registry", () => {
+  test("registers Hraness only in the current production browser authority", () => {
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hraness).toEqual({
+      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" }, displayName: "Hraness",
+      environments: { production: { billingReturn: { kind: "unsupported" }, siteUrl: "https://hraness.com" } },
+      id: "hraness",
+    });
+    expect(isSuiteAccountsCurrentConsumerId("hraness")).toBe(true);
+    expect(isSuiteAccountsCurrentOidcConsumerId("hraness")).toBe(true);
+    expect(suiteAccountsCurrentConsumerRequiresEmailOtp("hraness")).toBe(true);
+    expect("hraness" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
+    expect(SUITE_CONSUMER_IDS).not.toContain("hraness");
+    expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).not.toContain("hraness");
+    expect(Object.isFrozen(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hraness.environments.production)).toBe(true);
+  });
   test("assigns one explicit auth transport to every consumer", () => {
     expect(Object.keys(SUITE_ACCOUNTS_CONSUMERS).sort()).toEqual(
       [...SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS].sort(),
@@ -83,6 +97,7 @@ describe("suite Accounts auth-mode registry", () => {
       "slackorgs",
       "peopleblade",
       "aicharts",
+      "hraness",
     ]);
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS)
       .not.toBe(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS);
@@ -140,6 +155,7 @@ describe("suite Accounts auth-mode registry", () => {
       | "slackorgs"
       | "peopleblade"
       | "aicharts"
+      | "hraness"
     >();
     expectTypeOf<SuiteAccountsCurrentOAuthConsumerId>().toEqualTypeOf<
       SuiteAccountsCurrentOidcConsumerId
@@ -237,6 +253,7 @@ describe("suite Accounts auth-mode registry", () => {
         "slackorgs",
         "peopleblade",
         "aicharts",
+        "hraness",
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",

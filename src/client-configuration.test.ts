@@ -43,6 +43,20 @@ const peopleBladeBinding = {
 } as const;
 
 describe("suite Accounts client configuration", () => {
+  test("binds Hraness only through the exact current production registration", () => {
+    const binding = {
+      authMode: "oidc-rp", callbackUrl: "https://hraness.com/api/suite-auth/callback",
+      clientId: "hraness:hraness:production:v1", consumer: "hraness", environment: "production", origin: "https://hraness.com",
+    } as const;
+    expect(createSuiteAccountsClientConfiguration(binding)).toMatchObject({ ok: true, value: { binding } });
+    for (const origin of ["https://www.hraness.com", "https://hraness.com.evil.example", "https://hraness-git-main.vercel.app"]) {
+      expect(createSuiteAccountsClientConfiguration({ ...binding, origin })).toEqual({ ok: false, error: "invalid-origin" });
+    }
+    expect(createSuiteAccountsClientConfiguration({ ...binding, callbackUrl: "https://hraness.com/api/suite-auth/foreign" }))
+      .toEqual({ ok: false, error: "invalid-callback-url" });
+    expect(createSuiteAccountsClientConfiguration({ ...binding, clientId: "hraness:hraness:preview:v1" }))
+      .toEqual({ ok: false, error: "invalid-client-id" });
+  });
   test("derives every authority-controlled value from one exact binding", () => {
     const result = createSuiteAccountsClientConfiguration(hraBinding);
     expect(result.ok).toBe(true);

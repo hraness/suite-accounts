@@ -130,6 +130,13 @@ describe("suite Accounts URLs", () => {
   });
 
   test("matches only checked email-OTP-required client IDs", () => {
+    expect(suiteAccountsCurrentOidcClientRegistration("hraness", "production")).toEqual({
+      callbackUrl: "https://hraness.com/api/suite-auth/callback",
+      clientId: "hraness:hraness:production:v1",
+    });
+    expect(suiteAccountsOidcClientRegistration("hraness", "production")).toBeNull();
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp("hraness:hraness:production:v1")).toBe(true);
+    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp("hraness:hraness:preview:v1")).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:elders:production:v1",
     )).toBe(true);
