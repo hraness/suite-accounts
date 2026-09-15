@@ -158,7 +158,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "subcounter",
   "slackorgs",
   "peopleblade",
-  "aicharts"
+  "aicharts",
+  "hraness"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -181,7 +182,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
   slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com"),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
-  aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io")
+  aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io"),
+  hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
