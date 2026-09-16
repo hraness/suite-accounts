@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.6"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.7"
   }
 }
 ```
@@ -416,11 +416,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.9.6` release for this package version.
+Pin the immutable `v0.9.7` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.9.7` | Registers Soulscrape at `https://soulscrape.com` as a current-only email-code OIDC client with an exact origin and callback. |
 | `v0.9.6` | Names the personal-site membership product `hraness.com` instead of the `HRNSS` wordmark. |
 | `v0.9.5` | Retires the BigDataDepot (`slackorgs`) current OIDC client registration; historical identities remain parseable without origin or client trust. |
 | `v0.9.4` | Registers Hraness at `https://hraness.com` as a current-only email-code OIDC client with an exact origin and callback. |
