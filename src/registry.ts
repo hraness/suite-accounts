@@ -228,7 +228,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "hra",
   "sponge",
   "subcounter",
-  "slackorgs",
   "peopleblade",
   "aicharts",
   "hraness",
@@ -282,11 +281,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
     "subcounter",
     "Subcounter",
     "https://subcounter.com",
-  ),
-  slackorgs: currentOidcSite(
-    "slackorgs",
-    "BigDataDepot",
-    "https://bigdatadepot.com",
   ),
   peopleblade: currentOidcSite(
     "peopleblade",

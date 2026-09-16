@@ -77,21 +77,19 @@ describe("suite Accounts public origin laws", () => {
     ));
   });
 
-  test("BigDataDepot never accepts a decorated, insecure, or legacy origin", () => {
+  test("Subcounter never accepts a decorated or insecure origin", () => {
     assertProperty(fc.property(
       fc.constantFrom(
-        "https://user:pass@bigdatadepot.com",
-        "https://bigdatadepot.com/path",
-        "https://bigdatadepot.com/?token=secret",
-        "https://bigdatadepot.com/#secret",
-        "http://bigdatadepot.com",
-        "https://bigdatadepot.com.evil.example",
-        "https://bigdatadepot-git-main.vercel.app",
-        "https://subdomaindata.com",
-        "https://slackorgs.com",
+        "https://user:pass@subcounter.com",
+        "https://subcounter.com/path",
+        "https://subcounter.com/?token=secret",
+        "https://subcounter.com/#secret",
+        "http://subcounter.com",
+        "https://subcounter.com.evil.example",
+        "https://subcounter-git-main.vercel.app",
       ),
       (siteUrl) => {
-        expect(() => parseSuiteAccountsPublicConfig("slackorgs", {
+        expect(() => parseSuiteAccountsPublicConfig("subcounter", {
           ...accounts,
           NEXT_PUBLIC_SITE_URL: siteUrl,
         })).toThrow();
