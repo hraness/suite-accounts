@@ -734,7 +734,7 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     emoji: "\uD83E\uDEA2",
     href: "https://hraness.com",
     id: "hraness",
-    name: "HRNSS"
+    name: "hraness.com"
   },
   {
     description: "pareto frontier charts",

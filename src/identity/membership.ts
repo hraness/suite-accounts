@@ -22,7 +22,7 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     emoji: "🪢",
     href: "https://hraness.com",
     id: "hraness",
-    name: "HRNSS",
+    name: "hraness.com",
   },
   {
     description: "pareto frontier charts",
