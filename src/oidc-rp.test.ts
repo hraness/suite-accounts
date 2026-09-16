@@ -812,11 +812,12 @@ describe("suite OAuth relying party", () => {
     expect(contentSecurityPolicy).toBe(
       `default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; script-src 'nonce-${continuationNonce}'`,
     );
+    expect(continuation).toContain("<p>Signed in.</p>");
     expect(continuation).toContain(
       `<a href="/settings?tab=billing&amp;continue=%3C%2Fscript%3E">Continue</a>`,
     );
     expect(continuation).toContain(
-      `<script nonce="${continuationNonce}">location.replace("/settings?tab=billing\\u0026continue=%3C%2Fscript%3E");</script>`,
+      `<script nonce="${continuationNonce}">try{sessionStorage.setItem("hraness:suite:signed-in:v1","1")}catch{}location.replace("/settings?tab=billing\\u0026continue=%3C%2Fscript%3E");</script>`,
     );
     expect(continuation).not.toContain("https://attacker.example");
     expect(continuation).not.toContain("</script><script");

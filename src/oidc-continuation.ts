@@ -16,6 +16,9 @@ function inlineJson(value: string): string {
     .replaceAll("\u2029", "\\u2029");
 }
 
+export const SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY =
+  "hraness:suite:signed-in:v1" as const;
+
 export function createOidcContinuationResponse(
   returnTo: string,
   nonce: string,
@@ -43,11 +46,12 @@ export function createOidcContinuationResponse(
     "<head>",
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
-    "<title>Continue</title>",
+    "<title>Signed in</title>",
     "</head>",
     "<body>",
+    "<p>Signed in.</p>",
     `<p><a href="${htmlAttribute(returnTo)}">Continue</a></p>`,
-    `<script nonce="${nonce}">location.replace(${inlineJson(returnTo)});</script>`,
+    `<script nonce="${nonce}">try{sessionStorage.setItem(${inlineJson(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY)},"1")}catch{}location.replace(${inlineJson(returnTo)});</script>`,
     "</body>",
     "</html>",
   ].join("");

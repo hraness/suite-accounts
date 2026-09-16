@@ -529,6 +529,50 @@ function parseSuiteConvexBrowserIdentity(value, configuration) {
   });
 }
 
+// src/oidc-continuation.ts
+function htmlAttribute(value) {
+  return value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("'", "&#39;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+function inlineJson(value) {
+  return JSON.stringify(value).replaceAll("&", "\\u0026").replaceAll("<", "\\u003c").replaceAll(">", "\\u003e").replaceAll("\u2028", "\\u2028").replaceAll("\u2029", "\\u2029");
+}
+var SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY = "hraness:suite:signed-in:v1";
+function createOidcContinuationResponse(returnTo, nonce, cookies) {
+  const headers = new Headers({
+    "cache-control": "no-store",
+    "content-security-policy": [
+      "default-src 'none'",
+      "base-uri 'none'",
+      "form-action 'none'",
+      "frame-ancestors 'none'",
+      `script-src 'nonce-${nonce}'`
+    ].join("; "),
+    "content-type": "text/html; charset=utf-8",
+    pragma: "no-cache",
+    "referrer-policy": "no-referrer",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY"
+  });
+  for (const cookie of cookies)
+    headers.append("set-cookie", cookie);
+  const body = [
+    "<!doctype html>",
+    '<html lang="en">',
+    "<head>",
+    '<meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1">',
+    "<title>Signed in</title>",
+    "</head>",
+    "<body>",
+    "<p>Signed in.</p>",
+    `<p><a href="${htmlAttribute(returnTo)}">Continue</a></p>`,
+    `<script nonce="${nonce}">try{sessionStorage.setItem(${inlineJson(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY)},"1")}catch{}location.replace(${inlineJson(returnTo)});</script>`,
+    "</body>",
+    "</html>"
+  ].join("");
+  return new Response(body, { headers, status: 200 });
+}
+
 // src/browser-session.ts
 var MAXIMUM_SESSION_RESPONSE_BYTES = 32768;
 var SESSION_PATH = "/api/suite-auth/session";
@@ -672,6 +716,17 @@ async function signOutSuiteOidcBrowserSession(dependencies = {}) {
     }
   }, withExclusiveLock);
   notifySignedOut();
+}
+function consumeSuiteOidcJustSignedIn() {
+  try {
+    if (typeof sessionStorage === "undefined" || sessionStorage.getItem(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY) === null) {
+      return false;
+    }
+    sessionStorage.removeItem(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // src/convex-browser-auth-browser.ts
