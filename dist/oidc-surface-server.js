@@ -938,6 +938,7 @@ function htmlAttribute(value) {
 function inlineJson(value) {
   return JSON.stringify(value).replaceAll("&", "\\u0026").replaceAll("<", "\\u003c").replaceAll(">", "\\u003e").replaceAll("\u2028", "\\u2028").replaceAll("\u2029", "\\u2029");
 }
+var SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY = "hraness:suite:signed-in:v1";
 function createOidcContinuationResponse(returnTo, nonce, cookies) {
   const headers = new Headers({
     "cache-control": "no-store",
@@ -962,11 +963,12 @@ function createOidcContinuationResponse(returnTo, nonce, cookies) {
     "<head>",
     '<meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
-    "<title>Continue</title>",
+    "<title>Signed in</title>",
     "</head>",
     "<body>",
+    "<p>Signed in.</p>",
     `<p><a href="${htmlAttribute(returnTo)}">Continue</a></p>`,
-    `<script nonce="${nonce}">location.replace(${inlineJson(returnTo)});</script>`,
+    `<script nonce="${nonce}">try{sessionStorage.setItem(${inlineJson(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY)},"1")}catch{}location.replace(${inlineJson(returnTo)});</script>`,
     "</body>",
     "</html>"
   ].join("");

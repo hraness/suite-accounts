@@ -1,3 +1,7 @@
+import {
+  SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY,
+} from "./oidc-continuation.js";
+
 const MAXIMUM_SESSION_RESPONSE_BYTES = 32_768;
 const SESSION_PATH = "/api/suite-auth/session";
 const REFRESH_PATH = "/api/suite-auth/refresh";
@@ -233,4 +237,24 @@ export async function signOutSuiteOidcBrowserSession(
     }
   }, withExclusiveLock);
   notifySignedOut();
+}
+
+/**
+ * Consume the one-shot marker the relying-party continuation page plants on
+ * this product origin immediately before its replace navigation. Returns true
+ * exactly once per completed sign-in so a product can show post-auth feedback.
+ */
+export function consumeSuiteOidcJustSignedIn(): boolean {
+  try {
+    if (
+      typeof sessionStorage === "undefined"
+      || sessionStorage.getItem(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY) === null
+    ) {
+      return false;
+    }
+    sessionStorage.removeItem(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 }

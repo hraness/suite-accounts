@@ -467,7 +467,7 @@ try {
     ?.match(/script-src 'nonce-([A-Za-z0-9_-]{32})'$/u)?.[1];
   assert.equal(continuationNonce?.length, 32);
   assert.ok(successCallback.body.includes(
-    `<script nonce="${continuationNonce}">location.replace("/settings?from=oidc");</script>`,
+    `<script nonce="${continuationNonce}">try{sessionStorage.setItem("hraness:suite:signed-in:v1","1")}catch{}location.replace("/settings?from=oidc");</script>`,
   ));
   assert.deepEqual(continuationEvidence, {
     destination: "document",

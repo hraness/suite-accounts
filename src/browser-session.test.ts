@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  consumeSuiteOidcJustSignedIn,
   loadSuiteOidcBrowserSession,
   signOutSuiteOidcBrowserSession,
   SUITE_OIDC_REFRESH_LOCK_NAME,
@@ -8,6 +9,9 @@ import {
   type SuiteOidcBrowserSessionDependencies,
   type SuiteOidcExclusiveLock,
 } from "./browser-session";
+import {
+  SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY,
+} from "./oidc-continuation";
 
 function jsonResponse(value: unknown, init: ResponseInit = {}): Response {
   const body = JSON.stringify(value);
@@ -231,5 +235,51 @@ describe("suite OIDC browser session", () => {
       withExclusiveLock: null,
     })).rejects.toThrow("sign-out response was invalid");
     expect(notified).toBe(false);
+  });
+
+  test("reports the just-signed-in marker exactly once", () => {
+    const store = new Map<string, string>();
+    const storage: Storage = {
+      clear: () => store.clear(),
+      getItem: key => store.get(key) ?? null,
+      key: index => [...store.keys()][index] ?? null,
+      get length() {
+        return store.size;
+      },
+      removeItem: key => void store.delete(key),
+      setItem: (key, value) => void store.set(key, value),
+    };
+    const previous = Reflect.get(globalThis, "sessionStorage");
+    Reflect.set(globalThis, "sessionStorage", storage);
+    try {
+      expect(consumeSuiteOidcJustSignedIn()).toBe(false);
+      store.set(SUITE_OIDC_JUST_SIGNED_IN_STORAGE_KEY, "1");
+      expect(consumeSuiteOidcJustSignedIn()).toBe(true);
+      expect(consumeSuiteOidcJustSignedIn()).toBe(false);
+    } finally {
+      if (previous === undefined) {
+        Reflect.deleteProperty(globalThis, "sessionStorage");
+      } else {
+        Reflect.set(globalThis, "sessionStorage", previous);
+      }
+    }
+  });
+
+  test("fails closed when storage access throws", () => {
+    const previous = Reflect.get(globalThis, "sessionStorage");
+    Reflect.set(globalThis, "sessionStorage", {
+      getItem: () => {
+        throw new Error("denied");
+      },
+    });
+    try {
+      expect(consumeSuiteOidcJustSignedIn()).toBe(false);
+    } finally {
+      if (previous === undefined) {
+        Reflect.deleteProperty(globalThis, "sessionStorage");
+      } else {
+        Reflect.set(globalThis, "sessionStorage", previous);
+      }
+    }
   });
 });
