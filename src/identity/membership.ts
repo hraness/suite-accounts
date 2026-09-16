@@ -67,6 +67,13 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "Stripe History",
   },
   {
+    description: "eds evidence, stratified and sourced",
+    emoji: "🧬",
+    href: "https://hraness.com/eds",
+    id: "eds-research",
+    name: "EDS Research",
+  },
+  {
     description: "move to puerto rico",
     emoji: "⏱️",
     href: "https://act60.me",
