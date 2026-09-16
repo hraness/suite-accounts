@@ -156,7 +156,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "hra",
   "sponge",
   "subcounter",
-  "slackorgs",
   "peopleblade",
   "aicharts",
   "hraness"
@@ -180,7 +179,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   hra: currentOidcSite("hra", "Oompa", "https://oompa.app"),
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
-  slackorgs: currentOidcSite("slackorgs", "BigDataDepot", "https://bigdatadepot.com"),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
   aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com")

@@ -110,12 +110,6 @@ describe("suite Accounts URLs", () => {
       suiteAccountsOidcClientRegistration("subcounter", "production"),
     ).toBeNull();
     expect(
-      suiteAccountsCurrentOidcClientRegistration("slackorgs", "production"),
-    ).toEqual({
-      callbackUrl: "https://bigdatadepot.com/api/suite-auth/callback",
-      clientId: "hraness:slackorgs:production:v1",
-    });
-    expect(
       suiteAccountsOidcClientRegistration("slackorgs", "production"),
     ).toBeNull();
     expect(
@@ -166,12 +160,6 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:slackorgs:production:v1",
-    )).toBe(true);
-    expect(suiteAccountsOidcClientRequiresEmailOtp(
-      "hraness:slackorgs:production:v1",
-    )).toBe(false);
-    expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
-      "hraness:slackorgs:preview:v1",
     )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:peopleblade:production:v1",

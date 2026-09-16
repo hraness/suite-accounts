@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.4"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.5"
   }
 }
 ```
@@ -416,11 +416,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.9.4` release for this package version.
+Pin the immutable `v0.9.5` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.9.5` | Retires the BigDataDepot (`slackorgs`) current OIDC client registration; historical identities remain parseable without origin or client trust. |
 | `v0.9.4` | Registers Hraness at `https://hraness.com` as a current-only email-code OIDC client with an exact origin and callback. |
 | `v0.8.0` | Adds the optional public-profile form with explicit visibility, preserved conflict drafts, exact save-result validation, and hydration/lifetime guards. The v1 form remains compatible; consumers still own authenticated transport and activation. |
 | `v0.7.0` | Adds exact public, editor, and revision-bound update profile v2 contracts, GitHub URL normalization, and opaque avatar reference helpers. Existing six-link contracts and the React form remain unchanged; endpoint activation is separate. |

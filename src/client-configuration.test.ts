@@ -24,15 +24,6 @@ const subcounterBinding = {
   origin: "https://subcounter.com",
 } as const;
 
-const bigDataDepotBinding = {
-  authMode: "oidc-rp",
-  callbackUrl: "https://bigdatadepot.com/api/suite-auth/callback",
-  clientId: "hraness:slackorgs:production:v1",
-  consumer: "slackorgs",
-  environment: "production",
-  origin: "https://bigdatadepot.com",
-} as const;
-
 const peopleBladeBinding = {
   authMode: "oidc-rp",
   callbackUrl: "https://peopleblade.com/api/suite-auth/callback",
@@ -249,43 +240,6 @@ describe("suite Accounts client configuration", () => {
     expect(createSuiteAccountsClientConfiguration({
       ...subcounterBinding,
       clientId: "hraness:subcounter:preview:v1",
-    })).toEqual({ error: "invalid-client-id", ok: false });
-  });
-
-  test("binds BigDataDepot only to its exact current production registration", () => {
-    const result = createSuiteAccountsClientConfiguration(bigDataDepotBinding);
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value).toMatchObject({
-      authBasePath: "/api/suite-auth",
-      binding: bigDataDepotBinding,
-      configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
-      wireVersion: SUITE_ACCOUNTS_WIRE_VERSION,
-    });
-
-    expect(createSuiteAccountsClientConfiguration({
-      ...bigDataDepotBinding,
-      origin: "https://bigdatadepot.com.evil.example",
-    })).toEqual({ error: "invalid-origin", ok: false });
-    expect(createSuiteAccountsClientConfiguration({
-      ...bigDataDepotBinding,
-      origin: "https://bigdatadepot-git-main.vercel.app",
-    })).toEqual({ error: "invalid-origin", ok: false });
-    expect(createSuiteAccountsClientConfiguration({
-      ...bigDataDepotBinding,
-      origin: "https://subdomaindata.com",
-    })).toEqual({ error: "invalid-origin", ok: false });
-    expect(createSuiteAccountsClientConfiguration({
-      ...bigDataDepotBinding,
-      origin: "https://slackorgs.com",
-    })).toEqual({ error: "invalid-origin", ok: false });
-    expect(createSuiteAccountsClientConfiguration({
-      ...bigDataDepotBinding,
-      callbackUrl: "https://bigdatadepot.com/api/suite-auth/foreign",
-    })).toEqual({ error: "invalid-callback-url", ok: false });
-    expect(createSuiteAccountsClientConfiguration({
-      ...bigDataDepotBinding,
-      clientId: "hraness:slackorgs:preview:v1",
     })).toEqual({ error: "invalid-client-id", ok: false });
   });
 

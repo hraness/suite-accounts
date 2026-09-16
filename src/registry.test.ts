@@ -94,7 +94,6 @@ describe("suite Accounts auth-mode registry", () => {
       "hra",
       "sponge",
       "subcounter",
-      "slackorgs",
       "peopleblade",
       "aicharts",
       "hraness",
@@ -152,7 +151,6 @@ describe("suite Accounts auth-mode registry", () => {
       | "hra"
       | "sponge"
       | "subcounter"
-      | "slackorgs"
       | "peopleblade"
       | "aicharts"
       | "hraness"
@@ -186,32 +184,6 @@ describe("suite Accounts auth-mode registry", () => {
     expect(isSuiteAccountsCurrentOAuthConsumerId("subcounter")).toBe(true);
     expect("subcounter" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
     expect(SUITE_CONSUMER_IDS).not.toContain("subcounter");
-  });
-
-  test("registers BigDataDepot only in the current unlinked OIDC authority", () => {
-    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.slackorgs).toEqual({
-      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "BigDataDepot",
-      environments: {
-        production: {
-          billingReturn: { kind: "unsupported" },
-          siteUrl: "https://bigdatadepot.com",
-        },
-      },
-      id: "slackorgs",
-    });
-    expect(getSuiteAccountsCurrentConsumerEnvironment(
-      "slackorgs",
-      "production",
-    )).toEqual({
-      billingReturn: { kind: "unsupported" },
-      siteUrl: "https://bigdatadepot.com",
-    });
-    expect(isSuiteAccountsCurrentConsumerId("slackorgs")).toBe(true);
-    expect(isSuiteAccountsCurrentOidcConsumerId("slackorgs")).toBe(true);
-    expect(isSuiteAccountsCurrentOAuthConsumerId("slackorgs")).toBe(true);
-    expect("slackorgs" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
-    expect(SUITE_CONSUMER_IDS).not.toContain("slackorgs");
   });
 
   test("registers PeopleBlade only in the current linked OIDC authority", () => {
@@ -250,7 +222,6 @@ describe("suite Accounts auth-mode registry", () => {
         "hra",
         "sponge",
         "subcounter",
-        "slackorgs",
         "peopleblade",
         "aicharts",
         "hraness",
@@ -262,8 +233,6 @@ describe("suite Accounts auth-mode registry", () => {
     ]);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("hra")).toBe(true);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("subcounter"))
-      .toBe(true);
-    expect(suiteAccountsCurrentConsumerRequiresEmailOtp("slackorgs"))
       .toBe(true);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("peopleblade"))
       .toBe(true);
@@ -445,11 +414,6 @@ describe("suite Accounts auth-mode registry", () => {
       "https://attacker.example",
     )).toBe(false);
     expect(Reflect.set(
-      SUITE_ACCOUNTS_CURRENT_CONSUMERS.slackorgs.environments.production,
-      "siteUrl",
-      "https://attacker.example",
-    )).toBe(false);
-    expect(Reflect.set(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production,
       "siteUrl",
       "https://attacker.example",
@@ -468,9 +432,6 @@ describe("suite Accounts auth-mode registry", () => {
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production.siteUrl,
     ).toBe("https://subcounter.com");
-    expect(
-      SUITE_ACCOUNTS_CURRENT_CONSUMERS.slackorgs.environments.production.siteUrl,
-    ).toBe("https://bigdatadepot.com");
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production.siteUrl,
     ).toBe("https://peopleblade.com");
