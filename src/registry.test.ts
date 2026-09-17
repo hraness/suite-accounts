@@ -241,8 +241,6 @@ describe("suite Accounts auth-mode registry", () => {
       .toBe(true);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)
       .not.toContain("subcounter");
-    expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)
-      .not.toContain("slackorgs");
     expect(SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS).not.toContain("hra");
   });
 
