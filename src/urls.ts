@@ -21,6 +21,7 @@ export const SUITE_ACCOUNTS_OAUTH_RESOURCE =
 
 export type SuiteAccountsOidcProviderConfiguration = Readonly<{
   authorizationEndpoint: string;
+  deviceAuthorizationEndpoint: string;
   discoveryEndpoint: string;
   entitlementReceiptEndpoint: string;
   identityLinkReceiptEndpoint: string;
@@ -143,6 +144,8 @@ export function suiteAccountsOidcProviderConfiguration(
   const authBase = new URL("/api/auth/", issuer);
   return deepFreeze({
     authorizationEndpoint: new URL("oauth2/authorize", authBase).href,
+    deviceAuthorizationEndpoint:
+      new URL("oauth2/device_authorization", authBase).href,
     discoveryEndpoint:
       new URL("/.well-known/openid-configuration", issuer).href,
     entitlementReceiptEndpoint:

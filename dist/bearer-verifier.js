@@ -315,6 +315,7 @@ function suiteAccountsOidcProviderConfiguration(environment) {
   const authBase = new URL("/api/auth/", issuer);
   return deepFreeze({
     authorizationEndpoint: new URL("oauth2/authorize", authBase).href,
+    deviceAuthorizationEndpoint: new URL("oauth2/device_authorization", authBase).href,
     discoveryEndpoint: new URL("/.well-known/openid-configuration", issuer).href,
     entitlementReceiptEndpoint: new URL("/suite/entitlements/receipt", issuer).href,
     identityLinkReceiptEndpoint: new URL("/suite/identity-links/receipt", issuer).href,

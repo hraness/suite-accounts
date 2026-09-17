@@ -25,6 +25,8 @@ describe("suite Accounts URLs", () => {
     expect(suiteAccountsOidcProviderConfiguration("production")).toEqual({
       authorizationEndpoint:
         "https://account.hraness.com/api/auth/oauth2/authorize",
+      deviceAuthorizationEndpoint:
+        "https://account.hraness.com/api/auth/oauth2/device_authorization",
       discoveryEndpoint:
         "https://account.hraness.com/.well-known/openid-configuration",
       entitlementReceiptEndpoint:

@@ -107,6 +107,12 @@
       "import": "./dist/identity/return-targets.js",
       "default": "./dist/identity/return-targets.js"
     },
+    "./oidc-device-code": {
+      "bun": "./dist/oidc-device-code.js",
+      "types": "./src/oidc-device-code.ts",
+      "import": "./dist/oidc-device-code.js",
+      "default": "./dist/oidc-device-code.js"
+    },
     "./oidc-rp": {
       "bun": "./dist/oidc-rp.js",
       "types": "./src/oidc-rp.ts",
