@@ -1,6 +1,6 @@
 {
   "name": "@hraness/suite-accounts",
-  "version": "0.9.11",
+  "version": "0.9.12",
   "description": "Validated client and protocol boundaries for Hraness Accounts.",
   "license": "MIT",
   "type": "module",
@@ -106,6 +106,12 @@
       "types": "./src/identity/return-targets.ts",
       "import": "./dist/identity/return-targets.js",
       "default": "./dist/identity/return-targets.js"
+    },
+    "./oidc-device-code": {
+      "bun": "./dist/oidc-device-code.js",
+      "types": "./src/oidc-device-code.ts",
+      "import": "./dist/oidc-device-code.js",
+      "default": "./dist/oidc-device-code.js"
     },
     "./oidc-rp": {
       "bun": "./dist/oidc-rp.js",

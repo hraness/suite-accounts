@@ -121,6 +121,8 @@ describe("AI Charts current registration", () => {
       configurationVersion: "suite-accounts-client-configuration-v1",
       wireVersion: "v1",
       provider: {
+        deviceAuthorizationEndpoint:
+          "https://account.hraness.com/api/auth/oauth2/device_authorization",
         issuer: "https://account.hraness.com",
         jwksEndpoint: "https://account.hraness.com/api/auth/jwks",
         resource: "https://hraness.com/suite",
@@ -128,7 +130,8 @@ describe("AI Charts current registration", () => {
       },
     });
     expect("grantTypes" in result.value).toBe(false);
-    expect("deviceAuthorizationEndpoint" in result.value.provider).toBe(false);
+    expect("deviceAuthorizationEndpoint" in result.value.provider).toBe(true);
+    expect("deviceTokenEndpoint" in result.value.provider).toBe(true);
     for (const value of [
       result.value,
       result.value.binding,
