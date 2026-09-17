@@ -425,7 +425,7 @@ Previously published immutable releases remain unchanged:
 | `v0.9.8` | Adds the EDS Research index at `https://hraness.com/eds` to the shared membership product list. |
 | `v0.9.7` | Registers Soulscrape at `https://soulscrape.com` as a current-only email-code OIDC client with an exact origin and callback. |
 | `v0.9.6` | Names the personal-site membership product `hraness.com` instead of the `HRNSS` wordmark. |
-| `v0.9.5` | Retires the BigDataDepot (`slackorgs`) current OIDC client registration; historical identities remain parseable without origin or client trust. |
+| `v0.9.5` | Retires a deleted product's current OIDC client registration; historical identities remain parseable without origin or client trust. |
 | `v0.9.4` | Registers Hraness at `https://hraness.com` as a current-only email-code OIDC client with an exact origin and callback. |
 | `v0.8.0` | Adds the optional public-profile form with explicit visibility, preserved conflict drafts, exact save-result validation, and hydration/lifetime guards. The v1 form remains compatible; consumers still own authenticated transport and activation. |
 | `v0.7.0` | Adds exact public, editor, and revision-bound update profile v2 contracts, GitHub URL normalization, and opaque avatar reference helpers. Existing six-link contracts and the React form remain unchanged; endpoint activation is separate. |
@@ -439,7 +439,7 @@ Previously published immutable releases remain unchanged:
 | `v0.4.2` | Adds verified-account-email accessors for provisioning before optional username onboarding. Live userinfo must match subject, client, Suite account, and profile state; the accessor returns only an `email_verified` address. |
 | `v0.4.1` | Registers PeopleBlade at `https://peopleblade.com` for email-OTP OIDC. Its signed product-link receipt binds local and Suite subjects; email equality never creates or merges a link. |
 | `v0.4.0` | Removes the retired OPRTE browser client from current and deprecated registration helpers while preserving bounded historical product-ID parsing. |
-| `v0.3.7` | Moves the stable `slackorgs` consumer registration to BigDataDepot at `https://bigdatadepot.com` without changing its client ID. Predecessor origins gain no Accounts authority. |
+| `v0.3.7` | Moves a stable consumer registration to its renamed product origin without changing its client ID. Predecessor origins gain no Accounts authority. |
 | `v0.3.6` | Moves the current Sponge origin to `https://sponge.computer` without changing its client ID. |
 
 Deterministic tests exercise valid registrations and readable failures.
