@@ -165,6 +165,13 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     id: "oh-computer",
     name: "oh.computer",
   },
+  {
+    description: "reproducible capability checks for agents",
+    emoji: "📡",
+    href: "https://clankdar.com",
+    id: "clankdar",
+    name: "Clankdar",
+  },
 ] as const satisfies readonly SuiteMembershipProduct[]);
 
 export type SuiteMembershipProductId =
