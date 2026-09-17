@@ -269,7 +269,7 @@ export function parseDeviceTokenResponse(
 }
 
 export type SuiteOidcDeviceFetch = (
-  input: RequestInfo | URL,
+  input: string | URL | Request,
   init?: RequestInit,
 ) => Promise<Response>;
 
