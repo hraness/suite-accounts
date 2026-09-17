@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.10"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.12"
   }
 }
 ```
@@ -188,7 +188,6 @@ for authorization.
 | `./identity/return-targets` | Opt-in Accounts-owned billing return-target identifiers |
 | `./client-configuration` | Additive validated product-binding factory |
 | `./browser-session` | Same-origin browser session reads and serialized refresh |
-| `./oidc-device-code` | OAuth 2.0 Device Authorization Grant client protocol |
 | `./oidc-rp` | Server-only OAuth 2.1 relying-party implementation |
 | `./oidc-session-policy` | Shared encrypted-cookie and session-lifetime policy |
 | `./oidc-surface-server` | Registered browser-RP server handlers |
@@ -417,12 +416,13 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.9.10` release for this package version.
+Pin the immutable `v0.9.12` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
-| `v0.9.11` (unreleased) | Adds the OAuth 2.0 Device Authorization Grant client protocol under `./oidc-device-code`, including issuer endpoint pinning in the closed provider configuration. |
+| `v0.9.12` | Adds the OAuth 2.0 Device Authorization Grant client protocol under `./oidc-device-code`, registers Wrench (`https://wrench.rip`) as a current-only email-code OIDC client with an exact origin and callback, and makes `deviceAuthorizationEndpoint` / `deviceTokenEndpoint` available in the closed provider configuration. |
+| `v0.9.11` | Adds Clankdar (`https://clankdar.com`) to the shared membership product list. |
 | `v0.9.10` | Registers Platonik at `https://platonik.space` as a current-only email-code OIDC client with an exact origin and callback. |
 | `v0.9.9` | Adds a one-shot just-signed-in marker on the OIDC continuation page (`consumeSuiteOidcJustSignedIn` in `browser-session`) so products can render post-auth feedback, and names the continuation page. |
 | `v0.9.8` | Adds the EDS Research index at `https://hraness.com/eds` to the shared membership product list. |
