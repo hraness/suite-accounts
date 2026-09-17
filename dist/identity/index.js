@@ -879,6 +879,13 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     href: "https://oh.computer",
     id: "oh-computer",
     name: "oh.computer"
+  },
+  {
+    description: "reproducible capability checks for agents",
+    emoji: "\uD83D\uDCE1",
+    href: "https://clankdar.com",
+    id: "clankdar",
+    name: "Clankdar"
   }
 ]);
 // src/identity/profiles.ts
