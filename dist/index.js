@@ -160,7 +160,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "aicharts",
   "hraness",
   "soulscrape",
-  "platonik"
+  "platonik",
+  "wrench"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -185,7 +186,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
-  platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space")
+  platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
+  wrench: currentOidcSite("wrench", "Wrench", "https://wrench.rip")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -206,7 +208,8 @@ var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUI
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
   "hra",
-  "peopleblade"
+  "peopleblade",
+  "wrench"
 ]);
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
@@ -316,6 +319,7 @@ function suiteAccountsOidcProviderConfiguration(environment) {
   return deepFreeze({
     authorizationEndpoint: new URL("oauth2/authorize", authBase).href,
     deviceAuthorizationEndpoint: new URL("oauth2/device_authorization", authBase).href,
+    deviceTokenEndpoint: new URL("oauth2/device/token", authBase).href,
     discoveryEndpoint: new URL("/.well-known/openid-configuration", issuer).href,
     entitlementReceiptEndpoint: new URL("/suite/entitlements/receipt", issuer).href,
     identityLinkReceiptEndpoint: new URL("/suite/identity-links/receipt", issuer).href,
@@ -976,7 +980,7 @@ async function initiateSuiteOidcDeviceAuthorization(configuration, request, depe
     deviceCode: parsed.deviceCode
   };
   return {
-    poll: () => pollSuiteOidcDeviceToken(configuration.tokenEndpoint, tokenRequest, {
+    poll: () => pollSuiteOidcDeviceToken(configuration.deviceTokenEndpoint, tokenRequest, {
       ...dependencies.now === undefined ? {} : { now: dependencies.now },
       fetch: fetcher
     }),

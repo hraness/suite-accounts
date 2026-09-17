@@ -160,7 +160,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "aicharts",
   "hraness",
   "soulscrape",
-  "platonik"
+  "platonik",
+  "wrench"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -185,7 +186,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
-  platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space")
+  platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
+  wrench: currentOidcSite("wrench", "Wrench", "https://wrench.rip")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -206,7 +208,8 @@ var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUI
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
   "hra",
-  "peopleblade"
+  "peopleblade",
+  "wrench"
 ]);
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
@@ -465,6 +468,7 @@ var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
   "peopleblade",
+  "wrench",
   "crclte",
   "pub"
 ]);
@@ -526,6 +530,7 @@ function parseSuiteProduct(value) {
     case "soundfish":
     case "hra":
     case "peopleblade":
+    case "wrench":
     case "crclte":
     case "pub":
       return ok5(value);
@@ -620,6 +625,7 @@ var SUITE_LINK_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
   "peopleblade",
+  "wrench",
   "crclte",
   "pub"
 ]);
@@ -635,6 +641,7 @@ function parseSuiteLinkProduct(value) {
     case "soundfish":
     case "hra":
     case "peopleblade":
+    case "wrench":
     case "crclte":
     case "pub":
       return ok6(parsed.value);

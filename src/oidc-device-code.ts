@@ -318,7 +318,7 @@ async function readBoundedJson(response: Response): Promise<unknown> {
 export async function initiateSuiteOidcDeviceAuthorization(
   configuration: Readonly<{
     deviceAuthorizationEndpoint: string;
-    tokenEndpoint: string;
+    deviceTokenEndpoint: string;
   }>,
   request: SuiteOidcDeviceAuthorizationRequest,
   dependencies: SuiteOidcDeviceDependencies = {},
@@ -353,7 +353,7 @@ export async function initiateSuiteOidcDeviceAuthorization(
   };
   return {
     poll: () =>
-      pollSuiteOidcDeviceToken(configuration.tokenEndpoint, tokenRequest, {
+      pollSuiteOidcDeviceToken(configuration.deviceTokenEndpoint, tokenRequest, {
         ...(dependencies.now === undefined
           ? {}
           : { now: dependencies.now }),

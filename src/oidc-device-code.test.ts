@@ -224,7 +224,8 @@ describe("initiateSuiteOidcDeviceAuthorization", () => {
       {
         deviceAuthorizationEndpoint:
           "https://account.hraness.com/api/auth/oauth2/device_authorization",
-        tokenEndpoint: "https://account.hraness.com/api/auth/oauth2/token",
+        deviceTokenEndpoint:
+          "https://account.hraness.com/api/auth/oauth2/device/token",
       },
       { clientId: "hraness:wrench:production:v1", scopes: ["suite.read"] },
       { fetch: fetcher, now: () => new Date(nowMs) },
@@ -247,7 +248,8 @@ describe("initiateSuiteOidcDeviceAuthorization", () => {
         {
           deviceAuthorizationEndpoint:
             "https://account.hraness.com/api/auth/oauth2/device_authorization",
-          tokenEndpoint: "https://account.hraness.com/api/auth/oauth2/token",
+          deviceTokenEndpoint:
+            "https://account.hraness.com/api/auth/oauth2/device/token",
         },
         { clientId: "x" },
         { fetch: fetcher },

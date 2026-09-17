@@ -61,6 +61,8 @@ describe("suite Accounts client configuration", () => {
           "https://account.hraness.com/api/auth/oauth2/authorize",
         deviceAuthorizationEndpoint:
           "https://account.hraness.com/api/auth/oauth2/device_authorization",
+        deviceTokenEndpoint:
+          "https://account.hraness.com/api/auth/oauth2/device/token",
         discoveryEndpoint:
           "https://account.hraness.com/.well-known/openid-configuration",
         entitlementReceiptEndpoint:

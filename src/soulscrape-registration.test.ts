@@ -130,6 +130,7 @@ describe("Soulscrape current registration", () => {
     });
     expect("grantTypes" in result.value).toBe(false);
     expect("deviceAuthorizationEndpoint" in result.value.provider).toBe(true);
+    expect("deviceTokenEndpoint" in result.value.provider).toBe(true);
     for (const value of [
       result.value,
       result.value.binding,

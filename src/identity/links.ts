@@ -35,6 +35,7 @@ export const SUITE_LINK_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
   "peopleblade",
+  "wrench",
   // Compatibility-only readers for already-issued publication receipts and links.
   "crclte",
   "pub",
@@ -60,6 +61,7 @@ export function parseSuiteLinkProduct(
     case "soundfish":
     case "hra":
     case "peopleblade":
+    case "wrench":
     case "crclte":
     case "pub":
       return ok(parsed.value);
