@@ -159,7 +159,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "peopleblade",
   "aicharts",
   "hraness",
-  "soulscrape"
+  "soulscrape",
+  "platonik"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -183,7 +184,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
   aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
-  soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com")
+  soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
+  platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
