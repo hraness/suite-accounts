@@ -622,172 +622,6 @@ function parseSuiteConvexBrowserIdentity(value, configuration) {
   });
 }
 
-// src/convex-url.ts
-var LOCAL_HOSTNAMES = new Set(["127.0.0.1", "[::1]", "localhost"]);
-function invalid(input, reason, message) {
-  return deepFreeze({ input, kind: "invalid", message, reason });
-}
-function parseConvexDeployment(value) {
-  if (typeof value !== "string" || value.trim() === "") {
-    return deepFreeze({ kind: "missing" });
-  }
-  const input = value.trim();
-  let parsed;
-  try {
-    parsed = new URL(input);
-  } catch {
-    return invalid(input, "not-a-url", "Use a complete Convex deployment URL.");
-  }
-  if (parsed.username !== "" || parsed.password !== "") {
-    return invalid(input, "credentials", "Deployment URLs cannot contain credentials.");
-  }
-  if (parsed.pathname !== "/" || parsed.search !== "" || parsed.hash !== "") {
-    return invalid(input, "not-an-origin", "Use the deployment origin without a path or query.");
-  }
-  const local = LOCAL_HOSTNAMES.has(parsed.hostname);
-  if (parsed.protocol !== "https:" && !(local && parsed.protocol === "http:")) {
-    return invalid(input, "insecure-remote", "Remote Convex deployments must use HTTPS.");
-  }
-  return deepFreeze({
-    kind: "ready",
-    origin: parsed.origin,
-    transport: local ? "local" : "cloud",
-    url: parsed.origin
-  });
-}
-
-// src/public-config.ts
-var LOOPBACK_HOSTS = new Set(["127.0.0.1", "[::1]", "localhost"]);
-var SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS = deepFreeze([
-  "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL",
-  "NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL",
-  "NEXT_PUBLIC_SITE_URL"
-]);
-function parseOrigin(value, field) {
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
-    throw new Error(`${field} must be an absolute URL.`);
-  }
-  const loopback = LOOPBACK_HOSTS.has(url.hostname);
-  if (url.protocol !== "https:" && !(loopback && url.protocol === "http:")) {
-    throw new Error(`${field} must use HTTPS (HTTP is allowed only on loopback).`);
-  }
-  if (url.username !== "" || url.password !== "" || url.search !== "" || url.hash !== "" || url.pathname !== "" && url.pathname !== "/") {
-    throw new Error(`${field} must be a credential-free origin.`);
-  }
-  return new URL(url.origin);
-}
-function readyRemoteConfig(consumer, siteUrl, convexUrl, convexSiteUrl) {
-  const registration = getPublicConsumer(consumer);
-  const environment = "production";
-  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
-  const deployment = getSuiteAccountsDeployment(environment);
-  if (consumerEnvironment?.siteUrl === siteUrl && deployment.convexUrl === convexUrl && deployment.convexSiteUrl === convexSiteUrl) {
-    return deepFreeze({
-      ...publicAuthConfiguration(registration.auth),
-      canonicalProductOrigin: siteUrl,
-      consumer,
-      convexSiteUrl,
-      convexUrl,
-      environment,
-      kind: "ready",
-      siteUrl,
-      surfaceOrigin: siteUrl
-    });
-  }
-  return null;
-}
-function publicAuthConfiguration(auth) {
-  switch (auth.kind) {
-    case "authority":
-      return { authBasePath: auth.basePath, authMode: auth.kind };
-    case "oidc-rp":
-      return { authBasePath: auth.basePath, authMode: auth.kind };
-    case "proxy":
-      return { authBasePath: auth.basePath, authMode: auth.kind };
-  }
-}
-function getPublicConsumer(consumer) {
-  return isSuiteAccountsCurrentConsumerId(consumer) ? getSuiteAccountsCurrentConsumer(consumer) : getSuiteAccountsConsumer(consumer);
-}
-function parseSuiteAccountsPublicConfig(consumer, environment) {
-  const missing = SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS.filter((name) => {
-    const value = environment[name];
-    return typeof value !== "string" || value.trim() === "";
-  });
-  if (missing.length > 0)
-    return deepFreeze({ kind: "missing", missing });
-  const site = parseOrigin(environment.NEXT_PUBLIC_SITE_URL, "NEXT_PUBLIC_SITE_URL");
-  const convexSite = parseOrigin(environment.NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL, "NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL");
-  const deployment = parseConvexDeployment(environment.NEXT_PUBLIC_ACCOUNTS_CONVEX_URL);
-  if (deployment.kind !== "ready") {
-    throw new Error(deployment.kind === "invalid" ? `NEXT_PUBLIC_ACCOUNTS_CONVEX_URL is invalid: ${deployment.message}` : "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL is required.");
-  }
-  const convex = parseOrigin(deployment.url, "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL");
-  const loopback = [site, convex, convexSite].map((url) => LOOPBACK_HOSTS.has(url.hostname));
-  if (loopback.every(Boolean)) {
-    if (consumer === "aicharts") {
-      throw new Error("AI Charts authentication requires its registered production origin.");
-    }
-    if (deployment.transport !== "local" || site.hostname !== convex.hostname || site.hostname !== convexSite.hostname) {
-      throw new Error("Local consumer and Accounts endpoints must use the same loopback host.");
-    }
-    const registration = getPublicConsumer(consumer);
-    return deepFreeze({
-      ...publicAuthConfiguration(registration.auth),
-      canonicalProductOrigin: site.origin,
-      consumer,
-      convexSiteUrl: convexSite.origin,
-      convexUrl: convex.origin,
-      environment: "local",
-      kind: "ready",
-      siteUrl: site.origin,
-      surfaceOrigin: site.origin
-    });
-  }
-  if (loopback.some(Boolean)) {
-    throw new Error("Consumer and Accounts endpoints cannot mix local and remote environments.");
-  }
-  const previewSurfaceValue = environment.NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN;
-  if (previewSurfaceValue !== undefined) {
-    const previewSurface = parseOrigin(previewSurfaceValue, "NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN");
-    if (!previewSurface.hostname.endsWith(".vercel.app")) {
-      throw new Error("NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN must use a generated .vercel.app origin.");
-    }
-    const production = readyRemoteConfig(consumer, site.origin, convex.origin, convexSite.origin);
-    if (production === null) {
-      throw new Error(`${getPublicConsumer(consumer).displayName} and Accounts endpoints ` + "do not match the production deployment.");
-    }
-    return deepFreeze({
-      canonicalProductOrigin: site.origin,
-      environment: "production",
-      kind: "unavailable",
-      message: "Suite authentication is unavailable on generated Vercel Preview origins.",
-      surfaceOrigin: previewSurface.origin
-    });
-  }
-  const remote = readyRemoteConfig(consumer, site.origin, convex.origin, convexSite.origin);
-  if (remote !== null)
-    return remote;
-  throw new Error(`${getPublicConsumer(consumer).displayName} and Accounts endpoints ` + "do not match an owned deployment environment.");
-}
-function suiteAccountsPublicConfigFromEnvironment(consumer, environment = {
-  NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN: process.env.NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN,
-  NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: process.env.NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL,
-  NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: process.env.NEXT_PUBLIC_ACCOUNTS_CONVEX_URL,
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL
-}) {
-  try {
-    return parseSuiteAccountsPublicConfig(consumer, environment);
-  } catch (error) {
-    return deepFreeze({
-      kind: "invalid",
-      message: error instanceof Error ? error.message : "Suite Accounts configuration is invalid."
-    });
-  }
-}
 // src/oidc-device-code.ts
 var SUITE_OIDC_DEVICE_CODE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
 var MIN_DEVICE_CODE_INTERVAL_MS = 1000;
@@ -1012,6 +846,173 @@ async function pollSuiteOidcDeviceToken(tokenEndpoint, request, dependencies = {
     throw new Error("The device token response was invalid.");
   }
   return parsed;
+}
+
+// src/convex-url.ts
+var LOCAL_HOSTNAMES = new Set(["127.0.0.1", "[::1]", "localhost"]);
+function invalid(input, reason, message) {
+  return deepFreeze({ input, kind: "invalid", message, reason });
+}
+function parseConvexDeployment(value) {
+  if (typeof value !== "string" || value.trim() === "") {
+    return deepFreeze({ kind: "missing" });
+  }
+  const input = value.trim();
+  let parsed;
+  try {
+    parsed = new URL(input);
+  } catch {
+    return invalid(input, "not-a-url", "Use a complete Convex deployment URL.");
+  }
+  if (parsed.username !== "" || parsed.password !== "") {
+    return invalid(input, "credentials", "Deployment URLs cannot contain credentials.");
+  }
+  if (parsed.pathname !== "/" || parsed.search !== "" || parsed.hash !== "") {
+    return invalid(input, "not-an-origin", "Use the deployment origin without a path or query.");
+  }
+  const local = LOCAL_HOSTNAMES.has(parsed.hostname);
+  if (parsed.protocol !== "https:" && !(local && parsed.protocol === "http:")) {
+    return invalid(input, "insecure-remote", "Remote Convex deployments must use HTTPS.");
+  }
+  return deepFreeze({
+    kind: "ready",
+    origin: parsed.origin,
+    transport: local ? "local" : "cloud",
+    url: parsed.origin
+  });
+}
+
+// src/public-config.ts
+var LOOPBACK_HOSTS = new Set(["127.0.0.1", "[::1]", "localhost"]);
+var SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS = deepFreeze([
+  "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL",
+  "NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL",
+  "NEXT_PUBLIC_SITE_URL"
+]);
+function parseOrigin(value, field) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${field} must be an absolute URL.`);
+  }
+  const loopback = LOOPBACK_HOSTS.has(url.hostname);
+  if (url.protocol !== "https:" && !(loopback && url.protocol === "http:")) {
+    throw new Error(`${field} must use HTTPS (HTTP is allowed only on loopback).`);
+  }
+  if (url.username !== "" || url.password !== "" || url.search !== "" || url.hash !== "" || url.pathname !== "" && url.pathname !== "/") {
+    throw new Error(`${field} must be a credential-free origin.`);
+  }
+  return new URL(url.origin);
+}
+function readyRemoteConfig(consumer, siteUrl, convexUrl, convexSiteUrl) {
+  const registration = getPublicConsumer(consumer);
+  const environment = "production";
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
+  const deployment = getSuiteAccountsDeployment(environment);
+  if (consumerEnvironment?.siteUrl === siteUrl && deployment.convexUrl === convexUrl && deployment.convexSiteUrl === convexSiteUrl) {
+    return deepFreeze({
+      ...publicAuthConfiguration(registration.auth),
+      canonicalProductOrigin: siteUrl,
+      consumer,
+      convexSiteUrl,
+      convexUrl,
+      environment,
+      kind: "ready",
+      siteUrl,
+      surfaceOrigin: siteUrl
+    });
+  }
+  return null;
+}
+function publicAuthConfiguration(auth) {
+  switch (auth.kind) {
+    case "authority":
+      return { authBasePath: auth.basePath, authMode: auth.kind };
+    case "oidc-rp":
+      return { authBasePath: auth.basePath, authMode: auth.kind };
+    case "proxy":
+      return { authBasePath: auth.basePath, authMode: auth.kind };
+  }
+}
+function getPublicConsumer(consumer) {
+  return isSuiteAccountsCurrentConsumerId(consumer) ? getSuiteAccountsCurrentConsumer(consumer) : getSuiteAccountsConsumer(consumer);
+}
+function parseSuiteAccountsPublicConfig(consumer, environment) {
+  const missing = SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS.filter((name) => {
+    const value = environment[name];
+    return typeof value !== "string" || value.trim() === "";
+  });
+  if (missing.length > 0)
+    return deepFreeze({ kind: "missing", missing });
+  const site = parseOrigin(environment.NEXT_PUBLIC_SITE_URL, "NEXT_PUBLIC_SITE_URL");
+  const convexSite = parseOrigin(environment.NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL, "NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL");
+  const deployment = parseConvexDeployment(environment.NEXT_PUBLIC_ACCOUNTS_CONVEX_URL);
+  if (deployment.kind !== "ready") {
+    throw new Error(deployment.kind === "invalid" ? `NEXT_PUBLIC_ACCOUNTS_CONVEX_URL is invalid: ${deployment.message}` : "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL is required.");
+  }
+  const convex = parseOrigin(deployment.url, "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL");
+  const loopback = [site, convex, convexSite].map((url) => LOOPBACK_HOSTS.has(url.hostname));
+  if (loopback.every(Boolean)) {
+    if (consumer === "aicharts") {
+      throw new Error("AI Charts authentication requires its registered production origin.");
+    }
+    if (deployment.transport !== "local" || site.hostname !== convex.hostname || site.hostname !== convexSite.hostname) {
+      throw new Error("Local consumer and Accounts endpoints must use the same loopback host.");
+    }
+    const registration = getPublicConsumer(consumer);
+    return deepFreeze({
+      ...publicAuthConfiguration(registration.auth),
+      canonicalProductOrigin: site.origin,
+      consumer,
+      convexSiteUrl: convexSite.origin,
+      convexUrl: convex.origin,
+      environment: "local",
+      kind: "ready",
+      siteUrl: site.origin,
+      surfaceOrigin: site.origin
+    });
+  }
+  if (loopback.some(Boolean)) {
+    throw new Error("Consumer and Accounts endpoints cannot mix local and remote environments.");
+  }
+  const previewSurfaceValue = environment.NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN;
+  if (previewSurfaceValue !== undefined) {
+    const previewSurface = parseOrigin(previewSurfaceValue, "NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN");
+    if (!previewSurface.hostname.endsWith(".vercel.app")) {
+      throw new Error("NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN must use a generated .vercel.app origin.");
+    }
+    const production = readyRemoteConfig(consumer, site.origin, convex.origin, convexSite.origin);
+    if (production === null) {
+      throw new Error(`${getPublicConsumer(consumer).displayName} and Accounts endpoints ` + "do not match the production deployment.");
+    }
+    return deepFreeze({
+      canonicalProductOrigin: site.origin,
+      environment: "production",
+      kind: "unavailable",
+      message: "Suite authentication is unavailable on generated Vercel Preview origins.",
+      surfaceOrigin: previewSurface.origin
+    });
+  }
+  const remote = readyRemoteConfig(consumer, site.origin, convex.origin, convexSite.origin);
+  if (remote !== null)
+    return remote;
+  throw new Error(`${getPublicConsumer(consumer).displayName} and Accounts endpoints ` + "do not match an owned deployment environment.");
+}
+function suiteAccountsPublicConfigFromEnvironment(consumer, environment = {
+  NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN: process.env.NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN,
+  NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: process.env.NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL,
+  NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: process.env.NEXT_PUBLIC_ACCOUNTS_CONVEX_URL,
+  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL
+}) {
+  try {
+    return parseSuiteAccountsPublicConfig(consumer, environment);
+  } catch (error) {
+    return deepFreeze({
+      kind: "invalid",
+      message: error instanceof Error ? error.message : "Suite Accounts configuration is invalid."
+    });
+  }
 }
 export {
   suiteConvexBrowserEnvironmentForOrigin,

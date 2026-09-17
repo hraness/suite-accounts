@@ -25,6 +25,7 @@ const entrypoints = [
   "src/identity/functions.ts",
   "src/identity/index.ts",
   "src/identity/return-targets.ts",
+  "src/oidc-device-code.ts",
   "src/oidc-rp.ts",
   "src/oidc-session-policy.ts",
   "src/oidc-surface-server.ts",
