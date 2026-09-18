@@ -208,7 +208,7 @@ describe("initiateSuiteOidcDeviceAuthorization", () => {
       expect(init?.method).toBe("POST");
       const request = new Request(url, init);
       return request.text().then(body => {
-        expect(body).toContain("client_id=hraness%3Awrench%3Aproduction%3Av1");
+        expect(body).toContain("client_id=hraness%3Aghostget%3Aproduction%3Av1");
         expect(body).toContain("scope=suite.read");
         return okResponse({
           device_code: expectedResponse.deviceCode,
@@ -227,7 +227,7 @@ describe("initiateSuiteOidcDeviceAuthorization", () => {
         deviceTokenEndpoint:
           "https://account.hraness.com/api/auth/oauth2/device/token",
       },
-      { clientId: "hraness:wrench:production:v1", scopes: ["suite.read"] },
+      { clientId: "hraness:ghostget:production:v1", scopes: ["suite.read"] },
       { fetch: fetcher, now: () => new Date(nowMs) },
     );
 
@@ -275,7 +275,7 @@ describe("pollSuiteOidcDeviceToken", () => {
           "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code",
         );
         expect(body).toContain("device_code=d");
-        expect(body).toContain("client_id=hraness%3Awrench%3Aproduction%3Av1");
+        expect(body).toContain("client_id=hraness%3Aghostget%3Aproduction%3Av1");
         return okResponse({
           access_token: "a".repeat(32),
           expires_in: 3600,
@@ -286,7 +286,7 @@ describe("pollSuiteOidcDeviceToken", () => {
 
     const outcome = await pollSuiteOidcDeviceToken(
       "https://account.hraness.com/api/auth/oauth2/token",
-      { clientId: "hraness:wrench:production:v1", deviceCode: "d".repeat(40) },
+      { clientId: "hraness:ghostget:production:v1", deviceCode: "d".repeat(40) },
       { fetch: fetcher, now: () => new Date(nowMs) },
     );
 

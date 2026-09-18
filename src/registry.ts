@@ -233,7 +233,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "hraness",
   "soulscrape",
   "platonik",
-  "wrench",
+  "ghostget",
 ] as const);
 
 export type SuiteAccountsCurrentConsumerId =
@@ -298,7 +298,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
-  wrench: currentOidcSite("wrench", "Wrench", "https://wrench.rip"),
+  ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
 } as const satisfies Readonly<
   Record<
     SuiteAccountsCurrentConsumerId,
@@ -386,7 +386,7 @@ export const SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
   "hra",
   "peopleblade",
-  "wrench",
+  "ghostget",
 ] as const satisfies readonly SuiteAccountsCurrentOidcConsumerId[]);
 
 export type SuiteAccountsCurrentLinkedOidcConsumerId =

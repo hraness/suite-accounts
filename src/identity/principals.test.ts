@@ -70,7 +70,7 @@ describe("suite principals", () => {
       "soundfish",
       "hra",
       "peopleblade",
-      "wrench",
+      "ghostget",
       "crclte",
       "pub",
     ]);
