@@ -769,13 +769,6 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "Sleepyland"
   },
   {
-    description: "news aggregator",
-    emoji: "\uD83C\uDF27️",
-    href: "https://rough.day",
-    id: "roughday",
-    name: "Rough Day"
-  },
-  {
     description: "history of a generational co",
     emoji: "\uD83E\uDD93",
     href: "https://hraness.com/stripe",
@@ -804,11 +797,11 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "Ghostget"
   },
   {
-    description: "personal message butler",
-    emoji: "\uD83E\uDD16",
-    href: "https://textbutler.app",
-    id: "message-like-me",
-    name: "Textbutler"
+    description: "autonomous trading system research and build specification",
+    emoji: "\uD83D\uDCC8",
+    href: "https://sloptrade.com",
+    id: "sloptrade",
+    name: "Sloptrade"
   },
   {
     description: "visual studio for coding agents",
@@ -865,13 +858,6 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     href: "https://oompa.app",
     id: "hra",
     name: "Oompa"
-  },
-  {
-    description: "content-addressable music",
-    emoji: "\uD83D\uDC1F",
-    href: "https://sound.fish",
-    id: "soundfish",
-    name: "Soundfish"
   },
   {
     description: "open-source tools for agentic research",
