@@ -162,7 +162,7 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "hraness",
   "soulscrape",
   "platonik",
-  "wrench"
+  "ghostget"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -188,7 +188,7 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
-  wrench: currentOidcSite("wrench", "Wrench", "https://wrench.rip")
+  ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -210,7 +210,7 @@ var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
   "hra",
   "peopleblade",
-  "wrench"
+  "ghostget"
 ]);
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);

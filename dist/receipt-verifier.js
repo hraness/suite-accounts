@@ -224,7 +224,7 @@ var SUITE_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
   "peopleblade",
-  "wrench",
+  "ghostget",
   "crclte",
   "pub"
 ]);
@@ -286,7 +286,7 @@ function parseSuiteProduct(value) {
     case "soundfish":
     case "hra":
     case "peopleblade":
-    case "wrench":
+    case "ghostget":
     case "crclte":
     case "pub":
       return ok4(value);
@@ -381,7 +381,7 @@ var SUITE_LINK_PRODUCTS = deepFreeze([
   "soundfish",
   "hra",
   "peopleblade",
-  "wrench",
+  "ghostget",
   "crclte",
   "pub"
 ]);
@@ -397,7 +397,7 @@ function parseSuiteLinkProduct(value) {
     case "soundfish":
     case "hra":
     case "peopleblade":
-    case "wrench":
+    case "ghostget":
     case "crclte":
     case "pub":
       return ok5(parsed.value);

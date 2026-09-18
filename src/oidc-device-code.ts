@@ -18,7 +18,7 @@ const MAX_DEVICE_CODE_LENGTH = 2_048;
 const MAX_VERIFICATION_URI_LENGTH = 4_096;
 
 export type SuiteOidcDeviceAuthorizationRequest = Readonly<{
-  /** Registered OIDC client id, e.g. `hraness:wrench:production:v1`. */
+  /** Registered OIDC client id, e.g. `hraness:ghostget:production:v1`. */
   clientId: string;
   /** Optional space-delimited scope list; suite resource is implied by the client. */
   scopes?: readonly string[];

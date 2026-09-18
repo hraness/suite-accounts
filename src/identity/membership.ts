@@ -84,7 +84,7 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     description: "precise web capabilities for agents",
     emoji: "👻",
     href: "https://ghostget.com",
-    id: "wrench",
+    id: "ghostget",
     name: "Ghostget",
   },
   {
