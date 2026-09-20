@@ -153,7 +153,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "elders",
   "soundfish",
   "oh-computer",
-  "hra",
   "sponge",
   "subcounter",
   "peopleblade",
@@ -179,7 +178,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
-  hra: currentOidcSite("hra", "Oompa", "https://oompa.app"),
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
@@ -207,7 +205,6 @@ var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "hra",
   "peopleblade",
   "ghostget"
 ]);
@@ -741,53 +738,95 @@ function validateSuiteEntitlementReceipt(input, now) {
 // src/identity/membership.ts
 var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   {
-    description: "personal site",
-    emoji: "\uD83E\uDEA2",
-    href: "https://hraness.com",
-    id: "hraness",
-    name: "hraness.com"
-  },
-  {
-    description: "pareto frontier charts",
+    description: "model benchmarks and personal token usage",
     emoji: "\uD83D\uDCC8",
     href: "https://aicharts.io",
     id: "aicharts",
-    name: "AI Charts"
+    name: "AI CHARTS"
   },
   {
-    description: "software factories, in practice",
-    emoji: "\uD83C\uDFED",
-    href: "https://swft.io",
-    id: "swft",
-    name: "SWFT"
+    description: "a knowledge base for agents: markdown, backlinks, search, ontology, and git context",
+    emoji: "\uD83D\uDCDD",
+    href: "https://wordcell.io",
+    id: "kb",
+    name: "WORDCELL"
   },
   {
-    description: "personal life timeline maker",
-    emoji: "\uD83D\uDCCA",
-    href: "https://lifecharts.io",
-    id: "lifedaysleft",
-    name: "Lifecharts"
+    description: "an ontology-centered memory and research framework for agents",
+    emoji: "\uD83D\uDCDA",
+    href: "https://oh.computer",
+    id: "oh-computer",
+    name: "OH"
+  },
+  {
+    description: "deep research tools for connected, cited knowledge, exploring self-evolution",
+    emoji: "\uD83E\uDDFD",
+    href: "https://sponge.computer",
+    id: "sponge",
+    name: "SPONGE"
+  },
+  {
+    description: "a local-first crm for your personal agent",
+    emoji: "\uD83D\uDCC7",
+    href: "https://peopleblade.com",
+    id: "peopleblade",
+    name: "PEOPLEBLADE"
+  },
+  {
+    description: "a fast web gateway with typed website capabilities for agents",
+    emoji: "\uD83D\uDC7B",
+    href: "https://ghostget.com",
+    id: "ghostget",
+    name: "GHOSTGET"
+  },
+  {
+    description: "evidence-backed dossiers and revisable models of people",
+    emoji: "\uD83E\uDDBE",
+    href: "https://soulscrape.com",
+    id: "soulscrape",
+    name: "SOULSCRAPE"
+  },
+  {
+    description: "direct visual art, 3d scenes, animation, and video with your agent",
+    emoji: "\uD83D\uDCF8",
+    href: "https://slopcamera.com",
+    id: "slopcamera",
+    name: "SLOPCAMERA"
+  },
+  {
+    description: "autonomous trading system research and build specification",
+    emoji: "\uD83D\uDCC8",
+    href: "https://sloptrade.com",
+    id: "sloptrade",
+    name: "SLOPTRADE"
+  },
+  {
+    description: "advanced software research organization",
+    emoji: "\uD83E\uDEA2",
+    href: "https://hraness.com",
+    id: "hraness",
+    name: "HRANESS.COM"
   },
   {
     description: "sleep research and a calming sound machine",
     emoji: "\uD83D\uDCA4",
     href: "https://sleepy.land",
     id: "sleepyland",
-    name: "Sleepyland"
+    name: "SLEEPYLAND"
   },
   {
     description: "history of a generational co",
     emoji: "\uD83E\uDD93",
     href: "https://hraness.com/stripe",
     id: "stripe-history",
-    name: "Stripe History"
+    name: "STRIPE HISTORY"
   },
   {
     description: "eds evidence, stratified and sourced",
     emoji: "\uD83E\uDDEC",
     href: "https://hraness.com/eds",
     id: "eds-research",
-    name: "EDS Research"
+    name: "EDS RESEARCH"
   },
   {
     description: "move to puerto rico",
@@ -797,88 +836,39 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "ACT60"
   },
   {
-    description: "precise web capabilities for agents",
-    emoji: "\uD83D\uDC7B",
-    href: "https://ghostget.com",
-    id: "ghostget",
-    name: "Ghostget"
-  },
-  {
-    description: "autonomous trading system research and build specification",
-    emoji: "\uD83D\uDCC8",
-    href: "https://sloptrade.com",
-    id: "sloptrade",
-    name: "Sloptrade"
-  },
-  {
-    description: "visual studio for coding agents",
-    emoji: "\uD83D\uDCF8",
-    href: "https://slopcamera.com",
-    id: "slopcamera",
-    name: "Slopcamera"
-  },
-  {
-    description: "local-first contact book and evidence-backed enrichment for people and agents",
-    emoji: "\uD83D\uDCC7",
-    href: "https://peopleblade.com",
-    id: "peopleblade",
-    name: "PeopleBlade"
-  },
-  {
-    description: "absorb knowledge",
-    emoji: "\uD83E\uDDFD",
-    href: "https://sponge.computer",
-    id: "sponge",
-    name: "Sponge"
-  },
-  {
-    description: "markdown knowledge base for coding agents",
-    emoji: "\uD83D\uDCDD",
-    href: "https://wordcell.io",
-    id: "kb",
-    name: "Wordcell"
-  },
-  {
-    description: "evidence-backed working models of people",
-    emoji: "\uD83E\uDDBE",
-    href: "https://soulscrape.com",
-    id: "soulscrape",
-    name: "Soulscrape"
-  },
-  {
     description: "browser experiments for a game of algorithmic organisms",
     emoji: "\uD83E\uDDA0",
     href: "https://platonik.space",
     id: "platonik",
-    name: "Platonik"
+    name: "PLATONIK"
   },
   {
     description: "repeatable app states for browser agents",
     emoji: "\uD83C\uDFAF",
     href: "https://hraness.com/direct",
     id: "direct",
-    name: "Direct"
-  },
-  {
-    description: "one workspace for coding agents",
-    emoji: "\uD83D\uDFE0",
-    href: "https://oompa.app",
-    id: "hra",
-    name: "Oompa"
-  },
-  {
-    description: "open-source tools for agentic research",
-    emoji: "\uD83D\uDCDA",
-    href: "https://oh.computer",
-    id: "oh-computer",
-    name: "oh.computer"
+    name: "DIRECT"
   },
   {
     description: "reproducible capability checks for agents",
     emoji: "\uD83D\uDCE1",
     href: "https://clankdar.com",
     id: "clankdar",
-    name: "Clankdar"
+    name: "CLANKDAR"
+  },
+  {
+    description: "personal life timeline maker",
+    emoji: "\uD83D\uDCCA",
+    href: "https://lifecharts.io",
+    id: "lifedaysleft",
+    name: "LIFECHARTS"
+  },
+  {
+    description: "software factories, in practice",
+    emoji: "\uD83C\uDFED",
+    href: "https://swft.io",
+    id: "swft",
+    name: "SWFT"
   }
 ]);
 // src/identity/profiles.ts

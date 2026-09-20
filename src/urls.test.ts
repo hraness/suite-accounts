@@ -97,10 +97,7 @@ describe("suite Accounts URLs", () => {
     });
     expect(
       suiteAccountsCurrentOidcClientRegistration("hra", "production"),
-    ).toEqual({
-      callbackUrl: "https://oompa.app/api/suite-auth/callback",
-      clientId: "hraness:hra:production:v1",
-    });
+    ).toBeNull();
     expect(
       suiteAccountsCurrentOidcClientRegistration("oprte", "production"),
     ).toBeNull();
@@ -146,7 +143,7 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:hra:production:v1",
-    )).toBe(true);
+    )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:oprte:production:v1",
     )).toBe(false);

@@ -91,7 +91,6 @@ describe("suite Accounts auth-mode registry", () => {
       "elders",
       "soundfish",
       "oh-computer",
-      "hra",
       "sponge",
       "subcounter",
       "peopleblade",
@@ -118,40 +117,12 @@ describe("suite Accounts auth-mode registry", () => {
       .toBeNull();
   });
 
-  test("registers Oompa as the canonical current client", () => {
-    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra).toEqual({
-      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "Oompa",
-      environments: {
-        production: {
-          billingReturn: { kind: "unsupported" },
-          siteUrl: "https://oompa.app",
-        },
-      },
-      id: "hra",
-    });
-    expect(getSuiteAccountsCurrentConsumerEnvironment(
-      "oprte",
-      "production",
-    )).toBeNull();
-    expect(getSuiteAccountsCurrentConsumerEnvironment(
-      "hra",
-      "production",
-    )).toEqual({
-      billingReturn: { kind: "unsupported" },
-      siteUrl: "https://oompa.app",
-    });
-    expect(isSuiteAccountsCurrentConsumerId("hra")).toBe(true);
-    expect(isSuiteAccountsCurrentConsumerId("oprte")).toBe(false);
-    expect(isSuiteAccountsCurrentConsumerId("draw-money")).toBe(false);
-    expect(isSuiteAccountsCurrentOidcConsumerId("hra")).toBe(true);
-    expect(isSuiteAccountsCurrentOAuthConsumerId("hra")).toBe(true);
+  test("retains the exact current OIDC consumer types", () => {
     expectTypeOf<SuiteAccountsCurrentOidcConsumerId>().toEqualTypeOf<
       | "act60"
       | "elders"
       | "soundfish"
       | "oh-computer"
-      | "hra"
       | "sponge"
       | "subcounter"
       | "peopleblade"
@@ -225,8 +196,7 @@ describe("suite Accounts auth-mode registry", () => {
         "elders",
         "soundfish",
         "oh-computer",
-        "hra",
-        "sponge",
+          "sponge",
         "subcounter",
         "peopleblade",
         "aicharts",
@@ -237,11 +207,9 @@ describe("suite Accounts auth-mode registry", () => {
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",
-      "hra",
       "peopleblade",
       "ghostget",
     ]);
-    expect(suiteAccountsCurrentConsumerRequiresEmailOtp("hra")).toBe(true);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("subcounter"))
       .toBe(true);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("peopleblade"))
@@ -407,7 +375,7 @@ describe("suite Accounts auth-mode registry", () => {
       "accounts",
     )).toBe(false);
     expect(Reflect.set(
-      SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production,
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.soundfish.environments.production,
       "siteUrl",
       "https://attacker.example",
     )).toBe(false);
@@ -435,8 +403,8 @@ describe("suite Accounts auth-mode registry", () => {
     );
     expect(SUITE_ACCOUNTS_CONSUMERS.soundfish.environments.production.siteUrl)
       .toBe("https://sound.fish");
-    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.hra.environments.production.siteUrl)
-      .toBe("https://oompa.app");
+    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.soundfish.environments.production.siteUrl)
+      .toBe("https://sound.fish");
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production.siteUrl,
     ).toBe("https://subcounter.com");

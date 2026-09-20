@@ -6,13 +6,13 @@ import {
   SUITE_ACCOUNTS_WIRE_VERSION,
 } from "./client-configuration";
 
-const hraBinding = {
+const soundfishBinding = {
   authMode: "oidc-rp",
-  callbackUrl: "https://oompa.app/api/suite-auth/callback",
-  clientId: "hraness:hra:production:v1",
-  consumer: "hra",
+  callbackUrl: "https://sound.fish/api/suite-auth/callback",
+  clientId: "hraness:soundfish:production:v1",
+  consumer: "soundfish",
   environment: "production",
-  origin: "https://oompa.app",
+  origin: "https://sound.fish",
 } as const;
 
 const subcounterBinding = {
@@ -49,12 +49,12 @@ describe("suite Accounts client configuration", () => {
       .toEqual({ ok: false, error: "invalid-client-id" });
   });
   test("derives every authority-controlled value from one exact binding", () => {
-    const result = createSuiteAccountsClientConfiguration(hraBinding);
+    const result = createSuiteAccountsClientConfiguration(soundfishBinding);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value).toEqual({
       authBasePath: "/api/suite-auth",
-      binding: hraBinding,
+      binding: soundfishBinding,
       configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
       provider: {
         authorizationEndpoint:
@@ -94,20 +94,20 @@ describe("suite Accounts client configuration", () => {
       "https://attacker.example",
     )).toBe(false);
     expect(result.value.provider.issuer).toBe("https://account.hraness.com");
-    expect(result.value.binding.origin).toBe("https://oompa.app");
+    expect(result.value.binding.origin).toBe("https://sound.fish");
   });
 
   test("rejects every caller-selected trust value", () => {
     for (const field of ["issuer", "jwksEndpoint", "resource", "wireVersion"]) {
       expect(createSuiteAccountsClientConfiguration({
-        ...hraBinding,
+        ...soundfishBinding,
         [field]: "https://attacker.example",
       })).toEqual({ error: "invalid-binding", ok: false });
     }
   });
 
   test("rejects hidden, symbolic, and accessor binding fields", () => {
-    const hidden: Record<PropertyKey, unknown> = { ...hraBinding };
+    const hidden: Record<PropertyKey, unknown> = { ...soundfishBinding };
     Object.defineProperty(hidden, "issuer", {
       enumerable: false,
       value: "https://attacker.example",
@@ -118,7 +118,7 @@ describe("suite Accounts client configuration", () => {
     });
 
     const symbolic = {
-      ...hraBinding,
+      ...soundfishBinding,
       [Symbol("jwksEndpoint")]: "https://attacker.example/jwks",
     };
     expect(createSuiteAccountsClientConfiguration(symbolic)).toEqual({
@@ -127,12 +127,12 @@ describe("suite Accounts client configuration", () => {
     });
 
     let consumerReads = 0;
-    const accessor: Record<string, unknown> = { ...hraBinding };
+    const accessor: Record<string, unknown> = { ...soundfishBinding };
     Object.defineProperty(accessor, "consumer", {
       enumerable: true,
       get() {
         consumerReads += 1;
-        return "hra";
+        return "soundfish";
       },
     });
     expect(createSuiteAccountsClientConfiguration(accessor)).toEqual({
@@ -143,7 +143,7 @@ describe("suite Accounts client configuration", () => {
   });
 
   test("turns reflective proxy failures into an invalid binding", () => {
-    const hostile = new Proxy({ ...hraBinding }, {
+    const hostile = new Proxy({ ...soundfishBinding }, {
       ownKeys() {
         throw new Error("hostile ownKeys trap");
       },
@@ -158,7 +158,7 @@ describe("suite Accounts client configuration", () => {
     let descriptorReads = 0;
     let propertyReads = 0;
     let ownKeyReads = 0;
-    const observed = new Proxy({ ...hraBinding }, {
+    const observed = new Proxy({ ...soundfishBinding }, {
       get() {
         propertyReads += 1;
         throw new Error("binding properties must not be read directly");
@@ -181,23 +181,23 @@ describe("suite Accounts client configuration", () => {
 
   test("rejects a different origin, client, callback, or auth mode", () => {
     const mutations = [
-      { ...hraBinding, origin: "https://example.com" },
-      { ...hraBinding, clientId: "hraness:soundfish:production:v1" },
-      { ...hraBinding, callbackUrl: "https://oompa.app/callback" },
-      { ...hraBinding, authMode: "proxy" },
+      { ...soundfishBinding, origin: "https://example.com" },
+      { ...soundfishBinding, clientId: "hraness:peopleblade:production:v1" },
+      { ...soundfishBinding, callbackUrl: "https://sound.fish/callback" },
+      { ...soundfishBinding, authMode: "proxy" },
     ] as const;
     for (const mutation of mutations) {
       expect(createSuiteAccountsClientConfiguration(mutation).ok).toBe(false);
     }
   });
 
-  test("rejects the retired Oompa origin and callback without a compatibility binding", () => {
+  test("rejects an unrelated retired origin and callback without a compatibility binding", () => {
     const retiredOrigin = "https://oompa.dev";
     const retiredCallback = `${retiredOrigin}/api/suite-auth/callback`;
     for (const [binding, error] of [
-      [{ ...hraBinding, origin: retiredOrigin }, "invalid-origin"],
-      [{ ...hraBinding, callbackUrl: retiredCallback }, "invalid-callback-url"],
-      [{ ...hraBinding, origin: retiredOrigin, callbackUrl: retiredCallback }, "invalid-origin"],
+      [{ ...soundfishBinding, origin: retiredOrigin }, "invalid-origin"],
+      [{ ...soundfishBinding, callbackUrl: retiredCallback }, "invalid-callback-url"],
+      [{ ...soundfishBinding, origin: retiredOrigin, callbackUrl: retiredCallback }, "invalid-origin"],
     ] as const) {
       expect(createSuiteAccountsClientConfiguration(binding)).toEqual({
         error,

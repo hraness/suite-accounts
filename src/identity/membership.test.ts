@@ -27,6 +27,20 @@ describe("suite membership product list", () => {
     expect(product).toBeDefined();
   });
 
+  test("excludes retired Oompa from current membership marketing", () => {
+    expect(SUITE_MEMBERSHIP_PRODUCTS.some(entry => String(entry.id) === "hra"))
+      .toBe(false);
+    expect(SUITE_MEMBERSHIP_PRODUCTS.some(entry => entry.id === "peopleblade"))
+      .toBe(true);
+  });
+
+  test("keeps only the admitted membership IDs in portfolio priority order", () => {
+    expect(SUITE_MEMBERSHIP_PRODUCTS.map(entry => entry.id)).toEqual(["aicharts", "kb", "oh-computer", "sponge", "peopleblade", "ghostget", "soulscrape", "slopcamera", "sloptrade", "hraness", "sleepyland", "stripe-history", "eds-research", "act60", "platonik", "direct", "clankdar", "lifedaysleft", "swft"]);
+    for (const entry of SUITE_MEMBERSHIP_PRODUCTS) {
+      expect(String(entry.name)).toBe(entry.name.toUpperCase());
+    }
+  });
+
   test("keeps the list deeply frozen", () => {
     expect(Object.isFrozen(SUITE_MEMBERSHIP_PRODUCTS)).toBe(true);
     for (const entry of SUITE_MEMBERSHIP_PRODUCTS) {

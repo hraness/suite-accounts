@@ -13,14 +13,14 @@ import {
 } from "./oidc-surface-server";
 
 const configured = {
-  NEXT_PUBLIC_SITE_URL: "https://oompa.app",
+  NEXT_PUBLIC_SITE_URL: "https://sound.fish",
   SUITE_IDENTITY_RECEIPT_KEY_VERSION: "test-v1",
   SUITE_OIDC_COOKIE_SECRET: "0123456789abcdef0123456789abcdef",
 } as const;
 
 describe("shared Suite OIDC surface server", () => {
   test("binds only an exact registered environment origin", () => {
-    expect(suiteEnvironmentForConsumerOrigin("hra", "https://oompa.app"))
+    expect(suiteEnvironmentForConsumerOrigin("soundfish", "https://sound.fish"))
       .toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
       "subcounter",
@@ -50,17 +50,17 @@ describe("shared Suite OIDC surface server", () => {
       "sponge",
       "https://spongesearch.com",
     )).toBeNull();
-    expect(suiteEnvironmentForConsumerOrigin("hra", undefined)).toBeNull();
+    expect(suiteEnvironmentForConsumerOrigin("soundfish", undefined)).toBeNull();
   });
 
   test("creates a public client only from complete checked configuration", () => {
-    expect(createSurfaceSuiteRelyingParty("hra", {
+    expect(createSurfaceSuiteRelyingParty("soundfish", {
       ...configured,
-      NEXT_PUBLIC_SITE_URL: "https://oompa.app",
+      NEXT_PUBLIC_SITE_URL: "https://sound.fish",
     })?.configuration).toMatchObject({
-      callbackUrl: "https://oompa.app/api/suite-auth/callback",
-      clientId: "hraness:hra:production:v1",
-      siteUrl: "https://oompa.app",
+      callbackUrl: "https://sound.fish/api/suite-auth/callback",
+      clientId: "hraness:soundfish:production:v1",
+      siteUrl: "https://sound.fish",
     });
     expect(createSurfaceSuiteRelyingParty("subcounter", {
       NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
@@ -80,9 +80,9 @@ describe("shared Suite OIDC surface server", () => {
       NEXT_PUBLIC_SITE_URL: "https://foreign.example",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
-    expect(createSurfaceSuiteRelyingParty("hra", {
+    expect(createSurfaceSuiteRelyingParty("soundfish", {
       ...configured,
-      NEXT_PUBLIC_SITE_URL: "https://oompa.app.evil",
+      NEXT_PUBLIC_SITE_URL: "https://sound.fish.evil",
     })).toBeNull();
     expect(createSurfaceSuiteRelyingParty("act60", {
       NEXT_PUBLIC_SITE_URL: "https://act60.me",
@@ -100,23 +100,23 @@ describe("shared Suite OIDC surface server", () => {
 
   test("does not expose a server session from a foreign origin", async () => {
     const session = await suiteOidcSurfaceServerSession(
-      "hra",
+      "soundfish",
       new Request("https://evil.example/api/private"),
       configured,
     );
     expect(session).toBeNull();
     expect(await suiteOidcSurfaceServerAccountSession(
-      "hra",
+      "soundfish",
       new Request("https://evil.example/join"),
       configured,
     )).toBeNull();
     expect(await suiteOidcSurfaceServerVerifiedAccountEmail(
-      "hra",
+      "soundfish",
       new Request("https://evil.example/join"),
       configured,
     )).toBeNull();
     expect(await suiteOidcSurfaceServerVerifiedEmail(
-      "hra",
+      "soundfish",
       new Request("https://evil.example/join"),
       configured,
     )).toBeNull();
@@ -130,11 +130,11 @@ describe("shared Suite OIDC surface server", () => {
     if (!parsedAccountId.ok || !parsedUsername.ok) {
       throw new Error("Expected valid Suite identity values.");
     }
-    const request = new Request("https://oompa.app/private-profile");
+    const request = new Request("https://sound.fish/private-profile");
 
     const accountVerifiedEmail =
       await suiteOidcSurfaceServerVerifiedAccountEmail(
-        "hra",
+        "soundfish",
         request,
         configured,
         {
@@ -160,7 +160,7 @@ describe("shared Suite OIDC surface server", () => {
     });
 
     const verifiedEmail = await suiteOidcSurfaceServerVerifiedEmail(
-      "hra",
+      "soundfish",
       request,
       configured,
       {
