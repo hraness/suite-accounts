@@ -207,16 +207,16 @@ describe("suite OAuth relying party", () => {
     expect(relyingParty.configuration.provider.tokenEndpoint).toBe(
       "https://account.hraness.com/api/auth/oauth2/token",
     );
-    const hra = createSuiteOidcRelyingParty({
-      consumer: "hra",
+    const peopleblade = createSuiteOidcRelyingParty({
+      consumer: "peopleblade",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       receiptKeyVersion: "v1",
     });
-    expect(hra.configuration).toMatchObject({
-      callbackUrl: "https://oompa.app/api/suite-auth/callback",
-      clientId: "hraness:hra:production:v1",
-      siteUrl: "https://oompa.app",
+    expect(peopleblade.configuration).toMatchObject({
+      callbackUrl: "https://peopleblade.com/api/suite-auth/callback",
+      clientId: "hraness:peopleblade:production:v1",
+      siteUrl: "https://peopleblade.com",
     });
   });
 

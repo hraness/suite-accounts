@@ -225,7 +225,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "elders",
   "soundfish",
   "oh-computer",
-  "hra",
   "sponge",
   "subcounter",
   "peopleblade",
@@ -264,9 +263,9 @@ function currentOidcSite<const Consumer extends SuiteAccountsCurrentConsumerId>(
 /**
  * Current Accounts authority registrations.
  *
- * Oompa (consumer ID `hra`) is the canonical current registration. Historical
- * predecessor identities remain parseable, but neither current nor deprecated
- * registration helpers retain their browser origins or OAuth clients.
+ * Retired Oompa and predecessor identities remain parseable as historical
+ * evidence, but neither current nor deprecated registration helpers retain
+ * their browser origins or OAuth clients.
  */
 export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
@@ -274,7 +273,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
-  hra: currentOidcSite("hra", "Oompa", "https://oompa.app"),
   sponge: currentOidcSite(
     "sponge",
     "Sponge",
@@ -384,7 +382,6 @@ export type SuiteAccountsCurrentEmailOtpRequiredOidcConsumerId =
 
 export const SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "hra",
   "peopleblade",
   "ghostget",
 ] as const satisfies readonly SuiteAccountsCurrentOidcConsumerId[]);

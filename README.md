@@ -65,12 +65,13 @@ and adds no billing return, linked-product receipt, or native device grant.
 Accounts service adoption and product activation are separate from this
 package contract; a valid factory binding is not proof of live sign-in.
 
-Version 0.5.4 binds the current Oompa registration to
-`https://oompa.app`. The stable `hra` consumer ID and
-`hraness:hra:production:v1` client ID remain unchanged, so existing identity
-links, receipts, and stored evidence stay compatible. A product binding must
-supply the `https://oompa.app` origin and callback. Previous production
-origins have no current Accounts authority or compatibility redirect.
+Oompa (`hra`) is retired from current browser registration and membership
+listing. Its former client `hraness:hra:production:v1`, origins and callbacks
+cannot create a current binding. Historical product identities, links and
+receipt evidence remain readable; retirement does not delete Accounts data.
+This retirement follows the published v0.9.13 release. Deployments adopting
+it must pin a reviewed commit containing the change until a later immutable
+release includes it; installing v0.9.13 alone does not retire the client.
 
 Version 0.5.2 builds the profile manifest with UI v0.5.12 and its fail-fast
 property-validation contract. Compiler adopters must use compatible manifests
@@ -90,11 +91,11 @@ import { createSuiteAccountsClientConfiguration } from
 
 const configuration = createSuiteAccountsClientConfiguration({
   authMode: "oidc-rp",
-  callbackUrl: "https://oompa.app/api/suite-auth/callback",
-  clientId: "hraness:hra:production:v1",
-  consumer: "hra",
+  callbackUrl: "https://sound.fish/api/suite-auth/callback",
+  clientId: "hraness:soundfish:production:v1",
+  consumer: "soundfish",
   environment: "production",
-  origin: "https://oompa.app",
+  origin: "https://sound.fish",
 });
 
 if (!configuration.ok) {
@@ -105,7 +106,7 @@ configuration.value.provider.issuer;
 // "https://account.hraness.com"
 ```
 
-For the registered Oompa production client, the checked result begins with:
+For the registered Soundfish production client, the checked result begins with:
 
 ```json
 {

@@ -42,11 +42,11 @@ describe("README product contract", () => {
   test("derives the documented first proof from current authority", () => {
     const configuration = createSuiteAccountsClientConfiguration({
       authMode: "oidc-rp",
-      callbackUrl: "https://oompa.app/api/suite-auth/callback",
-      clientId: "hraness:hra:production:v1",
-      consumer: "hra",
+      callbackUrl: "https://sound.fish/api/suite-auth/callback",
+      clientId: "hraness:soundfish:production:v1",
+      consumer: "soundfish",
       environment: "production",
-      origin: "https://oompa.app",
+      origin: "https://sound.fish",
     });
 
     expect(configuration.ok).toBe(true);
