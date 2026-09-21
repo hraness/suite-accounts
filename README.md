@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.13"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.14"
   }
 }
 ```
@@ -418,11 +418,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.9.13` release for this package version.
+Pin the immutable `v0.9.14` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.9.14` | Renames the HRANESS.COM membership description to the current organization statement, "tools for agents and humans". |
 | `v0.9.13` | Adds the OAuth 2.0 Device Authorization Grant client protocol under `./oidc-device-code`, registers Ghostget (`https://ghostget.com`) as a current-only email-code OIDC client with an exact origin and callback, and makes `deviceAuthorizationEndpoint` / `deviceTokenEndpoint` available in the closed provider configuration. |
 | `v0.9.11` | Adds Clankdar (`https://clankdar.com`) to the shared membership product list. |
 | `v0.9.10` | Registers Platonik at `https://platonik.space` as a current-only email-code OIDC client with an exact origin and callback. |
