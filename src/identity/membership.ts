@@ -81,7 +81,7 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "SLOPTRADE",
   },
   {
-    description: "advanced software research organization",
+    description: "tools for agents and humans",
     emoji: "🪢",
     href: "https://hraness.com",
     id: "hraness",

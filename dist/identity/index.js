@@ -801,7 +801,7 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "SLOPTRADE"
   },
   {
-    description: "advanced software research organization",
+    description: "tools for agents and humans",
     emoji: "\uD83E\uDEA2",
     href: "https://hraness.com",
     id: "hraness",
