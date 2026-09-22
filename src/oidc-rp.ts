@@ -97,6 +97,13 @@ type Transaction = TransactionBase & (
 export type SuiteOidcFreshAuthenticationInput = Readonly<{
   context: string;
   expiresAtMs: number;
+  /**
+   * Optional reuse window floor. When present, the authorization request sets
+   * a positive OIDC `max_age` so the provider may satisfy `prompt=login` with
+   * a live session whose authentication is at or after this instant instead
+   * of forcing another interactive sign-in. Omitted means always re-auth.
+   */
+  authenticationNotBeforeMs?: number;
 }>;
 
 /** Verified evidence only. The product must durably consume it before authorizing. */
@@ -489,14 +496,20 @@ function parseFreshAuthenticationInput(
   if (!isRecord(value) || !safeInteger(nowMs)
     || !safeInteger(nowMs + TRANSACTION_TTL_MS)) return null;
   const descriptors = Object.getOwnPropertyDescriptors(value);
-  if (Reflect.ownKeys(descriptors).length !== 2
+  const ownKeys = Reflect.ownKeys(descriptors);
+  if ((ownKeys.length !== 2 && ownKeys.length !== 3)
     || !("value" in (descriptors["context"] ?? {}))
     || !("value" in (descriptors["expiresAtMs"] ?? {}))) return null;
+  if (ownKeys.length === 3 && !("value" in (descriptors["authenticationNotBeforeMs"] ?? {}))) return null;
   const context: unknown = descriptors["context"]!.value;
   const expiresAtMs: unknown = descriptors["expiresAtMs"]!.value;
+  const notBeforeMs: unknown = descriptors["authenticationNotBeforeMs"]?.value;
   if (!validFreshContext(context) || !safeInteger(expiresAtMs)
-    || expiresAtMs <= nowMs || expiresAtMs > nowMs + TRANSACTION_TTL_MS) return null;
-  return { context, expiresAtMs };
+    || expiresAtMs <= nowMs || expiresAtMs > nowMs + TRANSACTION_TTL_MS
+    || (notBeforeMs !== undefined && (!safeInteger(notBeforeMs) || notBeforeMs < 0))) return null;
+  return notBeforeMs === undefined
+    ? { context, expiresAtMs }
+    : { context, expiresAtMs, authenticationNotBeforeMs: notBeforeMs };
 }
 
 function parseStoredEntitlements(value: unknown): VerifiedSuiteEntitlements | null {
@@ -1621,12 +1634,18 @@ export function createSuiteOidcRelyingParty(
     authorize.searchParams.set("code_challenge", await sha256Base64Url(verifier));
     authorize.searchParams.set("code_challenge_method", "S256");
     authorize.searchParams.set("nonce", transaction.nonce);
-    if (
-      requireFresh || suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)
-    ) {
+    // Ordinary authorization never forces a fresh sign-in: a live Accounts
+    // session already satisfies the checked client. The provider-side hook
+    // still forces `prompt=login` for a session that lacks the required
+    // email-OTP method, so nothing here weakens the method boundary.
+    if (requireFresh) {
       authorize.searchParams.set("prompt", "login");
+      const notBefore = fresh?.authenticationNotBeforeMs;
+      authorize.searchParams.set(
+        "max_age",
+        String(notBefore === undefined ? 0 : Math.max(0, Math.ceil((issuedAtMs - notBefore) / 1_000))),
+      );
     }
-    if (requireFresh) authorize.searchParams.set("max_age", "0");
     authorize.searchParams.set("redirect_uri", configuration.callbackUrl);
     authorize.searchParams.set("resource", provider.resource);
     authorize.searchParams.set("response_type", "code");

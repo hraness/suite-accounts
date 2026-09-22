@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.14"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.15"
   }
 }
 ```
@@ -347,12 +347,17 @@ Use the explicit `startFreshAuthentication(request, input)` and
 action needs recently authenticated account evidence. Both methods are
 server-only. The existing surface handler does not opt into this flow.
 
-Pass exactly `{ context, expiresAtMs }` as the start input. `context` is an opaque
+Pass `{ context, expiresAtMs }` as the start input, optionally with
+`authenticationNotBeforeMs`. `context` is an opaque
 32–256 character value using only ASCII letters, digits, `_` and `-`.
 Create it on the product server and bind it to a durable, short-lived action;
 do not copy browser parameters, personal data or credentials into it.
 `expiresAtMs` must be a safe integer after server time and no more than 10
-minutes ahead. The request still uses the exact registered start URL, method
+minutes ahead. `authenticationNotBeforeMs`, when present, must be a
+non-negative safe integer and maps to a positive OIDC `max_age`: the provider
+may satisfy the login prompt with a live session authenticated at or after
+that instant. Omit it to force a fresh interactive sign-in every time. The
+request still uses the exact registered start URL, method
 and same-origin rules. The context is encrypted in the transaction cookie and
 is not added to the authorization URL, continuation HTML or browser session.
 
@@ -386,8 +391,12 @@ response may leave a consumed OAuth code; reconcile durable product state and
 start a new transaction instead of assuming the code can be replayed. Ordinary
 login, session access and refresh cannot produce fresh completion evidence.
 
-The SDK requests `prompt=login` and `max_age=0`, then independently checks the
-signed result. Request parameters alone are insufficient evidence. See
+The SDK requests `prompt=login` with `max_age=0` by default, then independently
+checks the signed result. An optional `authenticationNotBeforeMs` input maps to
+a positive `max_age`, letting the provider satisfy the prompt with a recent
+live session instead of another interactive sign-in; the same verified
+`auth_time` evidence is still returned for the product's own freshness check.
+Request parameters alone are insufficient evidence. See
 [OIDC authentication-time validation](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation).
 Qualify the authority's authentication-time semantics and the product's durable
 approval flow before activating privileged actions.
@@ -418,11 +427,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.9.14` release for this package version.
+Pin the immutable `v0.9.15` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.9.15` | Stops forcing `prompt=login` on ordinary authorization for email-OTP consumers so a valid live session can satisfy sign-in, and adds optional `authenticationNotBeforeMs` to `startFreshAuthentication`, mapping a server-owned freshness floor to a positive OIDC `max_age` so a sufficiently recent live session may satisfy the login prompt. Omitting it preserves the unconditional `max_age=0` re-authentication. |
 | `v0.9.14` | Renames the HRANESS.COM membership description to the current organization statement, "tools for agents and humans". |
 | `v0.9.13` | Adds the OAuth 2.0 Device Authorization Grant client protocol under `./oidc-device-code`, registers Ghostget (`https://ghostget.com`) as a current-only email-code OIDC client with an exact origin and callback, and makes `deviceAuthorizationEndpoint` / `deviceTokenEndpoint` available in the closed provider configuration. |
 | `v0.9.11` | Adds Clankdar (`https://clankdar.com`) to the shared membership product list. |

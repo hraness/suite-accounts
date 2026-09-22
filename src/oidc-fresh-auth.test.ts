@@ -56,13 +56,17 @@ function validStartInput(value: unknown): boolean {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
   const keys = Object.keys(candidate).sort();
-  return keys.length === 2 && keys[0] === "context" && keys[1] === "expiresAtMs"
+  const notBefore = candidate["authenticationNotBeforeMs"];
+  return (keys.join(",") === "context,expiresAtMs"
+      || keys.join(",") === "authenticationNotBeforeMs,context,expiresAtMs")
     && typeof candidate["context"] === "string"
     && /^[A-Za-z0-9_-]{32,256}$/u.test(candidate["context"])
     && typeof candidate["expiresAtMs"] === "number"
     && Number.isSafeInteger(candidate["expiresAtMs"])
     && candidate["expiresAtMs"] > initialTime
-    && candidate["expiresAtMs"] <= initialTime + 600_000;
+    && candidate["expiresAtMs"] <= initialTime + 600_000
+    && (keys.length === 2
+      || (typeof notBefore === "number" && Number.isSafeInteger(notBefore) && notBefore >= 0));
 }
 
 async function fixture() {
@@ -227,6 +231,7 @@ describe("fresh OIDC authentication completion", () => {
     expect(started.status).toBe(302);
     const authorization = new URL(started.headers.get("location")!);
     expect(authorization.searchParams.get("prompt")).toBe("login");
+    expect(authorization.searchParams.get("max_age")).toBe("0");
     expect(authorization.searchParams.get("code_challenge_method")).toBe("S256");
     expect(authorization.searchParams.get("client_id")).toBe(clientId);
     expect(authorization.href).not.toContain(context);
@@ -302,11 +307,36 @@ describe("fresh OIDC authentication completion", () => {
     { context, expiresAtMs: Number.MAX_SAFE_INTEGER + 1 },
     { context, expiresAtMs: String(initialTime + 1) },
     { context, expiresAtMs: initialTime + 1, returnTo: "/settings" },
+    { context, expiresAtMs: initialTime + 1, authenticationNotBeforeMs: -1 },
+    { context, expiresAtMs: initialTime + 1, authenticationNotBeforeMs: initialTime + 0.5 },
+    { context, expiresAtMs: initialTime + 1, authenticationNotBeforeMs: "0" },
+    { context, expiresAtMs: initialTime + 1, authenticationNotBeforeMs: null },
+    { context, expiresAtMs: initialTime + 1, notBeforeMs: initialTime },
   ])("rejects malformed server start input %# without provider work", async input => {
     const f = await fixture();
     const response = await f.relyingParty.startFreshAuthentication(request("/api/suite-auth/start"), input);
     expect(response.status).toBeGreaterThanOrEqual(400);
     expect(response.headers.get("location")).toBeNull();
+    expect(f.calls).toEqual([]);
+  });
+
+  test.each([
+    [undefined, "0"],
+    [initialTime, "0"],
+    [initialTime - 600_000, "600"],
+    [initialTime - 60_001, "61"],
+    [initialTime - 600_500, "601"],
+    [initialTime + 60_000, "0"],
+  ])("an optional not-before floor maps to a bounded max_age %#", async (notBeforeMs, expected) => {
+    const f = await fixture();
+    const input = notBeforeMs === undefined
+      ? { context, expiresAtMs: initialTime + 60_000 }
+      : { context, expiresAtMs: initialTime + 60_000, authenticationNotBeforeMs: notBeforeMs };
+    const started = await f.start(input);
+    expect(started.status).toBe(302);
+    const authorization = new URL(started.headers.get("location")!);
+    expect(authorization.searchParams.get("prompt")).toBe("login");
+    expect(authorization.searchParams.get("max_age")).toBe(expected);
     expect(f.calls).toEqual([]);
   });
 

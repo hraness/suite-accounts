@@ -1146,13 +1146,17 @@ function parseFreshAuthenticationInput(value, nowMs) {
   if (!isRecord3(value) || !safeInteger2(nowMs) || !safeInteger2(nowMs + TRANSACTION_TTL_MS))
     return null;
   const descriptors = Object.getOwnPropertyDescriptors(value);
-  if (Reflect.ownKeys(descriptors).length !== 2 || !("value" in (descriptors["context"] ?? {})) || !("value" in (descriptors["expiresAtMs"] ?? {})))
+  const ownKeys = Reflect.ownKeys(descriptors);
+  if (ownKeys.length !== 2 && ownKeys.length !== 3 || !("value" in (descriptors["context"] ?? {})) || !("value" in (descriptors["expiresAtMs"] ?? {})))
+    return null;
+  if (ownKeys.length === 3 && !("value" in (descriptors["authenticationNotBeforeMs"] ?? {})))
     return null;
   const context = descriptors["context"].value;
   const expiresAtMs = descriptors["expiresAtMs"].value;
-  if (!validFreshContext(context) || !safeInteger2(expiresAtMs) || expiresAtMs <= nowMs || expiresAtMs > nowMs + TRANSACTION_TTL_MS)
+  const notBeforeMs = descriptors["authenticationNotBeforeMs"]?.value;
+  if (!validFreshContext(context) || !safeInteger2(expiresAtMs) || expiresAtMs <= nowMs || expiresAtMs > nowMs + TRANSACTION_TTL_MS || notBeforeMs !== undefined && (!safeInteger2(notBeforeMs) || notBeforeMs < 0))
     return null;
-  return { context, expiresAtMs };
+  return notBeforeMs === undefined ? { context, expiresAtMs } : { context, expiresAtMs, authenticationNotBeforeMs: notBeforeMs };
 }
 function parseStoredEntitlements(value) {
   if (!isRecord3(value) || !Array.isArray(value["features"]))
@@ -1811,11 +1815,11 @@ function createSuiteOidcRelyingParty(options) {
     authorize.searchParams.set("code_challenge", await sha256Base64Url(verifier));
     authorize.searchParams.set("code_challenge_method", "S256");
     authorize.searchParams.set("nonce", transaction.nonce);
-    if (requireFresh || suiteAccountsCurrentConsumerRequiresEmailOtp(consumer)) {
+    if (requireFresh) {
       authorize.searchParams.set("prompt", "login");
+      const notBefore = fresh?.authenticationNotBeforeMs;
+      authorize.searchParams.set("max_age", String(notBefore === undefined ? 0 : Math.max(0, Math.ceil((issuedAtMs - notBefore) / 1000))));
     }
-    if (requireFresh)
-      authorize.searchParams.set("max_age", "0");
     authorize.searchParams.set("redirect_uri", configuration.callbackUrl);
     authorize.searchParams.set("resource", provider.resource);
     authorize.searchParams.set("response_type", "code");
