@@ -23,7 +23,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.15"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.16"
   }
 }
 ```
@@ -427,11 +427,12 @@ values.
 
 ## Current compatibility evidence
 
-Pin the immutable `v0.9.15` release for this package version.
+Pin the immutable `v0.9.16` release for this package version.
 Previously published immutable releases remain unchanged:
 
 | Release | Checked change |
 | --- | --- |
+| `v0.9.16` | Retires Elders and Subcounter from every registration surface: both products keep parseable historical identities, but neither retains an OIDC client, origin, or browser-token grant. The product Convex browser-token admission list is empty until a reviewed product is admitted. |
 | `v0.9.15` | Stops forcing `prompt=login` on ordinary authorization for email-OTP consumers so a valid live session can satisfy sign-in, and adds optional `authenticationNotBeforeMs` to `startFreshAuthentication`, mapping a server-owned freshness floor to a positive OIDC `max_age` so a sufficiently recent live session may satisfy the login prompt. Omitting it preserves the unconditional `max_age=0` re-authentication. |
 | `v0.9.14` | Renames the HRANESS.COM membership description to the current organization statement, "tools for agents and humans". |
 | `v0.9.13` | Adds the OAuth 2.0 Device Authorization Grant client protocol under `./oidc-device-code`, registers Ghostget (`https://ghostget.com`) as a current-only email-code OIDC client with an exact origin and callback, and makes `deviceAuthorizationEndpoint` / `deviceTokenEndpoint` available in the closed provider configuration. |

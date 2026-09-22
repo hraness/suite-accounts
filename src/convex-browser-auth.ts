@@ -39,9 +39,8 @@ export const SUITE_CONVEX_BROWSER_AUDIENCE_PATH = "/convex" as const;
  * Registration is deliberately separate from the broader OIDC consumer
  * union. Adding a suite RP must not silently let it mint a browser bearer.
  */
-export const SUITE_CONVEX_BROWSER_CONSUMER_IDS = deepFreeze([
-  "elders",
-] as const satisfies readonly SuiteAccountsOidcConsumerId[]);
+export const SUITE_CONVEX_BROWSER_CONSUMER_IDS = deepFreeze([] as
+  readonly SuiteAccountsOidcConsumerId[]);
 
 export type SuiteConvexBrowserConsumerId =
   (typeof SUITE_CONVEX_BROWSER_CONSUMER_IDS)[number];

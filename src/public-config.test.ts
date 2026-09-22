@@ -62,53 +62,67 @@ describe("suite Accounts public configuration", () => {
     }
   });
 
-  test("binds Subcounter public configuration only on its canonical surface", () => {
+  test("binds PeopleBlade public configuration only on its canonical surface", () => {
     const accounts = getSuiteAccountsDeployment("production");
-    expect(parseSuiteAccountsPublicConfig("subcounter", {
+    expect(parseSuiteAccountsPublicConfig("peopleblade", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
-      NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
+      NEXT_PUBLIC_SITE_URL: "https://peopleblade.com",
     })).toEqual({
       authBasePath: "/api/suite-auth",
       authMode: "oidc-rp",
-      canonicalProductOrigin: "https://subcounter.com",
-      consumer: "subcounter",
+      canonicalProductOrigin: "https://peopleblade.com",
+      consumer: "peopleblade",
       convexSiteUrl: accounts.convexSiteUrl,
       convexUrl: accounts.convexUrl,
       environment: "production",
       kind: "ready",
-      siteUrl: "https://subcounter.com",
-      surfaceOrigin: "https://subcounter.com",
+      siteUrl: "https://peopleblade.com",
+      surfaceOrigin: "https://peopleblade.com",
     });
 
-    expect(() => parseSuiteAccountsPublicConfig("subcounter", {
+    expect(() => parseSuiteAccountsPublicConfig("peopleblade", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
       NEXT_PUBLIC_SITE_URL: "https://foreign.example",
-    })).toThrow("Subcounter and Accounts endpoints do not match");
-    expect(() => parseSuiteAccountsPublicConfig("subcounter", {
+    })).toThrow("PeopleBlade and Accounts endpoints do not match");
+    expect(() => parseSuiteAccountsPublicConfig("peopleblade", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
-      NEXT_PUBLIC_SITE_URL: "https://subcounter-git-main.vercel.app",
-    })).toThrow("Subcounter and Accounts endpoints do not match");
+      NEXT_PUBLIC_SITE_URL: "https://peopleblade-git-main.vercel.app",
+    })).toThrow("PeopleBlade and Accounts endpoints do not match");
   });
 
-  test("keeps Suite authentication unavailable on Subcounter previews", () => {
+  test("keeps Suite authentication unavailable on PeopleBlade previews", () => {
     const accounts = getSuiteAccountsDeployment("production");
-    expect(parseSuiteAccountsPublicConfig("subcounter", {
+    expect(parseSuiteAccountsPublicConfig("peopleblade", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
-      NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
+      NEXT_PUBLIC_SITE_URL: "https://peopleblade.com",
       NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
-        "https://subcounter-git-main.vercel.app",
+        "https://peopleblade-git-main.vercel.app",
     })).toEqual({
-      canonicalProductOrigin: "https://subcounter.com",
+      canonicalProductOrigin: "https://peopleblade.com",
       environment: "production",
       kind: "unavailable",
       message:
         "Suite authentication is unavailable on generated Vercel Preview origins.",
-      surfaceOrigin: "https://subcounter-git-main.vercel.app",
+      surfaceOrigin: "https://peopleblade-git-main.vercel.app",
     });
+  });
+
+  test("rejects every retired Elders and Subcounter public configuration", () => {
+    const accounts = getSuiteAccountsDeployment("production");
+    for (const consumer of ["elders", "subcounter"] as const) {
+      expect(() => parseSuiteAccountsPublicConfig(
+        consumer as "peopleblade",
+        {
+          NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: accounts.convexSiteUrl,
+          NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: accounts.convexUrl,
+          NEXT_PUBLIC_SITE_URL: `https://${consumer}.example`,
+        },
+      )).toThrow();
+    }
   });
 
   test("rejects the retired staging deployment and origin", () => {

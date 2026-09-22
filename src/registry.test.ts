@@ -66,7 +66,7 @@ describe("suite Accounts auth-mode registry", () => {
     const oidcConsumers = SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter(
       isSuiteAccountsOidcConsumerId,
     );
-    expect(oidcConsumers).toHaveLength(5);
+    expect(oidcConsumers).toHaveLength(4);
     for (const consumer of oidcConsumers) {
       expect(SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toEqual({
         basePath: "/api/suite-auth",
@@ -80,7 +80,6 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS).toEqual([
       "accounts",
       "act60",
-      "elders",
       "soundfish",
       "oh-computer",
       "sponge",
@@ -88,11 +87,9 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS).toEqual([
       "accounts",
       "act60",
-      "elders",
       "soundfish",
       "oh-computer",
       "sponge",
-      "subcounter",
       "peopleblade",
       "aicharts",
       "hraness",
@@ -120,11 +117,9 @@ describe("suite Accounts auth-mode registry", () => {
   test("retains the exact current OIDC consumer types", () => {
     expectTypeOf<SuiteAccountsCurrentOidcConsumerId>().toEqualTypeOf<
       | "act60"
-      | "elders"
       | "soundfish"
       | "oh-computer"
       | "sponge"
-      | "subcounter"
       | "peopleblade"
       | "aicharts"
       | "hraness"
@@ -137,28 +132,14 @@ describe("suite Accounts auth-mode registry", () => {
     >();
   });
 
-  test("registers Subcounter only in the current unlinked OIDC authority", () => {
-    expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter).toEqual({
-      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "Subcounter",
-      environments: {
-        production: {
-          billingReturn: { kind: "unsupported" },
-          siteUrl: "https://subcounter.com",
-        },
-      },
-      id: "subcounter",
-    });
+  test("retires Subcounter from every registration surface", () => {
+    expect("subcounter" in SUITE_ACCOUNTS_CURRENT_CONSUMERS).toBe(false);
     expect(getSuiteAccountsCurrentConsumerEnvironment(
       "subcounter",
       "production",
-    )).toEqual({
-      billingReturn: { kind: "unsupported" },
-      siteUrl: "https://subcounter.com",
-    });
-    expect(isSuiteAccountsCurrentConsumerId("subcounter")).toBe(true);
-    expect(isSuiteAccountsCurrentOidcConsumerId("subcounter")).toBe(true);
-    expect(isSuiteAccountsCurrentOAuthConsumerId("subcounter")).toBe(true);
+    )).toBeNull();
+    expect(isSuiteAccountsCurrentConsumerId("subcounter")).toBe(false);
+    expect(isSuiteAccountsRegisteredConsumerId("subcounter")).toBe(false);
     expect("subcounter" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
     expect(SUITE_CONSUMER_IDS).not.toContain("subcounter");
   });
@@ -193,11 +174,9 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS)
       .toEqual([
         "act60",
-        "elders",
         "soundfish",
         "oh-computer",
           "sponge",
-        "subcounter",
         "peopleblade",
         "aicharts",
         "hraness",
@@ -210,12 +189,8 @@ describe("suite Accounts auth-mode registry", () => {
       "peopleblade",
       "ghostget",
     ]);
-    expect(suiteAccountsCurrentConsumerRequiresEmailOtp("subcounter"))
-      .toBe(true);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("peopleblade"))
       .toBe(true);
-    expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)
-      .not.toContain("subcounter");
     expect(SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS).not.toContain("hra");
   });
 
@@ -223,7 +198,7 @@ describe("suite Accounts auth-mode registry", () => {
     const oauthConsumers = SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter(
       isSuiteAccountsOAuthConsumerId,
     );
-    expect(oauthConsumers).toHaveLength(5);
+    expect(oauthConsumers).toHaveLength(4);
     for (const consumer of oauthConsumers) {
       expect("cookies" in SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toBe(false);
       expect(isSuiteAccountsOAuthConsumerId(consumer)).toBe(true);
@@ -233,7 +208,6 @@ describe("suite Accounts auth-mode registry", () => {
     expect(isSuiteAccountsOidcConsumerId("accounts")).toBe(false);
     expectTypeOf<SuiteAccountsOidcConsumerId>().toEqualTypeOf<
       | "act60"
-      | "elders"
       | "soundfish"
       | "oh-computer"
       | "sponge"
@@ -244,7 +218,6 @@ describe("suite Accounts auth-mode registry", () => {
     expectTypeOf<SuiteAccountsRegisteredConsumerId>().toEqualTypeOf<
       | "accounts"
       | "act60"
-      | "elders"
       | "soundfish"
       | "oh-computer"
       | "draw-money"
@@ -305,19 +278,15 @@ describe("suite Accounts auth-mode registry", () => {
     expect(suiteAccountsConsumerRequiresEmailOtp("sponge")).toBe(true);
   });
 
-  test("registers Elders as one exact browser RP", () => {
-    expect(SUITE_ACCOUNTS_CONSUMERS["elders"]).toEqual({
-      auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "Elders",
-      environments: {
-        production: {
-          billingReturn: { kind: "unsupported" },
-          siteUrl: "https://elders.hraness.com",
-        },
-      },
-      id: "elders",
-    });
-    expect(suiteAccountsConsumerRequiresEmailOtp("elders")).toBe(true);
+  test("retires Elders from every registration surface", () => {
+    expect("elders" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
+    expect("elders" in SUITE_ACCOUNTS_CURRENT_CONSUMERS).toBe(false);
+    expect(isSuiteAccountsRegisteredConsumerId("elders")).toBe(false);
+    expect(isSuiteAccountsCurrentConsumerId("elders")).toBe(false);
+    expect(getSuiteAccountsConsumerEnvironment("elders", "production"))
+      .toBeNull();
+    expect(getSuiteAccountsCurrentConsumerEnvironment("elders", "production"))
+      .toBeNull();
     expect("ask-town" in SUITE_ACCOUNTS_CONSUMERS).toBe(false);
     expect(suiteAccountsConsumerRequiresEmailOtp("soundfish")).toBe(true);
     expect(new Set<string>(SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS)).toEqual(
@@ -385,7 +354,7 @@ describe("suite Accounts auth-mode registry", () => {
       "accounts",
     )).toBe(false);
     expect(Reflect.set(
-      SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production,
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.aicharts.environments.production,
       "siteUrl",
       "https://attacker.example",
     )).toBe(false);
@@ -406,8 +375,8 @@ describe("suite Accounts auth-mode registry", () => {
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.soundfish.environments.production.siteUrl)
       .toBe("https://sound.fish");
     expect(
-      SUITE_ACCOUNTS_CURRENT_CONSUMERS.subcounter.environments.production.siteUrl,
-    ).toBe("https://subcounter.com");
+      SUITE_ACCOUNTS_CURRENT_CONSUMERS.aicharts.environments.production.siteUrl,
+    ).toBe("https://aicharts.io");
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production.siteUrl,
     ).toBe("https://peopleblade.com");

@@ -11,6 +11,7 @@ import {
   suiteOidcSurfaceServerSession,
   suiteOidcSurfaceServerVerifiedEmail,
 } from "./oidc-surface-server";
+import type { SuiteAccountsCurrentOidcConsumerId } from "./registry";
 
 const configured = {
   NEXT_PUBLIC_SITE_URL: "https://sound.fish",
@@ -23,15 +24,15 @@ describe("shared Suite OIDC surface server", () => {
     expect(suiteEnvironmentForConsumerOrigin("soundfish", "https://sound.fish"))
       .toBe("production");
     expect(suiteEnvironmentForConsumerOrigin(
-      "subcounter",
+      "subcounter" as SuiteAccountsCurrentOidcConsumerId,
       "https://subcounter.com",
-    )).toBe("production");
+    )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
-      "subcounter",
+      "subcounter" as SuiteAccountsCurrentOidcConsumerId,
       "https://subcounter-git-main.vercel.app",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
-      "subcounter",
+      "subcounter" as SuiteAccountsCurrentOidcConsumerId,
       "https://subcounter.com.evil.example",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
@@ -62,21 +63,17 @@ describe("shared Suite OIDC surface server", () => {
       clientId: "hraness:soundfish:production:v1",
       siteUrl: "https://sound.fish",
     });
-    expect(createSurfaceSuiteRelyingParty("subcounter", {
+    expect(createSurfaceSuiteRelyingParty("subcounter" as SuiteAccountsCurrentOidcConsumerId, {
       NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
-    })?.configuration).toMatchObject({
-      callbackUrl: "https://subcounter.com/api/suite-auth/callback",
-      clientId: "hraness:subcounter:production:v1",
-      siteUrl: "https://subcounter.com",
-    });
-    expect(createSurfaceSuiteRelyingParty("subcounter", {
+    })).toBeNull();
+    expect(createSurfaceSuiteRelyingParty("subcounter" as SuiteAccountsCurrentOidcConsumerId, {
       NEXT_PUBLIC_SITE_URL: "https://subcounter.com",
       NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN:
         "https://subcounter-git-main.vercel.app",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
-    expect(createSurfaceSuiteRelyingParty("subcounter", {
+    expect(createSurfaceSuiteRelyingParty("subcounter" as SuiteAccountsCurrentOidcConsumerId, {
       NEXT_PUBLIC_SITE_URL: "https://foreign.example",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();

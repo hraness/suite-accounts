@@ -103,10 +103,7 @@ describe("suite Accounts URLs", () => {
     ).toBeNull();
     expect(
       suiteAccountsCurrentOidcClientRegistration("subcounter", "production"),
-    ).toEqual({
-      callbackUrl: "https://subcounter.com/api/suite-auth/callback",
-      clientId: "hraness:subcounter:production:v1",
-    });
+    ).toBeNull();
     expect(
       suiteAccountsOidcClientRegistration("subcounter", "production"),
     ).toBeNull();
@@ -131,7 +128,7 @@ describe("suite Accounts URLs", () => {
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp("hraness:hraness:preview:v1")).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:elders:production:v1",
-    )).toBe(true);
+    )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:elders:staging:v1",
     )).toBe(false);
@@ -149,7 +146,7 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(
       "hraness:subcounter:production:v1",
-    )).toBe(true);
+    )).toBe(false);
     expect(suiteAccountsOidcClientRequiresEmailOtp(
       "hraness:subcounter:production:v1",
     )).toBe(false);
@@ -175,6 +172,8 @@ describe("suite Accounts URLs", () => {
 
   test("rejects retired OAuth clients", () => {
     for (const retired of [
+      "elders",
+      "subcounter",
       "oprte",
       "kitchen",
       "transmute",
@@ -191,10 +190,10 @@ describe("suite Accounts URLs", () => {
   test("returns immutable RP endpoints and client registrations", () => {
     const provider = suiteAccountsOidcProviderConfiguration("production");
     const registration = suiteAccountsOidcClientRegistration(
-      "elders",
+      "act60",
       "production",
     );
-    if (registration === null) throw new Error("Missing Elders registration.");
+    if (registration === null) throw new Error("Missing ACT60 registration.");
     expect(Reflect.set(
       provider,
       "authorizationEndpoint",
@@ -207,7 +206,7 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsOidcProviderConfiguration("production").authorizationEndpoint)
       .toBe("https://account.hraness.com/api/auth/oauth2/authorize");
-    expect(suiteAccountsOidcClientRegistration("elders", "production")?.callbackUrl)
-      .toBe("https://elders.hraness.com/api/suite-auth/callback");
+    expect(suiteAccountsOidcClientRegistration("act60", "production")?.callbackUrl)
+      .toBe("https://act60.me/api/suite-auth/callback");
   });
 });
