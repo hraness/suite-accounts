@@ -95,7 +95,6 @@ function oidcSite(id, displayName, productionSiteUrl) {
 var SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
-  "elders",
   "soundfish",
   "oh-computer",
   "draw-money",
@@ -118,7 +117,6 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     id: "accounts"
   },
   act60: oidcSite("act60", "ACT60", "https://act60.me"),
-  elders: oidcSite("elders", "Elders", "https://elders.hraness.com"),
   soundfish: {
     auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
     displayName: "Soundfish",
@@ -150,11 +148,9 @@ var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
 var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
-  "elders",
   "soundfish",
   "oh-computer",
   "sponge",
-  "subcounter",
   "peopleblade",
   "aicharts",
   "hraness",
@@ -175,11 +171,9 @@ function currentOidcSite(id, displayName, productionSiteUrl) {
 var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
   act60: SUITE_ACCOUNTS_CONSUMERS.act60,
-  elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
-  subcounter: currentOidcSite("subcounter", "Subcounter", "https://subcounter.com"),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
   aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
@@ -190,7 +184,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
-  "elders",
   "soundfish",
   "oh-computer",
   "sponge"

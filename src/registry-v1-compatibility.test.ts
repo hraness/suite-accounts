@@ -38,6 +38,6 @@ test("the remaining deprecated registry remains byte-stable", () => {
     ]),
   });
   expect(createHash("sha256").update(snapshot).digest("hex")).toBe(
-    "1815d9067d277103747c66c6ed5b4d78a3a0e8444d2330a0ecef343325c47737",
+    "2d8c1aad41a24716d9c6c643114e4d72df54a41a243ceebecb7cc61f91ff4642",
   );
 });

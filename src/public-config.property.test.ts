@@ -77,19 +77,19 @@ describe("suite Accounts public origin laws", () => {
     ));
   });
 
-  test("Subcounter never accepts a decorated or insecure origin", () => {
+  test("PeopleBlade never accepts a decorated or insecure origin", () => {
     assertProperty(fc.property(
       fc.constantFrom(
-        "https://user:pass@subcounter.com",
-        "https://subcounter.com/path",
-        "https://subcounter.com/?token=secret",
-        "https://subcounter.com/#secret",
-        "http://subcounter.com",
-        "https://subcounter.com.evil.example",
-        "https://subcounter-git-main.vercel.app",
+        "https://user:pass@peopleblade.com",
+        "https://peopleblade.com/path",
+        "https://peopleblade.com/?token=secret",
+        "https://peopleblade.com/#secret",
+        "http://peopleblade.com",
+        "https://peopleblade.com.evil.example",
+        "https://peopleblade-git-main.vercel.app",
       ),
       (siteUrl) => {
-        expect(() => parseSuiteAccountsPublicConfig("subcounter", {
+        expect(() => parseSuiteAccountsPublicConfig("peopleblade", {
           ...accounts,
           NEXT_PUBLIC_SITE_URL: siteUrl,
         })).toThrow();

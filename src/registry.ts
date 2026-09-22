@@ -124,7 +124,6 @@ function oidcSite<const Consumer extends SuiteAccountsConsumerId>(
 export const SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
-  "elders",
   "soundfish",
   "oh-computer",
   "draw-money",
@@ -164,11 +163,6 @@ export const SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     "act60",
     "ACT60",
     "https://act60.me",
-  ),
-  "elders": oidcSite(
-    "elders",
-    "Elders",
-    "https://elders.hraness.com",
   ),
   soundfish: {
     auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
@@ -222,11 +216,9 @@ export const SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
 export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
-  "elders",
   "soundfish",
   "oh-computer",
   "sponge",
-  "subcounter",
   "peopleblade",
   "aicharts",
   "hraness",
@@ -263,25 +255,19 @@ function currentOidcSite<const Consumer extends SuiteAccountsCurrentConsumerId>(
 /**
  * Current Accounts authority registrations.
  *
- * Retired Oompa and predecessor identities remain parseable as historical
- * evidence, but neither current nor deprecated registration helpers retain
- * their browser origins or OAuth clients.
+ * Retired Elders, Subcounter, Oompa and predecessor identities remain
+ * parseable as historical evidence, but neither current nor deprecated
+ * registration helpers retain their browser origins or OAuth clients.
  */
 export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
   act60: SUITE_ACCOUNTS_CONSUMERS.act60,
-  elders: SUITE_ACCOUNTS_CONSUMERS.elders,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
   sponge: currentOidcSite(
     "sponge",
     "Sponge",
     SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl,
-  ),
-  subcounter: currentOidcSite(
-    "subcounter",
-    "Subcounter",
-    "https://subcounter.com",
   ),
   peopleblade: currentOidcSite(
     "peopleblade",
@@ -313,7 +299,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
 export const SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
   "act60",
-  "elders",
   "soundfish",
   "oh-computer",
   "sponge",

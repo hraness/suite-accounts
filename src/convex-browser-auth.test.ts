@@ -14,6 +14,7 @@ import {
   suiteConvexBrowserAuthConfig,
   suiteConvexBrowserConfiguration,
   suiteConvexBrowserEnvironmentForOrigin,
+  type SuiteConvexBrowserConfiguration,
   type SuiteConvexBrowserConsumerId,
 } from "./convex-browser-auth";
 
@@ -26,100 +27,61 @@ const parsedUsername = parseSuiteUsername("reader");
 if (!parsedUsername.ok) throw new Error("The username fixture did not parse.");
 const username = parsedUsername.value;
 
-describe("suite Convex browser-token configuration", () => {
-  test("admits only Elders and pins production", () => {
-    expect(SUITE_CONVEX_BROWSER_CONSUMER_IDS).toEqual(["elders"]);
-    expectTypeOf<SuiteConvexBrowserConsumerId>().toEqualTypeOf<"elders">();
+/** A retired-consumer trust fixture; admission itself stays closed. */
+const retiredConfiguration: SuiteConvexBrowserConfiguration = {
+  audience: "https://elders.hraness.com/convex",
+  clientId: "hraness:elders:production:v1",
+  consumer: "elders" as SuiteConvexBrowserConsumerId,
+  environment: "production",
+  issuer: "https://elders.hraness.com/api/convex-auth",
+  jwksEndpoint: "https://elders.hraness.com/api/convex-auth/jwks",
+  siteUrl: "https://elders.hraness.com",
+  suiteIssuer: "https://account.hraness.com",
+  tokenEndpoint: "https://elders.hraness.com/api/convex-auth/token",
+};
 
-    expect(suiteConvexBrowserConfiguration("elders", "production"))
-      .toEqual({
-        audience: "https://elders.hraness.com/convex",
-        clientId: "hraness:elders:production:v1",
-        consumer: "elders",
-        environment: "production",
-        issuer: "https://elders.hraness.com/api/convex-auth",
-        jwksEndpoint: "https://elders.hraness.com/api/convex-auth/jwks",
-        siteUrl: "https://elders.hraness.com",
-        suiteIssuer: "https://account.hraness.com",
-        tokenEndpoint: "https://elders.hraness.com/api/convex-auth/token",
-      });
-    expect(() => suiteConvexBrowserConfiguration(
-      "oprte" as SuiteConvexBrowserConsumerId,
-      "production",
-    )).toThrow("no Convex browser-token grant");
+describe("suite Convex browser-token configuration", () => {
+  test("admits no product while the retired Elders grant stays closed", () => {
+    expect(SUITE_CONVEX_BROWSER_CONSUMER_IDS).toEqual([]);
+
+    for (const consumer of ["elders", "act60", "oprte"] as const) {
+      expect(() => suiteConvexBrowserConfiguration(
+        consumer as SuiteConvexBrowserConsumerId,
+        "production",
+      )).toThrow("no Convex browser-token grant");
+      expect(() => suiteConvexBrowserAuthConfig(
+        consumer as SuiteConvexBrowserConsumerId,
+        "production",
+      )).toThrow("no Convex browser-token grant");
+    }
+    expect(Reflect.set(
+      SUITE_CONVEX_BROWSER_CONSUMER_IDS,
+      "0",
+      "elders",
+    )).toBe(false);
+    expect(SUITE_CONVEX_BROWSER_CONSUMER_IDS).toEqual([]);
   });
 
-  test("resolves deployment only from the exact registered origin", () => {
-    expect(suiteConvexBrowserEnvironmentForOrigin(
-      "elders",
-      "https://elders.hraness.com",
-    )).toBe("production");
-    expect(suiteConvexBrowserEnvironmentForOrigin(
-      "elders",
-      "https://preview.elders.hraness.com",
-    )).toBeNull();
+  test("never resolves a deployment, even from the retired registered origin", () => {
     for (const value of [
+      "https://elders.hraness.com",
+      "https://preview.elders.hraness.com",
       "http://elders.hraness.com",
       "https://elders.hraness.com.evil",
       "https://elders.hraness.com/",
       undefined,
       null,
     ]) {
-      expect(suiteConvexBrowserEnvironmentForOrigin("elders", value))
-        .toBeNull();
+      expect(suiteConvexBrowserEnvironmentForOrigin(
+        "elders" as SuiteConvexBrowserConsumerId,
+        value,
+      )).toBeNull();
     }
-  });
-
-  test("builds one exact ES256 custom-JWT provider", () => {
-    const authConfig = suiteConvexBrowserAuthConfig("elders", "production");
-    expect(authConfig).toEqual({
-      providers: [
-        {
-          algorithm: "ES256",
-          applicationID: "https://elders.hraness.com/convex",
-          issuer: "https://elders.hraness.com/api/convex-auth",
-          jwks: "https://elders.hraness.com/api/convex-auth/jwks",
-          type: "customJwt",
-        },
-      ],
-    });
-    expect(Reflect.set(
-      SUITE_CONVEX_BROWSER_CONSUMER_IDS,
-      "0",
-      "oprte",
-    )).toBe(false);
-    expect(Reflect.set(
-      authConfig.providers[0]!,
-      "issuer",
-      "https://attacker.example",
-    )).toBe(false);
-    expect(SUITE_CONVEX_BROWSER_CONSUMER_IDS).toEqual(["elders"]);
-    const provider = authConfig.providers[0];
-    expect(provider && "issuer" in provider ? provider.issuer : null).toBe(
-      "https://elders.hraness.com/api/convex-auth",
-    );
-  });
-
-  test("returns an immutable exact browser-token configuration", () => {
-    const configuration = suiteConvexBrowserConfiguration(
-      "elders",
-      "production",
-    );
-    expect(Reflect.set(
-      configuration,
-      "jwksEndpoint",
-      "https://attacker.example/jwks",
-    )).toBe(false);
-    expect(suiteConvexBrowserConfiguration("elders", "production").jwksEndpoint)
-      .toBe("https://elders.hraness.com/api/convex-auth/jwks");
   });
 });
 
 describe("suite Convex browser identity", () => {
-  const configuration = suiteConvexBrowserConfiguration(
-    "elders",
-    "production",
-  );
+  const configuration = retiredConfiguration;
   const identity = {
     issuer: configuration.issuer,
     profile_complete: true,

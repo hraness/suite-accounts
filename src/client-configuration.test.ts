@@ -218,33 +218,25 @@ describe("suite Accounts client configuration", () => {
     expect(result).toEqual({ error: "invalid-consumer", ok: false });
   });
 
-  test("binds Subcounter only to its exact current production registration", () => {
-    const result = createSuiteAccountsClientConfiguration(subcounterBinding);
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value).toMatchObject({
-      authBasePath: "/api/suite-auth",
-      binding: subcounterBinding,
-      configurationVersion: SUITE_ACCOUNTS_CLIENT_CONFIGURATION_VERSION,
-      wireVersion: SUITE_ACCOUNTS_WIRE_VERSION,
-    });
-
+  test("rejects every retired Subcounter binding", () => {
+    expect(createSuiteAccountsClientConfiguration(subcounterBinding))
+      .toEqual({ error: "invalid-consumer", ok: false });
     expect(createSuiteAccountsClientConfiguration({
       ...subcounterBinding,
       origin: "https://subcounter.com.evil.example",
-    })).toEqual({ error: "invalid-origin", ok: false });
+    })).toEqual({ error: "invalid-consumer", ok: false });
     expect(createSuiteAccountsClientConfiguration({
       ...subcounterBinding,
       origin: "https://subcounter-git-main.vercel.app",
-    })).toEqual({ error: "invalid-origin", ok: false });
+    })).toEqual({ error: "invalid-consumer", ok: false });
     expect(createSuiteAccountsClientConfiguration({
       ...subcounterBinding,
       callbackUrl: "https://subcounter.com/api/suite-auth/foreign",
-    })).toEqual({ error: "invalid-callback-url", ok: false });
+    })).toEqual({ error: "invalid-consumer", ok: false });
     expect(createSuiteAccountsClientConfiguration({
       ...subcounterBinding,
       clientId: "hraness:subcounter:preview:v1",
-    })).toEqual({ error: "invalid-client-id", ok: false });
+    })).toEqual({ error: "invalid-consumer", ok: false });
   });
 
   test("binds PeopleBlade only to its exact current production registration", () => {
