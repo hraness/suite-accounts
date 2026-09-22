@@ -220,7 +220,10 @@ describe("suite OAuth relying party", () => {
     });
   });
 
-  test("forces a fresh provider login for every shared browser product", async () => {
+  test("reuses a live provider session for shared browser products", async () => {
+    // The provider still enforces the email-OTP session method; omitting
+    // `prompt=login` lets an existing Accounts session authorize without a
+    // redundant interactive sign-in.
     const elders = createSuiteOidcRelyingParty({
       consumer: "elders",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
@@ -237,7 +240,7 @@ describe("suite OAuth relying party", () => {
       { headers: { "sec-fetch-site": "same-origin" } },
     ));
     expect(new URL(eldersStart.headers.get("location")!).searchParams.get("prompt"))
-      .toBe("login");
+      .toBeNull();
     expect(new URL(eldersStart.headers.get("location")!).searchParams.get("scope"))
       .toBe("openid profile email offline_access");
 
@@ -258,7 +261,7 @@ describe("suite OAuth relying party", () => {
     ));
     expect(
       new URL(soundfishStart.headers.get("location")!).searchParams.get("prompt"),
-    ).toBe("login");
+    ).toBeNull();
     expect(
       new URL(soundfishStart.headers.get("location")!).searchParams.get("scope"),
     ).toBe("openid profile email offline_access");
@@ -772,7 +775,7 @@ describe("suite OAuth relying party", () => {
     expect(authorization.searchParams.get("scope")).toBe(
       "openid profile email offline_access",
     );
-    expect(authorization.searchParams.get("prompt")).toBe("login");
+    expect(authorization.searchParams.get("prompt")).toBeNull();
     const transactionCookie = cookiePair(getSetCookies(started)[0]!);
     expect(getSetCookies(started)[0]).toContain("HttpOnly");
     expect(getSetCookies(started)[0]).toContain("Secure");
