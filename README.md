@@ -106,7 +106,9 @@ link, and entitlement receipt endpoints from closed current-authority data.
 The returned configuration is frozen. Its provider endpoints, resource,
 configuration version, and wire version are derived from the package's checked
 current authority data. Accounts enforces the same registration on its side,
-so passing this check grants nothing Accounts has not registered.
+so passing this check grants nothing Accounts has not registered. A valid
+configuration does not show that live sign-in works. Setting up the client in
+the Accounts service and turning sign-in on in the product are separate steps.
 
 Local development still uses `parseSuiteAccountsPublicConfig`. The consumer
 origin and both Accounts Convex origins must use one exact loopback hostname.
@@ -377,7 +379,7 @@ live session instead of another interactive sign-in; the same verified
 Request parameters alone are insufficient evidence. See
 [OIDC authentication-time validation](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation).
 Before you enable privileged actions, verify how the live Accounts service
-reports authentication time, and verify your product's approval records.
+reports authentication time, and test your product's approval flow.
 
 ## Frozen v1 protocol compatibility
 

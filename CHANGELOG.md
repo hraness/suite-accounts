@@ -17,7 +17,7 @@ Stops forcing `prompt=login` on ordinary authorization for email-OTP consumers s
 
 ## v0.9.14
 
-Retires Oompa (`hra`) from current browser registration and the membership list: its former client `hraness:hra:production:v1`, origins, and callbacks can no longer create a current binding, historical product identities, links, and receipt data stay readable, and no Accounts data is deleted. Removes Rough Day, Textbutler, and Soundfish from the membership product list and adds the `sloptrade` entry. Renames the HRANESS.COM membership description to the current organization statement, "tools for agents and humans".
+Retires Oompa (`hra`) from current browser registration and the membership list: its former client `hraness:hra:production:v1`, origins, and callbacks can no longer create a current binding, historical product identities, links, and receipt data stay readable, and no Accounts data is deleted. Removes Rough Day, Textbutler, and Soundfish from the membership product list and adds the `sloptrade` entry. Renames the HRANESS.COM membership description to the current organization statement, "tools for agents and humans". Reorders the membership list by portfolio priority, changes every product name to uppercase (for example `AI CHARTS` and `HRANESS.COM`; `oh.computer` becomes `OH`), and rewrites several product descriptions.
 
 ## v0.9.13
 
