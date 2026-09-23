@@ -52,10 +52,10 @@ function withoutFieldError(
 const LINK_FIELDS = [
   ["x", "X"],
   ["linkedin", "LinkedIn"],
-  ["bluesky", "BlueSky"],
+  ["bluesky", "Bluesky"],
   ["instagram", "Instagram"],
   ["telegram", "Telegram"],
-  ["website", "Personal Website"],
+  ["website", "Personal website"],
 ] as const satisfies readonly (readonly [SuiteProfileLinkKey, string])[];
 
 function linkInputs(profile: SuiteProfileView): LinkInputs {

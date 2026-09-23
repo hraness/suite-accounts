@@ -40,7 +40,7 @@ test("link fields render prefixed icon affordances behind a closed group when em
   }
   expect(html).toContain('placeholder="Ada Lovelace"');
   expect(html).toContain('placeholder="A short introduction."');
-  expect(html).toContain("optional — a handle is enough");
+  expect(html).toContain("optional; a handle is enough");
   expect(html).toContain("<summary");
   expect(html).not.toMatch(/<details[^>]*\bopen\b/u);
   expect(html).not.toContain("style=");
