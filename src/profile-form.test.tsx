@@ -31,10 +31,10 @@ test("renders the shared profile contract without an editable email payload", ()
     "Bio",
     "X",
     "LinkedIn",
-    "BlueSky",
+    "Bluesky",
     "Instagram",
     "Telegram",
-    "Personal Website",
+    "Personal website",
   ]) {
     expect(html).toContain(`>${label}</span>`);
   }

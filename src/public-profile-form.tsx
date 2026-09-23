@@ -269,7 +269,7 @@ function PublicProfileEditor({ className, initialProfile, onSave, onSaved }: Sui
         {fieldError("bio")}
       </div>
       <details className={`suite-profile-links ${classes.links}`} onToggle={event => { setLinksOpen(event.currentTarget.open); }} open={linksOpen}>
-        <summary className={classes.linksSummary}>Links <span className={classes.linksHint}>optional — a handle is enough</span></summary>
+        <summary className={classes.linksSummary}>Links <span className={classes.linksHint}>optional; a handle is enough</span></summary>
         <div className={classes.linksBody}>
           {LINK_FIELDS.map(([key, label]) => {
             const affordance = SUITE_PROFILE_LINK_AFFORDANCES[key];

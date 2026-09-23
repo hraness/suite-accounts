@@ -193,7 +193,7 @@ try {
   await page.getByRole("button", { name: "Save profile" }).click();
   await page.waitForFunction(() => document.querySelector("#saved")?.textContent === "3");
   assert.equal(requests[1]?.expectedRevision, 2);
-  const websiteId = await page.getByLabel("Personal Website", { exact: true }).getAttribute("id");
+  const websiteId = await page.getByLabel("Personal website", { exact: true }).getAttribute("id");
   assert.ok(websiteId !== null && websiteId.endsWith("-website"));
   // The existing native label also contains its conditional field error. Bind
   // the already label-verified control before that text changes its name.

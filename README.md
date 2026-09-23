@@ -1,20 +1,21 @@
-# hraness/suite-accounts
+# @hraness/suite-accounts
 
-Give a Hraness product one registered sign-in and authorization boundary without
-letting application code choose what to trust. `@hraness/suite-accounts`
-accepts an exact product binding, returns closed OAuth and OIDC configuration,
-keeps browser bearer custody on the server, and parses identity and entitlement
-evidence from `unknown`.
+Add Hraness Accounts sign-in to a Hraness product. `@hraness/suite-accounts`
+supplies the OAuth and OIDC settings Accounts registered for your product,
+keeps OAuth tokens in encrypted HttpOnly cookies and server-to-server requests
+so browser code never sees them, and validates the identity and entitlement
+data Accounts returns before your code relies on it.
 
-The first useful result is a frozen configuration tied to one known origin,
-callback, client ID, and authentication mode. A misspelled field, retired
-client, unregistered origin, or caller-supplied trust value fails before the
-product starts an Accounts flow.
+You start by passing the origin, callback, client ID, and authentication mode
+Accounts assigned to your product, and you get back a frozen configuration. A
+misspelled field, a retired client, an unregistered origin, or an attempt to
+supply your own trust settings fails before the product starts an Accounts
+flow.
 
-Accounts remains the sole authority for account records, OAuth client
-registration, identity links, and entitlements. Installing this package does
-not let a product register itself or choose an issuer, JWKS endpoint, resource,
-callback, client ID, wire version, or trust algorithm.
+Accounts alone manages account records, OAuth client registration, identity
+links, and entitlements. Installing this package does not let a product
+register itself or pick its own issuer, JWKS endpoint, resource, callback,
+client ID, wire version, or trust algorithm.
 
 ## Install
 
@@ -47,8 +48,8 @@ The seven public variables are `--suite-profile-input-background`,
 `--suite-profile-line`, `--suite-profile-focus`, `--suite-profile-muted`,
 `--suite-profile-button-background`, `--suite-profile-button-foreground`, and
 `--suite-profile-error`. Native readonly, disabled, and focus-visible behavior
-is preserved. Width and padding retain the existing physical-axis contract in
-vertical writing modes.
+is preserved. Width and padding keep their physical-axis behavior in vertical
+writing modes.
 
 Applications that already join StyleX package rules can consume
 `@hraness/suite-accounts/stylex-manifest.json` and
@@ -58,29 +59,7 @@ union instead of the standalone `profile-form.css` or `stylex.css` export.
 The profile form is the only styled runtime entry. Root authentication and
 protocol imports do not import React or StyleX presentation.
 
-Version 0.5.5 adds the current-only AI Charts browser registration at
-`https://aicharts.io`, with client `hraness:aicharts:production:v1` and callback
-`https://aicharts.io/api/suite-auth/callback`. It requires email-code sessions
-and adds no billing return, linked-product receipt, or native device grant.
-Accounts service adoption and product activation are separate from this
-package contract; a valid factory binding is not proof of live sign-in.
-
-Oompa (`hra`) is retired from current browser registration and membership
-listing. Its former client `hraness:hra:production:v1`, origins and callbacks
-cannot create a current binding. Historical product identities, links and
-receipt evidence remain readable; retirement does not delete Accounts data.
-This retirement follows the published v0.9.13 release. Deployments adopting
-it must pin a reviewed commit containing the change until a later immutable
-release includes it; installing v0.9.13 alone does not retire the client.
-
-Version 0.5.2 builds the profile manifest with UI v0.5.12 and its fail-fast
-property-validation contract. Compiler adopters must use compatible manifests
-for every registered package and start a fresh generation after upgrading.
-The prior rollback pair is Suite Accounts v0.5.1 with UI v0.5.3. This compiler
-change adds no runtime or peer dependency and does not change authentication,
-profile behavior, or the existing presentation recipes.
-
-## First proof: bind one registered client
+## Bind a registered client
 
 Pass the exact public fields assigned to the product. The factory rejects
 unknown fields, including attempts to supply authority-controlled trust data.
@@ -126,15 +105,17 @@ link, and entitlement receipt endpoints from closed current-authority data.
 
 The returned configuration is frozen. Its provider endpoints, resource,
 configuration version, and wire version are derived from the package's checked
-current authority data. The Accounts service independently enforces the same
-registration, so this client-side check never creates authority.
+current authority data. Accounts enforces the same registration on its side,
+so passing this check grants nothing Accounts has not registered. A valid
+configuration does not show that live sign-in works. Setting up the client in
+the Accounts service and turning sign-in on in the product are separate steps.
 
 Local development still uses `parseSuiteAccountsPublicConfig`. The consumer
 origin and both Accounts Convex origins must use one exact loopback hostname.
 Remote configuration accepts only the checked production deployment.
-Generated Vercel Preview surfaces can report their surface origin through
-`NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN`, but suite authentication remains
-unavailable there.
+Vercel Preview deployments can expose their generated hostname through
+`NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN`, but sign-in does not work on Preview
+deployments.
 
 ## Follow the trust path
 
@@ -146,8 +127,7 @@ browser
   -> browser receives bounded session JSON, never an OAuth bearer
 ```
 
-The package participates at each protocol boundary, but it does not become the
-Accounts service or the product backend:
+Three parties share the work:
 
 | Authority | Owns |
 | --- | --- |
@@ -314,8 +294,8 @@ cancel an already-dispatched server operation.
 
 Server-rendered controls stay disabled until hydration. Private fields have no
 native submission names, and the form uses POST as a further URL-leak guard.
-JavaScript is required to edit and save. These browser controls complement,
-but never replace, server authentication, revision checks, and consent policy.
+JavaScript is required to edit and save. Keep authentication, revision checks,
+and consent policy on the server; these browser controls are an extra layer.
 
 ## Trust boundary
 
@@ -398,8 +378,8 @@ live session instead of another interactive sign-in; the same verified
 `auth_time` evidence is still returned for the product's own freshness check.
 Request parameters alone are insufficient evidence. See
 [OIDC authentication-time validation](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation).
-Qualify the authority's authentication-time semantics and the product's durable
-approval flow before activating privileged actions.
+Before you enable privileged actions, verify how the live Accounts service
+reports authentication time, and test your product's approval flow.
 
 ## Frozen v1 protocol compatibility
 
@@ -425,39 +405,11 @@ The compatibility registry is intentionally closed. It must not gain runtime
 mutation, remote discovery, environment overrides, or caller-supplied trust
 values.
 
-## Current compatibility evidence
+## Releases
 
-Pin the immutable `v0.9.16` release for this package version.
-Previously published immutable releases remain unchanged:
-
-| Release | Checked change |
-| --- | --- |
-| `v0.9.16` | Retires Elders and Subcounter from every registration surface: both products keep parseable historical identities, but neither retains an OIDC client, origin, or browser-token grant. The product Convex browser-token admission list is empty until a reviewed product is admitted. |
-| `v0.9.15` | Stops forcing `prompt=login` on ordinary authorization for email-OTP consumers so a valid live session can satisfy sign-in, and adds optional `authenticationNotBeforeMs` to `startFreshAuthentication`, mapping a server-owned freshness floor to a positive OIDC `max_age` so a sufficiently recent live session may satisfy the login prompt. Omitting it preserves the unconditional `max_age=0` re-authentication. |
-| `v0.9.14` | Renames the HRANESS.COM membership description to the current organization statement, "tools for agents and humans". |
-| `v0.9.13` | Adds the OAuth 2.0 Device Authorization Grant client protocol under `./oidc-device-code`, registers Ghostget (`https://ghostget.com`) as a current-only email-code OIDC client with an exact origin and callback, and makes `deviceAuthorizationEndpoint` / `deviceTokenEndpoint` available in the closed provider configuration. |
-| `v0.9.11` | Adds Clankdar (`https://clankdar.com`) to the shared membership product list. |
-| `v0.9.10` | Registers Platonik at `https://platonik.space` as a current-only email-code OIDC client with an exact origin and callback. |
-| `v0.9.9` | Adds a one-shot just-signed-in marker on the OIDC continuation page (`consumeSuiteOidcJustSignedIn` in `browser-session`) so products can render post-auth feedback, and names the continuation page. |
-| `v0.9.8` | Adds the EDS Research index at `https://hraness.com/eds` to the shared membership product list. |
-| `v0.9.7` | Registers Soulscrape at `https://soulscrape.com` as a current-only email-code OIDC client with an exact origin and callback. |
-| `v0.9.6` | Names the personal-site membership product `hraness.com` instead of the `HRNSS` wordmark. |
-| `v0.9.5` | Retires a deleted product's current OIDC client registration; historical identities remain parseable without origin or client trust. |
-| `v0.9.4` | Registers Hraness at `https://hraness.com` as a current-only email-code OIDC client with an exact origin and callback. |
-| `v0.8.0` | Adds the optional public-profile form with explicit visibility, preserved conflict drafts, exact save-result validation, and hydration/lifetime guards. The v1 form remains compatible; consumers still own authenticated transport and activation. |
-| `v0.7.0` | Adds exact public, editor, and revision-bound update profile v2 contracts, GitHub URL normalization, and opaque avatar reference helpers. Existing six-link contracts and the React form remain unchanged; endpoint activation is separate. |
-| `v0.6.0` | Adds explicit server-only fresh authentication with sealed action context, signed authentication-time validation and separate transaction modes. Ordinary login and registered authority remain unchanged. |
-| `v0.5.5` | Adds AI Charts as a current-only, production-only, email-code browser client with an exact origin and callback. Frozen v1 identities and linked-product privileges remain unchanged. |
-| `v0.5.4` | Binds Oompa to `https://oompa.app` and its exact callback while preserving the `hra` consumer and client IDs. Previous production origins gain no current Accounts authority or redirect. |
-| `v0.5.3` | Renames the current `hra` registration to Oompa without changing its client ID. Its production origin is superseded by v0.5.4. |
-| `v0.5.2` | Rebuilds the unchanged profile recipes and manifest against UI v0.5.12, binding fail-fast property validation while preserving presentation-free authentication entries and optional React peers. |
-| `v0.5.1` | Ends the verified OAuth callback with a nonce-locked same-origin continuation document, so the return page resolves its session without admitting a cross-site request. |
-| `v0.5.0` | Compiles the optional native profile form with StyleX, preserving public variables, semantic hooks, save behavior, and non-React authentication boundaries. Publishes a canonical compiler manifest and verifies standalone styles in a real browser. |
-| `v0.4.2` | Adds verified-account-email accessors for provisioning before optional username onboarding. Live userinfo must match subject, client, Suite account, and profile state; the accessor returns only an `email_verified` address. |
-| `v0.4.1` | Registers PeopleBlade at `https://peopleblade.com` for email-OTP OIDC. Its signed product-link receipt binds local and Suite subjects; email equality never creates or merges a link. |
-| `v0.4.0` | Removes the retired OPRTE browser client from current and deprecated registration helpers while preserving bounded historical product-ID parsing. |
-| `v0.3.7` | Moves a stable consumer registration to its renamed product origin without changing its client ID. Predecessor origins gain no Accounts authority. |
-| `v0.3.6` | Moves the current Sponge origin to `https://sponge.computer` without changing its client ID. |
+Pin the immutable `v0.9.16` release for this package version. Each release is
+an immutable Git tag, and [`CHANGELOG.md`](CHANGELOG.md) lists what each one
+changed.
 
 Deterministic tests exercise valid registrations and readable failures.
 Property tests cover foreign-value parsers, ordering, and round trips. The

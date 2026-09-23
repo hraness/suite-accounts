@@ -12,21 +12,21 @@ const packageManifest = JSON.parse(
   readonly version: string;
 };
 
-describe("README product contract", () => {
-  test("moves from result through proof, model, interfaces, and trust", () => {
-    const result = readme.indexOf("Give a Hraness product one registered sign-in");
-    const proof = readme.indexOf("## First proof: bind one registered client");
-    const model = readme.indexOf("## Follow the trust path");
-    const interfaces = readme.indexOf("## Interface map");
-    const trust = readme.indexOf("## Trust boundary");
-    const questions = readme.indexOf("## Questions before integration");
+const changelog = readFileSync(join(import.meta.dir, "..", "CHANGELOG.md"), "utf8");
 
-    expect(result).toBeGreaterThan(-1);
-    expect(proof).toBeGreaterThan(result);
-    expect(model).toBeGreaterThan(proof);
-    expect(interfaces).toBeGreaterThan(model);
-    expect(trust).toBeGreaterThan(interfaces);
-    expect(questions).toBeGreaterThan(trust);
+describe("README facts", () => {
+  test("names the installable package and records the current release", () => {
+    expect(readme.startsWith("# @hraness/suite-accounts\n")).toBe(true);
+    expect(changelog).toContain(`## v${packageManifest.version}\n`);
+  });
+
+  test("keeps release history out of the README", () => {
+    expect(readme).not.toMatch(/^Version \d+\.\d+\.\d+ (adds|builds|binds)/mu);
+    expect(readme).not.toMatch(/^\| `v\d+\.\d+\.\d+` \|/mu);
+  });
+
+  test("uses no em dashes", () => {
+    expect(readme).not.toContain("\u2014");
   });
 
   test("keeps the immutable install aligned with the package version", () => {

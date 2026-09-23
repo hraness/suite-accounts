@@ -1499,7 +1499,7 @@ function PublicProfileEditor({ className, initialProfile, onSave, onSaved }) {
               "Links ",
               /* @__PURE__ */ jsx("span", {
                 className: profileFormClasses.linksHint,
-                children: "optional — a handle is enough"
+                children: "optional; a handle is enough"
               })
             ]
           }),
@@ -1658,10 +1658,10 @@ function withoutFieldError(errors, field) {
 var LINK_FIELDS2 = [
   ["x", "X"],
   ["linkedin", "LinkedIn"],
-  ["bluesky", "BlueSky"],
+  ["bluesky", "Bluesky"],
   ["instagram", "Instagram"],
   ["telegram", "Telegram"],
-  ["website", "Personal Website"]
+  ["website", "Personal website"]
 ];
 function linkInputs2(profile) {
   return {
