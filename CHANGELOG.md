@@ -2,10 +2,13 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
-## Unreleased
+## v0.9.17
+
+Registers Alt at `https://alt.cool` as a current-only email-code OIDC client with an exact origin and callback. Alt is the only product whose server can issue five-minute Convex browser tokens with `./convex-browser-auth-server`. The token issuer (`https://alt.cool/api/convex-auth`), audience (`https://alt.cool/convex`), and JWKS URL come from Alt's current registration. `SuiteConvexBrowserConsumerId` is now the literal type `"alt"`.
 
 - The v1 profile form labels the Bluesky field `Bluesky` (was `BlueSky`) and the website field `Personal website` (was `Personal Website`). Update any code or test that selects these fields by label.
 - The public-profile form hint beside Links reads `optional; a handle is enough`.
+- `SUITE_MEMBERSHIP_PRODUCTS` uses each product's current one-line description, and two entries are renamed: `HRANESS.COM` becomes `HRANESS` and `EDS RESEARCH` becomes `EDS RESEARCH INDEX`. IDs, links, emoji, and order are unchanged.
 
 ## v0.9.16
 
