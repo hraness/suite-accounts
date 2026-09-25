@@ -731,98 +731,98 @@ function validateSuiteEntitlementReceipt(input, now) {
 // src/identity/membership.ts
 var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   {
-    description: "model benchmarks and personal token usage",
+    description: "model benchmark scores plotted against cost and tokens per task",
     emoji: "\uD83D\uDCC8",
     href: "https://aicharts.io",
     id: "aicharts",
     name: "AI CHARTS"
   },
   {
-    description: "a knowledge base for agents: markdown, backlinks, search, ontology, and git context",
+    description: "markdown knowledge base that gives agents the decisions behind code",
     emoji: "\uD83D\uDCDD",
     href: "https://wordcell.io",
     id: "kb",
     name: "WORDCELL"
   },
   {
-    description: "an ontology-centered memory and research framework for agents",
+    description: "memory for agents that stores each fact with its sources and history",
     emoji: "\uD83D\uDCDA",
     href: "https://oh.computer",
     id: "oh-computer",
     name: "OH"
   },
   {
-    description: "deep research tools for connected, cited knowledge, exploring self-evolution",
+    description: "private library for what you read, with notes your agent can cite",
     emoji: "\uD83E\uDDFD",
     href: "https://sponge.computer",
     id: "sponge",
     name: "SPONGE"
   },
   {
-    description: "a local-first crm for your personal agent",
+    description: "local personal crm for everyone you know, built for your agent",
     emoji: "\uD83D\uDCC7",
     href: "https://peopleblade.com",
     id: "peopleblade",
     name: "PEOPLEBLADE"
   },
   {
-    description: "a fast web gateway with typed website capabilities for agents",
+    description: "named web actions for ai agents: read pages, save media, use connected accounts",
     emoji: "\uD83D\uDC7B",
     href: "https://ghostget.com",
     id: "ghostget",
     name: "GHOSTGET"
   },
   {
-    description: "evidence-backed dossiers and revisable models of people",
+    description: "free agent skill that writes dated dossiers on people, sources cited",
     emoji: "\uD83E\uDDBE",
     href: "https://soulscrape.com",
     id: "soulscrape",
     name: "SOULSCRAPE"
   },
   {
-    description: "direct visual art, 3d scenes, animation, and video with your agent",
+    description: "media studio for agents: images, 3d, animation, and video to revise",
     emoji: "\uD83D\uDCF8",
     href: "https://slopcamera.com",
     id: "slopcamera",
     name: "SLOPCAMERA"
   },
   {
-    description: "autonomous trading system research and build specification",
+    description: "build prompt that turns a coding agent into a trading-system designer",
     emoji: "\uD83D\uDCC8",
     href: "https://sloptrade.com",
     id: "sloptrade",
     name: "SLOPTRADE"
   },
   {
-    description: "tools for agents and humans",
+    description: "software studio making tools for ai agents and for people",
     emoji: "\uD83E\uDEA2",
     href: "https://hraness.com",
     id: "hraness",
-    name: "HRANESS.COM"
+    name: "HRANESS"
   },
   {
-    description: "sleep research and a calming sound machine",
+    description: "free sleep sounds made in your browser, with sourced sleep guides",
     emoji: "\uD83D\uDCA4",
     href: "https://sleepy.land",
     id: "sleepyland",
     name: "SLEEPYLAND"
   },
   {
-    description: "history of a generational co",
+    description: "independent history of stripe where every event is dated and sourced",
     emoji: "\uD83E\uDD93",
     href: "https://hraness.com/stripe",
     id: "stripe-history",
     name: "STRIPE HISTORY"
   },
   {
-    description: "eds evidence, stratified and sourced",
+    description: "ehlers-danlos evidence stratified by kind, every record linked to sources",
     emoji: "\uD83E\uDDEC",
     href: "https://hraness.com/eds",
     id: "eds-research",
-    name: "EDS RESEARCH"
+    name: "EDS RESEARCH INDEX"
   },
   {
-    description: "move to puerto rico",
+    description: "estimate act 60 savings after real costs, with sourced guides and a day tracker",
     emoji: "⏱️",
     href: "https://act60.me",
     id: "act60",
@@ -836,28 +836,28 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "PLATONIK"
   },
   {
-    description: "repeatable app states for browser agents",
+    description: "repeatable app states for browser agents, opened by url",
     emoji: "\uD83C\uDFAF",
     href: "https://hraness.com/direct",
     id: "direct",
     name: "DIRECT"
   },
   {
-    description: "reproducible capability checks for agents",
+    description: "fresh puzzles for ai agents, scored exactly, with a signed receipt",
     emoji: "\uD83D\uDCE1",
     href: "https://clankdar.com",
     id: "clankdar",
     name: "CLANKDAR"
   },
   {
-    description: "personal life timeline maker",
+    description: "turn the chapters of your life into one timeline you can share",
     emoji: "\uD83D\uDCCA",
     href: "https://lifecharts.io",
     id: "lifedaysleft",
     name: "LIFECHARTS"
   },
   {
-    description: "software factories, in practice",
+    description: "free publication about how companies put ai agents to work",
     emoji: "\uD83C\uDFED",
     href: "https://swft.io",
     id: "swft",
