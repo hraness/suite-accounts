@@ -10,12 +10,12 @@ import type { AuthConfig } from "convex/server";
 
 import { deepFreeze } from "./immutable.js";
 import {
-  getSuiteAccountsConsumerEnvironment,
-  type SuiteAccountsOidcConsumerId,
+  getSuiteAccountsCurrentConsumerEnvironment,
+  type SuiteAccountsCurrentOidcConsumerId,
   type SuiteAccountsRemoteEnvironment,
 } from "./registry.js";
 import {
-  suiteAccountsOidcClientRegistration,
+  suiteAccountsCurrentOidcClientRegistration,
   suiteAccountsOidcProviderConfiguration,
 } from "./urls.js";
 import { SUITE_OIDC_EARLY_REFRESH_WINDOW_MS } from "./oidc-session-policy.js";
@@ -38,9 +38,12 @@ export const SUITE_CONVEX_BROWSER_AUDIENCE_PATH = "/convex" as const;
  *
  * Registration is deliberately separate from the broader OIDC consumer
  * union. Adding a suite RP must not silently let it mint a browser bearer.
+ * Admission names a current OIDC consumer; every trust value below derives
+ * from the current Accounts authority, never the deprecated v1 registry.
  */
-export const SUITE_CONVEX_BROWSER_CONSUMER_IDS = deepFreeze([] as
-  readonly SuiteAccountsOidcConsumerId[]);
+export const SUITE_CONVEX_BROWSER_CONSUMER_IDS = deepFreeze([
+  "alt",
+] as const satisfies readonly SuiteAccountsCurrentOidcConsumerId[]);
 
 export type SuiteConvexBrowserConsumerId =
   (typeof SUITE_CONVEX_BROWSER_CONSUMER_IDS)[number];
@@ -88,7 +91,7 @@ function enabledConsumer(
     && (SUITE_CONVEX_BROWSER_CONSUMER_IDS as readonly string[]).includes(value);
 }
 
-/** Resolve every product-token trust value from the checked suite registry. */
+/** Resolve every product-token trust value from the current suite registry. */
 export function suiteConvexBrowserConfiguration(
   consumer: SuiteConvexBrowserConsumerId,
   environment: SuiteAccountsRemoteEnvironment,
@@ -96,7 +99,7 @@ export function suiteConvexBrowserConfiguration(
   if (!enabledConsumer(consumer)) {
     throw new Error("The suite consumer has no Convex browser-token grant.");
   }
-  const consumerEnvironment = getSuiteAccountsConsumerEnvironment(
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(
     consumer,
     environment,
   );
@@ -104,7 +107,7 @@ export function suiteConvexBrowserConfiguration(
     throw new Error("The suite consumer is unavailable in this environment.");
   }
   const siteUrl = consumerEnvironment.siteUrl;
-  const registration = suiteAccountsOidcClientRegistration(
+  const registration = suiteAccountsCurrentOidcClientRegistration(
     consumer,
     environment,
   );
@@ -131,8 +134,8 @@ export function suiteConvexBrowserEnvironmentForOrigin(
   value: unknown,
 ): SuiteAccountsRemoteEnvironment | null {
   if (typeof value !== "string" || !enabledConsumer(consumer)) return null;
-  return getSuiteAccountsConsumerEnvironment(consumer, "production")?.siteUrl
-      === value
+  return getSuiteAccountsCurrentConsumerEnvironment(consumer, "production")
+      ?.siteUrl === value
     ? "production"
     : null;
 }

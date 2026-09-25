@@ -156,7 +156,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "hraness",
   "soulscrape",
   "platonik",
-  "ghostget"
+  "ghostget",
+  "alt"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -179,7 +180,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
-  ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com")
+  ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
+  alt: currentOidcSite("alt", "Alt", "https://alt.cool")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -524,7 +526,9 @@ var SUITE_CONVEX_BROWSER_TOKEN_PATH = "/api/convex-auth/token";
 var SUITE_CONVEX_BROWSER_JWKS_PATH = "/api/convex-auth/jwks";
 var SUITE_CONVEX_BROWSER_ISSUER_PATH = "/api/convex-auth";
 var SUITE_CONVEX_BROWSER_AUDIENCE_PATH = "/convex";
-var SUITE_CONVEX_BROWSER_CONSUMER_IDS = deepFreeze([]);
+var SUITE_CONVEX_BROWSER_CONSUMER_IDS = deepFreeze([
+  "alt"
+]);
 function isRecord2(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -535,12 +539,12 @@ function suiteConvexBrowserConfiguration(consumer, environment) {
   if (!enabledConsumer(consumer)) {
     throw new Error("The suite consumer has no Convex browser-token grant.");
   }
-  const consumerEnvironment = getSuiteAccountsConsumerEnvironment(consumer, environment);
+  const consumerEnvironment = getSuiteAccountsCurrentConsumerEnvironment(consumer, environment);
   if (consumerEnvironment === null) {
     throw new Error("The suite consumer is unavailable in this environment.");
   }
   const siteUrl = consumerEnvironment.siteUrl;
-  const registration = suiteAccountsOidcClientRegistration(consumer, environment);
+  const registration = suiteAccountsCurrentOidcClientRegistration(consumer, environment);
   if (registration === null) {
     throw new Error("The suite consumer has no OIDC client registration.");
   }
@@ -560,7 +564,7 @@ function suiteConvexBrowserConfiguration(consumer, environment) {
 function suiteConvexBrowserEnvironmentForOrigin(consumer, value) {
   if (typeof value !== "string" || !enabledConsumer(consumer))
     return null;
-  return getSuiteAccountsConsumerEnvironment(consumer, "production")?.siteUrl === value ? "production" : null;
+  return getSuiteAccountsCurrentConsumerEnvironment(consumer, "production")?.siteUrl === value ? "production" : null;
 }
 function suiteConvexBrowserAuthConfig(consumer, environment) {
   const configuration = suiteConvexBrowserConfiguration(consumer, environment);

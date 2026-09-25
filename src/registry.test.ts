@@ -96,6 +96,7 @@ describe("suite Accounts auth-mode registry", () => {
       "soulscrape",
       "platonik",
       "ghostget",
+      "alt",
     ]);
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS)
       .not.toBe(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS);
@@ -126,6 +127,7 @@ describe("suite Accounts auth-mode registry", () => {
       | "soulscrape"
       | "platonik"
       | "ghostget"
+      | "alt"
     >();
     expectTypeOf<SuiteAccountsCurrentOAuthConsumerId>().toEqualTypeOf<
       SuiteAccountsCurrentOidcConsumerId
@@ -183,6 +185,7 @@ describe("suite Accounts auth-mode registry", () => {
         "soulscrape",
         "platonik",
         "ghostget",
+        "alt",
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",
