@@ -2,6 +2,14 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
+## v0.9.20
+
+Registers Algal at `https://algal.cloud` as a current-only email-code OIDC client `hraness:algal:production:v1` with the exact callback `https://algal.cloud/api/suite-auth/callback`, and adds the Algal CLI as the first dedicated device client, `hraness:algal-cli:production:v1`: a public client with only the device-code grant, scopes `openid email profile`, and no redirect URI.
+
+- `SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS` and `suiteAccountsCurrentDeviceClientRegistration()` describe dedicated device clients. They are not consumers and cannot bind a browser origin or callback.
+- `suiteAccountsCurrentDeviceCodeClientAllowed(clientId)` answers whether a client may start a device-code grant. It allows the Algal CLI and the browser clients of the eleven products registered before this release, listed in `SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS`. It denies the Algal web client and every client registered later.
+- Access tokens already carry `azp` and `suite_client_id` equal to the requesting client, with audiences `https://hraness.com/suite` and the Accounts userinfo URL. The token format is unchanged; tests now pin both claims for Algal and for every other current client. A token issued to the Algal CLI carries the CLI's own `azp`, so the Algal web verifier rejects it.
+
 ## v0.9.19
 
 Releases the v0.9.18 registration with a consistent package version. The `v0.9.18` tag is bound to the commit before its version bump, so an install resolves a package that reports `0.9.17`; pin `v0.9.19` instead. No behavior changes.

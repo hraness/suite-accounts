@@ -157,7 +157,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "soulscrape",
   "platonik",
   "ghostget",
-  "alt"
+  "alt",
+  "algal"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
   return {
@@ -181,7 +182,8 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
-  alt: currentOidcSite("alt", "Alt", "https://alt.dog")
+  alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
+  algal: currentOidcSite("algal", "Algal", "https://algal.cloud")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
@@ -203,6 +205,30 @@ var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "peopleblade",
   "ghostget"
 ]);
+var SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS = deepFreeze([
+  "act60",
+  "soundfish",
+  "oh-computer",
+  "sponge",
+  "peopleblade",
+  "aicharts",
+  "hraness",
+  "soulscrape",
+  "platonik",
+  "ghostget",
+  "alt"
+]);
+var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([
+  "algal-cli"
+]);
+var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({
+  "algal-cli": {
+    consumer: "algal",
+    displayName: "Algal CLI",
+    environments: ["production"],
+    id: "algal-cli"
+  }
+});
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
 }
@@ -229,6 +255,12 @@ function isSuiteAccountsCurrentLinkedOidcConsumerId(value) {
 }
 function isSuiteAccountsCurrentOAuthConsumerId(value) {
   return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+function isSuiteAccountsCurrentBrowserDeviceCodeConsumerId(value) {
+  return typeof value === "string" && SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS.includes(value);
+}
+function isSuiteAccountsCurrentDeviceClientId(value) {
+  return typeof value === "string" && SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS.includes(value);
 }
 function suiteAccountsCurrentConsumerRequiresEmailOtp(consumer) {
   return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.includes(consumer);
@@ -305,6 +337,28 @@ function suiteAccountsCurrentOidcClientRequiresEmailOtp(clientId) {
     return false;
   return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some((consumer) => suiteAccountsCurrentOidcClientRegistration(consumer, "production")?.clientId === clientId);
 }
+var DEVICE_CODE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
+function suiteAccountsCurrentDeviceClientRegistration(deviceClient, environment) {
+  if (!isSuiteAccountsCurrentDeviceClientId(deviceClient))
+    return null;
+  const registration = SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS[deviceClient];
+  if (!registration.environments.includes(environment) || suiteAccountsCurrentOidcClientRegistration(registration.consumer, environment) === null) {
+    return null;
+  }
+  return deepFreeze({
+    clientId: `hraness:${deviceClient}:${environment}:v1`,
+    consumer: registration.consumer,
+    grantTypes: [DEVICE_CODE_GRANT_TYPE],
+    redirectUris: [],
+    scopes: ["openid", "email", "profile"],
+    tokenEndpointAuthMethod: "none"
+  });
+}
+function suiteAccountsCurrentDeviceCodeClientAllowed(clientId) {
+  if (typeof clientId !== "string")
+    return false;
+  return SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS.some((deviceClient) => suiteAccountsCurrentDeviceClientRegistration(deviceClient, "production")?.clientId === clientId) || SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS.some((consumer) => isSuiteAccountsCurrentBrowserDeviceCodeConsumerId(consumer) && suiteAccountsCurrentOidcClientRegistration(consumer, "production")?.clientId === clientId);
+}
 function suiteAccountsOidcProviderConfiguration(environment) {
   const issuer = getSuiteAccountsDeployment(environment).accountsOrigin;
   const authBase = new URL("/api/auth/", issuer);
@@ -329,6 +383,8 @@ export {
   suiteAccountsOidcClientRegistration,
   suiteAccountsCurrentOidcClientRequiresEmailOtp,
   suiteAccountsCurrentOidcClientRegistration,
+  suiteAccountsCurrentDeviceCodeClientAllowed,
+  suiteAccountsCurrentDeviceClientRegistration,
   suiteAccountsCentralUrl,
   suiteAccountsBillingReturnUrl,
   SUITE_ACCOUNTS_OAUTH_RESOURCE

@@ -226,6 +226,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "platonik",
   "ghostget",
   "alt",
+  "algal",
 ] as const);
 
 export type SuiteAccountsCurrentConsumerId =
@@ -285,6 +286,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
+  algal: currentOidcSite("algal", "Algal", "https://algal.cloud"),
 } as const satisfies Readonly<
   Record<
     SuiteAccountsCurrentConsumerId,
@@ -376,6 +378,63 @@ export const SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 export type SuiteAccountsCurrentLinkedOidcConsumerId =
   (typeof SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS)[number];
 
+/**
+ * Browser clients that accepted the device-code grant before dedicated device
+ * clients existed. The list is closed: a newly registered product gets a
+ * dedicated device client instead, and its browser client never starts a
+ * device-code grant.
+ */
+export const SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS =
+  deepFreeze([
+    "act60",
+    "soundfish",
+    "oh-computer",
+    "sponge",
+    "peopleblade",
+    "aicharts",
+    "hraness",
+    "soulscrape",
+    "platonik",
+    "ghostget",
+    "alt",
+  ] as const satisfies readonly SuiteAccountsCurrentOidcConsumerId[]);
+
+export type SuiteAccountsCurrentBrowserDeviceCodeConsumerId =
+  (typeof SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS)[number];
+
+/**
+ * Dedicated public device-authorization clients. Each one belongs to exactly
+ * one current browser product, has no redirect URI, and may use only the
+ * device-code grant.
+ */
+export const SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([
+  "algal-cli",
+] as const);
+
+export type SuiteAccountsCurrentDeviceClientId =
+  (typeof SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS)[number];
+
+export type SuiteAccountsCurrentDeviceClient = Readonly<{
+  consumer: Exclude<
+    SuiteAccountsCurrentOidcConsumerId,
+    SuiteAccountsCurrentBrowserDeviceCodeConsumerId
+  >;
+  displayName: string;
+  environments: readonly SuiteAccountsRemoteEnvironment[];
+  id: SuiteAccountsCurrentDeviceClientId;
+}>;
+
+export const SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({
+  "algal-cli": {
+    consumer: "algal",
+    displayName: "Algal CLI",
+    environments: ["production"],
+    id: "algal-cli",
+  },
+} as const satisfies Readonly<
+  Record<SuiteAccountsCurrentDeviceClientId, SuiteAccountsCurrentDeviceClient>
+>);
+
 export type SuiteAccountsOAuthConsumerId = {
   [Consumer in SuiteAccountsRegisteredConsumerId]:
     (typeof SUITE_ACCOUNTS_CONSUMERS)[Consumer]["auth"]["kind"] extends
@@ -463,6 +522,24 @@ export function isSuiteAccountsCurrentOAuthConsumerId(
   value: SuiteAccountsCurrentConsumerId,
 ): value is SuiteAccountsCurrentOAuthConsumerId {
   return getSuiteAccountsCurrentConsumer(value).auth.kind === "oidc-rp";
+}
+
+export function isSuiteAccountsCurrentBrowserDeviceCodeConsumerId(
+  value: unknown,
+): value is SuiteAccountsCurrentBrowserDeviceCodeConsumerId {
+  return typeof value === "string"
+    && (
+      SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS as
+        readonly string[]
+    ).includes(value);
+}
+
+export function isSuiteAccountsCurrentDeviceClientId(
+  value: unknown,
+): value is SuiteAccountsCurrentDeviceClientId {
+  return typeof value === "string"
+    && (SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS as readonly string[])
+      .includes(value);
 }
 
 export function suiteAccountsCurrentConsumerRequiresEmailOtp(
