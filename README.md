@@ -24,7 +24,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.18"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.19"
   }
 }
 ```
@@ -407,7 +407,7 @@ values.
 
 ## Releases
 
-Pin the immutable `v0.9.18` release for this package version. Each release is
+Pin the immutable `v0.9.19` release for this package version. Each release is
 an immutable Git tag, and [`CHANGELOG.md`](CHANGELOG.md) lists what each one
 changed.
 

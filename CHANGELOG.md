@@ -2,6 +2,10 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
+## v0.9.19
+
+Releases the v0.9.18 registration with a consistent package version. The `v0.9.18` tag is bound to the commit before its version bump, so an install resolves a package that reports `0.9.17`; pin `v0.9.19` instead. No behavior changes.
+
 ## v0.9.18
 
 Moves Alt to `https://alt.dog`. The current registration's site URL, OIDC callback (`https://alt.dog/api/suite-auth/callback`), Convex browser-token issuer (`https://alt.dog/api/convex-auth`), audience (`https://alt.dog/convex`), and JWKS endpoint all follow; the client ID `hraness:alt:production:v1` is unchanged. Origins and callbacks for `alt.cool` are no longer current: consumers pinned to v0.9.17 keep binding them, so upgrade the pin before the domain cutover. No Accounts data changes — the reconciler rewrites the stored client's redirect URIs to match.
