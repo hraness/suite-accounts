@@ -182,7 +182,7 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
-  alt: currentOidcSite("alt", "Alt", "https://alt.cool")
+  alt: currentOidcSite("alt", "Alt", "https://alt.dog")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
