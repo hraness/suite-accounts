@@ -135,15 +135,15 @@ describe("suite Convex browser server authority", () => {
   test("admits only Alt at its exact registered endpoints", () => {
     expect(SUITE_CONVEX_BROWSER_CONSUMER_IDS).toEqual(["alt"]);
     expect(configuration).toEqual({
-      audience: "https://alt.cool/convex",
+      audience: "https://alt.dog/convex",
       clientId: "hraness:alt:production:v1",
       consumer: "alt",
       environment: "production",
-      issuer: "https://alt.cool/api/convex-auth",
-      jwksEndpoint: "https://alt.cool/api/convex-auth/jwks",
-      siteUrl: "https://alt.cool",
+      issuer: "https://alt.dog/api/convex-auth",
+      jwksEndpoint: "https://alt.dog/api/convex-auth/jwks",
+      siteUrl: "https://alt.dog",
       suiteIssuer: "https://account.hraness.com",
-      tokenEndpoint: "https://alt.cool/api/convex-auth/token",
+      tokenEndpoint: "https://alt.dog/api/convex-auth/token",
     });
   });
 
@@ -179,9 +179,9 @@ describe("suite Convex browser server authority", () => {
       environment: "staging",
       issuer: "https://attacker.example/api/convex-auth",
       jwksEndpoint: "https://attacker.example/jwks",
-      siteUrl: "https://www.alt.cool",
+      siteUrl: "https://www.alt.dog",
       suiteIssuer: "https://attacker.example",
-      tokenEndpoint: "https://alt.cool/api/convex-auth/token/",
+      tokenEndpoint: "https://alt.dog/api/convex-auth/token/",
     } as const satisfies Record<keyof SuiteConvexBrowserConfiguration, string>;
     for (const [key, value] of Object.entries(substitutes)) {
       const drifted: SuiteConvexBrowserConfiguration = {
@@ -298,14 +298,14 @@ describe("suite Convex browser signer", () => {
       createLocalJWKSet(keyring.jwks as JSONWebKeySet),
       {
         algorithms: ["ES256"],
-        audience: "https://alt.cool/convex",
+        audience: "https://alt.dog/convex",
         currentDate: new Date(nowMs),
-        issuer: "https://alt.cool/api/convex-auth",
+        issuer: "https://alt.dog/api/convex-auth",
       },
     );
     expect(verified.payload).toMatchObject({
-      aud: "https://alt.cool/convex",
-      iss: "https://alt.cool/api/convex-auth",
+      aud: "https://alt.dog/convex",
+      iss: "https://alt.dog/api/convex-auth",
       profile_complete: true,
       profile_revision: "username-v1",
       sub: accountId,
@@ -319,8 +319,8 @@ describe("suite Convex browser signer", () => {
     expect(verified.payload).not.toHaveProperty("email");
     expect(verified.payload).not.toHaveProperty("name");
     for (const [audience, issuer] of [
-      ["https://platonik.space/convex", "https://alt.cool/api/convex-auth"],
-      ["https://alt.cool/convex", "https://platonik.space/api/convex-auth"],
+      ["https://platonik.space/convex", "https://alt.dog/api/convex-auth"],
+      ["https://alt.dog/convex", "https://platonik.space/api/convex-auth"],
     ] as const) {
       let rejected = false;
       try {
@@ -377,7 +377,7 @@ describe("suite Convex browser route handlers", () => {
       serverSession: () => Promise.reject(new Error("must not read session")),
     });
     const response = await handlers.jwks(
-      new Request("https://alt.cool/api/convex-auth/jwks"),
+      new Request("https://alt.dog/api/convex-auth/jwks"),
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
@@ -392,7 +392,7 @@ describe("suite Convex browser route handlers", () => {
       new Request(`${configuration.jwksEndpoint}?cache=1`),
       new Request("https://evil.example/api/convex-auth/jwks"),
       new Request("https://platonik.space/api/convex-auth/jwks"),
-      new Request("https://www.alt.cool/api/convex-auth/jwks"),
+      new Request("https://www.alt.dog/api/convex-auth/jwks"),
     ]) {
       expect((await handlers.jwks(request)).status).toBe(403);
     }
@@ -416,7 +416,7 @@ describe("suite Convex browser route handlers", () => {
       },
     });
     const response = await handlers.token(
-      tokenRequest({ url: "https://alt.cool/api/convex-auth/token" }),
+      tokenRequest({ url: "https://alt.dog/api/convex-auth/token" }),
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
@@ -448,7 +448,7 @@ describe("suite Convex browser route handlers", () => {
       tokenRequest({ url: "https://platonik.space/api/convex-auth/token" }),
       tokenRequest({ headers: { origin: "https://evil.example" } }),
       tokenRequest({ headers: { origin: "https://platonik.space" } }),
-      tokenRequest({ headers: { origin: "https://www.alt.cool" } }),
+      tokenRequest({ headers: { origin: "https://www.alt.dog" } }),
       tokenRequest({ headers: {
         origin: configuration.siteUrl,
         "sec-fetch-site": "cross-site",

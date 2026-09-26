@@ -35,15 +35,15 @@ if (!parsedUsername.ok) throw new Error("The username fixture did not parse.");
 const username = parsedUsername.value;
 
 const altConfiguration = {
-  audience: "https://alt.cool/convex",
+  audience: "https://alt.dog/convex",
   clientId: "hraness:alt:production:v1",
   consumer: "alt",
   environment: "production",
-  issuer: "https://alt.cool/api/convex-auth",
-  jwksEndpoint: "https://alt.cool/api/convex-auth/jwks",
-  siteUrl: "https://alt.cool",
+  issuer: "https://alt.dog/api/convex-auth",
+  jwksEndpoint: "https://alt.dog/api/convex-auth/jwks",
+  siteUrl: "https://alt.dog",
   suiteIssuer: "https://account.hraness.com",
-  tokenEndpoint: "https://alt.cool/api/convex-auth/token",
+  tokenEndpoint: "https://alt.dog/api/convex-auth/token",
 } as const;
 
 /**
@@ -56,7 +56,7 @@ function nonAltConsumerCandidates(): readonly string[] {
     ...SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS,
     ...SUITE_CONSUMER_IDS,
     "elders", "subcounter", "hra", "oprte", "kitchen", "loops", "wrench",
-    "Alt", "ALT", " alt", "alt ", "alt.cool", "alt-cool", "hraness:alt:production:v1",
+    "Alt", "ALT", " alt", "alt ", "alt.dog", "alt-dog", "hraness:alt:production:v1",
     "",
   ]);
   candidates.delete("alt");
@@ -109,15 +109,15 @@ describe("suite Convex browser-token configuration", () => {
   });
 
   test("resolves deployment only from the exact registered Alt origin", () => {
-    expect(suiteConvexBrowserEnvironmentForOrigin("alt", "https://alt.cool"))
+    expect(suiteConvexBrowserEnvironmentForOrigin("alt", "https://alt.dog"))
       .toBe("production");
     for (const value of [
-      "http://alt.cool",
-      "https://www.alt.cool",
-      "https://alt.cool/",
-      "https://alt.cool:443",
+      "http://alt.dog",
+      "https://www.alt.dog",
+      "https://alt.dog/",
+      "https://alt.dog:443",
       "https://ALT.COOL",
-      "https://alt.cool.evil.example",
+      "https://alt.dog.evil.example",
       "https://alt-git-main-hraness.vercel.app",
       "http://localhost:3000",
       "https://platonik.space",
@@ -126,7 +126,7 @@ describe("suite Convex browser-token configuration", () => {
       null,
       0,
       {},
-      ["https://alt.cool"],
+      ["https://alt.dog"],
     ]) {
       expect(suiteConvexBrowserEnvironmentForOrigin("alt", value)).toBeNull();
     }
@@ -135,7 +135,7 @@ describe("suite Convex browser-token configuration", () => {
   test("arbitrary origin values other than the exact Alt origin resolve nothing", () => {
     const originLike = fc.tuple(
       fc.constantFrom("https://", "http://", "HTTPS://", "//", ""),
-      fc.oneof(fc.domain(), fc.constant("alt.cool"), fc.constant("www.alt.cool")),
+      fc.oneof(fc.domain(), fc.constant("alt.dog"), fc.constant("www.alt.dog")),
       fc.constantFrom("", "/", ":443", "/convex", "?next=/", "#fragment", "."),
     ).map(([scheme, host, suffix]) => `${scheme}${host}${suffix}`);
     fc.assert(fc.property(fc.oneof(
@@ -143,7 +143,7 @@ describe("suite Convex browser-token configuration", () => {
       originLike,
       fc.jsonValue({ maxDepth: 2 }),
     ), (value) => {
-      fc.pre(value !== "https://alt.cool");
+      fc.pre(value !== "https://alt.dog");
       expect(suiteConvexBrowserEnvironmentForOrigin("alt", value)).toBeNull();
     }), { numRuns: 200 });
   });
@@ -154,9 +154,9 @@ describe("suite Convex browser-token configuration", () => {
       providers: [
         {
           algorithm: "ES256",
-          applicationID: "https://alt.cool/convex",
-          issuer: "https://alt.cool/api/convex-auth",
-          jwks: "https://alt.cool/api/convex-auth/jwks",
+          applicationID: "https://alt.dog/convex",
+          issuer: "https://alt.dog/api/convex-auth",
+          jwks: "https://alt.dog/api/convex-auth/jwks",
           type: "customJwt",
         },
       ],
@@ -179,7 +179,7 @@ describe("suite Convex browser-token configuration", () => {
     expect(SUITE_CONVEX_BROWSER_CONSUMER_IDS).toEqual(["alt"]);
     const provider = authConfig.providers[0];
     expect(provider && "issuer" in provider ? provider.issuer : null).toBe(
-      "https://alt.cool/api/convex-auth",
+      "https://alt.dog/api/convex-auth",
     );
   });
 
@@ -192,7 +192,7 @@ describe("suite Convex browser-token configuration", () => {
       "https://attacker.example/jwks",
     )).toBe(false);
     expect(suiteConvexBrowserConfiguration("alt", "production").jwksEndpoint)
-      .toBe("https://alt.cool/api/convex-auth/jwks");
+      .toBe("https://alt.dog/api/convex-auth/jwks");
   });
 });
 
@@ -216,7 +216,7 @@ describe("suite Convex browser identity", () => {
     expect(parsed).toEqual({
       ok: true,
       value: {
-        issuer: "https://alt.cool/api/convex-auth",
+        issuer: "https://alt.dog/api/convex-auth",
         subject: accountId,
         suiteAccountId: accountId,
         username,

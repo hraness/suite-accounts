@@ -41,11 +41,11 @@ import {
 
 const binding = {
   authMode: "oidc-rp",
-  callbackUrl: "https://alt.cool/api/suite-auth/callback",
+  callbackUrl: "https://alt.dog/api/suite-auth/callback",
   clientId: "hraness:alt:production:v1",
   consumer: "alt",
   environment: "production",
-  origin: "https://alt.cool",
+  origin: "https://alt.dog",
 } as const;
 
 describe("Alt current registration", () => {
@@ -56,7 +56,7 @@ describe("Alt current registration", () => {
       environments: {
         production: {
           billingReturn: { kind: "unsupported" },
-          siteUrl: "https://alt.cool",
+          siteUrl: "https://alt.dog",
         },
       },
       id: "alt",
@@ -92,7 +92,7 @@ describe("Alt current registration", () => {
       "hraness:alt:preview:v1",
       "hraness:alt:local:v1",
       "hraness:alt:production:v2",
-      "hraness:alt-cool:production:v1",
+      "hraness:alt-dog:production:v1",
       "hraness:Alt:production:v1",
     ]) {
       expect(suiteAccountsCurrentOidcClientRequiresEmailOtp(client)).toBe(false);
@@ -167,16 +167,16 @@ describe("Alt current registration", () => {
 
   test("rejects altered origin, callback, client, auth mode and environment", () => {
     for (const origin of [
-      "http://alt.cool", "https://www.alt.cool", "https://alt.cool/",
-      "https://alt.cool:443", "https://alt.cool.evil.example",
+      "http://alt.dog", "https://www.alt.dog", "https://alt.dog/",
+      "https://alt.dog:443", "https://alt.dog.evil.example",
       "https://alt-git-main-hraness.vercel.app", "http://localhost:3000",
     ]) {
       expect(createSuiteAccountsClientConfiguration({ ...binding, origin }))
         .toEqual({ ok: false, error: "invalid-origin" });
     }
     for (const callbackUrl of [
-      "https://alt.cool/api/auth/callback",
-      "https://alt.cool/api/suite-auth/callback/",
+      "https://alt.dog/api/auth/callback",
+      "https://alt.dog/api/suite-auth/callback/",
       `${binding.callbackUrl}?next=/`, `${binding.callbackUrl}#fragment`,
       "https://foreign.example/api/suite-auth/callback",
     ]) {
@@ -212,15 +212,15 @@ describe("Alt current registration", () => {
     expect(SUITE_CONVEX_BROWSER_CONSUMER_IDS).toEqual(["alt"]);
     const configuration = suiteConvexBrowserConfiguration("alt", "production");
     expect(configuration).toEqual({
-      audience: "https://alt.cool/convex",
+      audience: "https://alt.dog/convex",
       clientId: binding.clientId,
       consumer: "alt",
       environment: "production",
-      issuer: "https://alt.cool/api/convex-auth",
-      jwksEndpoint: "https://alt.cool/api/convex-auth/jwks",
+      issuer: "https://alt.dog/api/convex-auth",
+      jwksEndpoint: "https://alt.dog/api/convex-auth/jwks",
       siteUrl: binding.origin,
       suiteIssuer: "https://account.hraness.com",
-      tokenEndpoint: "https://alt.cool/api/convex-auth/token",
+      tokenEndpoint: "https://alt.dog/api/convex-auth/token",
     });
     expect(suiteConvexBrowserEnvironmentForOrigin("alt", binding.origin))
       .toBe("production");
