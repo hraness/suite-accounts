@@ -2,13 +2,20 @@ import {
   getSuiteAccountsCurrentConsumerEnvironment,
   getSuiteAccountsConsumerEnvironment,
   getSuiteAccountsDeployment,
+  isSuiteAccountsCurrentBrowserDeviceCodeConsumerId,
   isSuiteAccountsCurrentConsumerId,
+  isSuiteAccountsCurrentDeviceClientId,
   isSuiteAccountsCurrentOAuthConsumerId,
   isSuiteAccountsConsumerId,
   isSuiteAccountsOAuthConsumerId,
+  SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS,
+  SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS,
+  SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS,
   SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
   SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS,
   type SuiteAccountsConsumerId,
+  type SuiteAccountsCurrentDeviceClient,
+  type SuiteAccountsCurrentDeviceClientId,
   type SuiteAccountsCurrentOidcClientRegistration,
   type SuiteAccountsOidcClientRegistration,
   type SuiteAccountsRemoteEnvironment,
@@ -135,6 +142,69 @@ export function suiteAccountsCurrentOidcClientRequiresEmailOtp(
         consumer,
         "production",
       )?.clientId === clientId,
+  );
+}
+
+/** RFC 8628 grant type; equal to `SUITE_OIDC_DEVICE_CODE_GRANT_TYPE`. */
+const DEVICE_CODE_GRANT_TYPE =
+  "urn:ietf:params:oauth:grant-type:device_code" as const;
+
+export type SuiteAccountsCurrentDeviceClientRegistration = Readonly<{
+  clientId:
+    `hraness:${SuiteAccountsCurrentDeviceClientId}:${SuiteAccountsRemoteEnvironment}:v1`;
+  consumer: SuiteAccountsCurrentDeviceClient["consumer"];
+  grantTypes: readonly [typeof DEVICE_CODE_GRANT_TYPE];
+  redirectUris: readonly [];
+  scopes: readonly ["openid", "email", "profile"];
+  tokenEndpointAuthMethod: "none";
+}>;
+
+/**
+ * Registration for a dedicated public device-authorization client. It has no
+ * redirect URI, no client secret, and exactly one grant.
+ */
+export function suiteAccountsCurrentDeviceClientRegistration(
+  deviceClient: unknown,
+  environment: SuiteAccountsRemoteEnvironment,
+): SuiteAccountsCurrentDeviceClientRegistration | null {
+  if (!isSuiteAccountsCurrentDeviceClientId(deviceClient)) return null;
+  const registration: SuiteAccountsCurrentDeviceClient =
+    SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS[deviceClient];
+  if (
+    !registration.environments.includes(environment)
+    || suiteAccountsCurrentOidcClientRegistration(
+      registration.consumer,
+      environment,
+    ) === null
+  ) {
+    return null;
+  }
+  return deepFreeze({
+    clientId: `hraness:${deviceClient}:${environment}:v1`,
+    consumer: registration.consumer,
+    grantTypes: [DEVICE_CODE_GRANT_TYPE],
+    redirectUris: [],
+    scopes: ["openid", "email", "profile"],
+    tokenEndpointAuthMethod: "none",
+  } as const);
+}
+
+/**
+ * Match an exact client that may start the device-code grant: a dedicated
+ * device client, or a browser client on the closed pre-v0.9.20 list. A
+ * browser client whose product has a dedicated device client never matches.
+ */
+export function suiteAccountsCurrentDeviceCodeClientAllowed(
+  clientId: unknown,
+): boolean {
+  if (typeof clientId !== "string") return false;
+  return SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS.some(deviceClient =>
+    suiteAccountsCurrentDeviceClientRegistration(deviceClient, "production")
+      ?.clientId === clientId
+  ) || SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS.some(consumer =>
+    isSuiteAccountsCurrentBrowserDeviceCodeConsumerId(consumer)
+    && suiteAccountsCurrentOidcClientRegistration(consumer, "production")
+      ?.clientId === clientId
   );
 }
 
