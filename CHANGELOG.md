@@ -2,6 +2,10 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
+## v0.9.18
+
+Moves Alt to `https://alt.dog`. The current registration's site URL, OIDC callback (`https://alt.dog/api/suite-auth/callback`), Convex browser-token issuer (`https://alt.dog/api/convex-auth`), audience (`https://alt.dog/convex`), and JWKS endpoint all follow; the client ID `hraness:alt:production:v1` is unchanged. Origins and callbacks for `alt.cool` are no longer current: consumers pinned to v0.9.17 keep binding them, so upgrade the pin before the domain cutover. No Accounts data changes — the reconciler rewrites the stored client's redirect URIs to match.
+
 ## v0.9.17
 
 Registers Alt at `https://alt.cool` as a current-only email-code OIDC client with an exact origin and callback. Alt is the only product whose server can issue five-minute Convex browser tokens with `./convex-browser-auth-server`. The token issuer (`https://alt.cool/api/convex-auth`), audience (`https://alt.cool/convex`), and JWKS URL come from Alt's current registration. `SuiteConvexBrowserConsumerId` is now the literal type `"alt"`.
