@@ -16,3 +16,7 @@ updates:
     groups:
       bun:
         patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      # Hraness deps stay on reviewed immutable commits/releases (AGENTS.md).
+      - dependency-name: "@hraness/*"
