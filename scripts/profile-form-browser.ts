@@ -1,5 +1,6 @@
+import { provisionedBrowserExecutable, verificationBrowserLaunchOptions } from "./browser-executable.js";
 import assert from "node:assert/strict";
-import { access, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -63,10 +64,7 @@ main{max-width:560px;margin:auto}form.caller{gap:24px;font-language-override:"EN
 const requests: SuiteProfileUpdateRequest[] = [];
 let releasePending: (() => void) | undefined;
 const pending = new Promise<void>((resolvePending) => { releasePending = resolvePending; });
-const executable = process.env["CHROMIUM_EXECUTABLE_PATH"] ?? (
-  process.platform === "darwin" ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" : "/usr/bin/google-chrome"
-);
-await access(executable);
+const executable = await provisionedBrowserExecutable();
 const evidence = await mkdtemp(join(tmpdir(), "suite-profile-browser-evidence-"));
 const server = Bun.serve({
   hostname: "127.0.0.1", port: 0,
@@ -104,7 +102,7 @@ const failedResponses: Array<Readonly<{ method: string; status: number; url: str
 const checks: string[] = [];
 let verificationPassed = false;
 try {
-  browser = await chromium.launch({ executablePath: executable, headless: true });
+  browser = await chromium.launch({ executablePath: executable, headless: true, ...verificationBrowserLaunchOptions() });
   const context = await browser.newContext();
   const page = await context.newPage();
   page.on("pageerror", error => errors.push(error.message));

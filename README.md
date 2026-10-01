@@ -334,11 +334,13 @@ Create it on the product server and bind it to a durable, short-lived action;
 do not copy browser parameters, personal data or credentials into it.
 `expiresAtMs` must be a safe integer after server time and no more than 10
 minutes ahead. `authenticationNotBeforeMs`, when present, must be a
-non-negative safe integer and maps to a positive OIDC `max_age`: the provider
-may satisfy the login prompt with a live session authenticated at or after
-that instant. Omit it to force a fresh interactive sign-in every time. The
-request still uses the exact registered start URL, method
-and same-origin rules. The context is encrypted in the transaction cookie and
+non-negative safe integer. It sets the OIDC `max_age` request parameter to
+`max(0, ceil((startedAtMs - authenticationNotBeforeMs) / 1000))`; omitting it
+sends `max_age=0`. Completion still rejects authentication before the
+transaction start's whole-second boundary, so this option does not enable reuse
+of an earlier session.
+
+The request uses the exact registered start URL, method, and same-origin rules. The context is encrypted in the transaction cookie and
 is not added to the authorization URL, continuation HTML or browser session.
 
 The fresh transaction uses a separate version. Ordinary `callback()` and
@@ -371,11 +373,7 @@ response may leave a consumed OAuth code; reconcile durable product state and
 start a new transaction instead of assuming the code can be replayed. Ordinary
 login, session access and refresh cannot produce fresh completion evidence.
 
-The SDK requests `prompt=login` with `max_age=0` by default, then independently
-checks the signed result. An optional `authenticationNotBeforeMs` input maps to
-a positive `max_age`, letting the provider satisfy the prompt with a recent
-live session instead of another interactive sign-in; the same verified
-`auth_time` evidence is still returned for the product's own freshness check.
+The SDK requests `prompt=login` and independently checks the signed result.
 Request parameters alone are insufficient evidence. See
 [OIDC authentication-time validation](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation).
 Before you enable privileged actions, verify how the live Accounts service
@@ -398,8 +396,8 @@ release and an exact factory binding. Retired client identifiers and routes are
 rejected by current APIs.
 
 The published v1 browser refresh-lock and session-notification channel strings
-also remain unchanged in version 0.1. Existing tabs therefore coordinate
-across a rolling package migration without a browser namespace cutover.
+retain their original values. Existing tabs therefore coordinate across a
+rolling package migration without a browser namespace cutover.
 
 The compatibility registry is intentionally closed. It must not gain runtime
 mutation, remote discovery, environment overrides, or caller-supplied trust
@@ -407,15 +405,8 @@ values.
 
 ## Releases
 
-Pin the immutable `v0.9.20` release for this package version. Each release is
-an immutable Git tag, and [`CHANGELOG.md`](CHANGELOG.md) lists what each one
-changed.
-
-Deterministic tests exercise valid registrations and readable failures.
-Property tests cover foreign-value parsers, ordering, and round trips. The
-package smoke installs built entries into clean Bundler and NodeNext consumers
-with React 18.3.1 and 19.2.3, then builds the client entries in a clean Next.js
-16.2 webpack consumer.
+Each release is an immutable Git tag. [`CHANGELOG.md`](CHANGELOG.md) lists the
+changes and migration notes for each version.
 
 ## Service boundary
 
@@ -458,6 +449,7 @@ and product gates before the callback is enabled in production.
 ```sh
 bun install --frozen-lockfile --ignore-scripts
 bun run check
+bun run browser:install
 bun run test:browser
 bun pm pack --dry-run --ignore-scripts
 ```
@@ -476,10 +468,13 @@ styles at compact and wide widths, native focus and readonly controls, vertical
 writing, hydration, pending saves, conflict revisions, validation errors, and
 save failures. It also verifies that a real cross-site callback ends before the
 nonce-locked continuation starts a same-origin session request. Only the save
-transport and callback provider are synthetic. The script uses an installed
-browser without downloading one; set `CHROMIUM_EXECUTABLE_PATH` to select its
-executable. It prints the retained temporary profile evidence directory and
-closes its own browsers and loopback servers. Branch and release verification
+transport and callback provider are synthetic. Install the Chromium revision pinned by `playwright-core` with
+`bun run browser:install` before running these checks. An explicit
+`CHROMIUM_EXECUTABLE_PATH` may select a separately provisioned Chrome for Testing;
+the installed Chrome app is rejected, including through a symlink. Checks report
+the resolved executable and version, mute audio, and disable `PaintHolding` and
+`MacAppCodeSignClone` while preserving other browser flags. They print the
+temporary evidence directory and close their browsers and loopback servers. Branch and release verification
 both require this browser check.
 
 The public-profile browser fixture uses the same built optional entry. It

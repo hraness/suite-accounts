@@ -1,6 +1,6 @@
+import { provisionedBrowserExecutable, verificationBrowserLaunchOptions } from "./browser-executable.js";
 import assert from "node:assert/strict";
 import {
-  access,
   mkdtemp,
   readFile,
   rm,
@@ -258,12 +258,7 @@ authorizationNonce = successTransaction.nonce;
 const providerPage = `${provider.issuer}/suite-accounts-browser-provider`;
 const failureProviderPage = `${provider.issuer}/suite-accounts-browser-provider-failure`;
 
-const executable = process.env["CHROMIUM_EXECUTABLE_PATH"] ?? (
-  process.platform === "darwin"
-    ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    : "/usr/bin/google-chrome"
-);
-await access(executable);
+const executable = await provisionedBrowserExecutable();
 
 type CallbackEvidence = Readonly<{
   body: string;
@@ -389,9 +384,9 @@ try {
   });
 
   browser = await chromium.launch({
-    args: [
+    ...verificationBrowserLaunchOptions([
       `--host-resolver-rules=MAP sound.fish 127.0.0.1:${server.port},EXCLUDE 127.0.0.1`,
-    ],
+    ]),
     executablePath: executable,
     headless: true,
   });
