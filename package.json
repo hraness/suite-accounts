@@ -206,6 +206,7 @@
     "test": "bun test --preload ./scripts/register-stylex-test-transform.ts ./src",
     "test:property": "bun test ./src/*.property.test.ts ./src/identity/*.property.test.ts",
     "test:package": "bun run ./scripts/package-smoke.ts",
+    "browser:install": "bun x --no-install playwright-core install --with-deps chromium",
     "test:browser": "bun run test:browser:profile && bun run test:browser:public-profile && bun run test:browser:oidc",
     "test:browser:oidc": "bun run ./scripts/oidc-navigation-browser.ts",
     "test:browser:profile": "bun run ./scripts/profile-form-browser.ts",

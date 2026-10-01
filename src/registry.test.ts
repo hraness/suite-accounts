@@ -191,7 +191,7 @@ describe("suite Accounts auth-mode registry", () => {
         "ghostget",
         "alt",
         "algal",
-      "textmock",
+        "textmock",
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",

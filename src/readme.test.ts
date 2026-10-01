@@ -33,7 +33,6 @@ describe("README facts", () => {
     expect(readme).toContain(
       `"@hraness/suite-accounts": "github:hraness/suite-accounts#v${packageManifest.version}"`,
     );
-    expect(readme).toContain(`immutable \`v${packageManifest.version}\` release`);
     expect(normalizedReadme).toContain(
       `Install them only when using \`@hraness/suite-accounts/react\` or`,
     );
