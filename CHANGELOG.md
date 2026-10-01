@@ -2,6 +2,10 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
+## v0.9.21
+
+Registers Textmock at `https://textmock.com` with client `hraness:textmock:production:v1` and the exact callback `https://textmock.com/api/suite-auth/callback`. The production browser client uses the existing email-code and PKCE flow. It has no legacy registration, identity-link privileges, or device grant.
+
 ## v0.9.20
 
 Registers Algal at `https://algal.cloud` as a current-only email-code OIDC client `hraness:algal:production:v1` with the exact callback `https://algal.cloud/api/suite-auth/callback`, and adds the Algal CLI as the first dedicated device client, `hraness:algal-cli:production:v1`: a public client with only the device-code grant, scopes `openid email profile`, and no redirect URI.
