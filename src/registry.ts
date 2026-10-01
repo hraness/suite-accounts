@@ -227,6 +227,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "ghostget",
   "alt",
   "algal",
+  "textmock",
 ] as const);
 
 export type SuiteAccountsCurrentConsumerId =
@@ -287,6 +288,7 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
   algal: currentOidcSite("algal", "Algal", "https://algal.cloud"),
+  textmock: currentOidcSite("textmock", "Textmock", "https://textmock.com"),
 } as const satisfies Readonly<
   Record<
     SuiteAccountsCurrentConsumerId,
