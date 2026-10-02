@@ -408,6 +408,10 @@ values.
 Each release is an immutable Git tag. [`CHANGELOG.md`](CHANGELOG.md) lists the
 changes and migration notes for each version.
 
+When a pull request that bumps the `package.json` version merges and CI passes
+on `main`, the matching `v<version>` tag is created automatically. Pushing the
+tag by hand still works.
+
 ## Service boundary
 
 This repository does not contain billing prices or provider lookup keys,
