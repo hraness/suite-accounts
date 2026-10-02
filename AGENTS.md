@@ -14,7 +14,7 @@
 - `src/react.tsx`, `src/profile-form.tsx`, `src/profile-form.stylex.ts`, and `src/profile-form.css` contain the optional React surface and precompiled presentation entry.
 - `src/*.test.ts`, `src/*.test.tsx`, and `src/*.property.test.ts` contain deterministic examples and arbitrary-input laws.
 - `scripts/` contains the portable inventory validator, ESM build, public-boundary scan, and clean-consumer package smoke.
-- `.github/workflows/` contains read-only branch validation and checks-gated immutable GitHub Release automation.
+- `.github/workflows/` contains read-only branch validation, CI-gated version-bump tagging (`auto-tag.yml`; manual tags still work), and checks-gated immutable GitHub Release automation.
 - `.agents/skills/` contains portable cross-repository KB and phased-execution workflows.
 - `kb/` contains authored repository rationale, maintained synthesis, and implementation plans.
 - `WRITING.md` and `STYLE.md` define the internal and public prose contracts.
