@@ -17,6 +17,17 @@ links, and entitlements. Installing this package does not let a product
 register itself or pick its own issuer, JWKS endpoint, resource, callback,
 client ID, wire version, or trust algorithm.
 
+## Choose an integration task
+
+For a new sign-in integration, [bind a registered client](#bind-a-registered-client) before choosing runtime imports from the [interface map](#interface-map). You need an Accounts registration; installing the package does not create one.
+
+- [Trust path](#follow-the-trust-path): see what stays in the browser and what your server verifies.
+- [Identity protocol](#use-the-identity-protocol): parse data without mistaking parsing for signature verification.
+- [Public profiles](#public-profile-v2-contracts): validate revision-bound updates and use the optional React editor.
+- [Fresh authentication](#fresh-authentication-for-server-owned-actions): request recent authentication separately from ordinary sign-in.
+- [Frozen v1 compatibility](#frozen-v1-protocol-compatibility): distinguish historical parsing from current registrations.
+- [Questions before integration](#questions-before-integration): check registration, authorization, and billing responsibilities.
+
 ## Install
 
 Pin the immutable release:
