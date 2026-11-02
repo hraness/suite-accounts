@@ -183,19 +183,17 @@ describe("suite Accounts public configuration", () => {
     })).toThrow("same loopback host");
   });
 
-  test("rejects AI Charts loopback configuration without changing existing clients", () => {
+  test("retired aicharts configuration is invalid while existing loopback clients stay ready", () => {
     const local = {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: "http://127.0.0.1:3211",
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: "http://127.0.0.1:3210",
       NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3000",
     } as const;
-    const message = "AI Charts authentication requires its registered production origin.";
-    expect(() => parseSuiteAccountsPublicConfig("aicharts", local))
-      .toThrow(message);
-    expect(suiteAccountsPublicConfigFromEnvironment("aicharts", local))
-      .toEqual({ kind: "invalid", message });
+    expect(() => { Reflect.apply(parseSuiteAccountsPublicConfig, undefined, ["aicharts", local]); })
+      .toThrow();
+    const result: unknown = Reflect.apply(suiteAccountsPublicConfigFromEnvironment, undefined, ["aicharts", local]);
+    expect(result).toMatchObject({ kind: "invalid" });
     for (const consumer of SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS) {
-      if (consumer === "aicharts") continue;
       expect(parseSuiteAccountsPublicConfig(consumer, local)).toMatchObject({
         consumer,
         environment: "local",
@@ -205,20 +203,20 @@ describe("suite Accounts public configuration", () => {
     }
   });
 
-  test("keeps AI Charts authentication unavailable on generated Previews", () => {
+  test("rejects retired aicharts on production and generated Preview origins", () => {
     const production = getSuiteAccountsDeployment("production");
-    expect(parseSuiteAccountsPublicConfig("aicharts", {
-      NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: production.convexSiteUrl,
-      NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: production.convexUrl,
-      NEXT_PUBLIC_SITE_URL: "https://aicharts.io",
-      NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN: "https://aicharts-change-123.vercel.app",
-    })).toEqual({
-      canonicalProductOrigin: "https://aicharts.io",
-      environment: "production",
-      kind: "unavailable",
-      message: "Suite authentication is unavailable on generated Vercel Preview origins.",
-      surfaceOrigin: "https://aicharts-change-123.vercel.app",
-    });
+    for (const surface of ["https://aicharts.io", "https://aicharts-change-123.vercel.app"]) {
+      const environment = {
+        NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: production.convexSiteUrl,
+        NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: production.convexUrl,
+        NEXT_PUBLIC_SITE_URL: "https://aicharts.io",
+        NEXT_PUBLIC_VERCEL_SURFACE_ORIGIN: surface,
+      };
+      expect(() => { Reflect.apply(parseSuiteAccountsPublicConfig, undefined, ["aicharts", environment]); })
+        .toThrow();
+      const result: unknown = Reflect.apply(suiteAccountsPublicConfigFromEnvironment, undefined, ["aicharts", environment]);
+      expect(result).toMatchObject({ kind: "invalid" });
+    }
   });
 
   test("makes Suite auth unavailable on a generated production-backed Preview", () => {

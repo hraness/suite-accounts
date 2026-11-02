@@ -7,6 +7,7 @@ import {
   getSuiteAccountsConsumer,
   getSuiteAccountsDeployment,
   isSuiteAccountsCurrentConsumerId,
+  isSuiteAccountsRegisteredConsumerId,
   type SuiteAccountsAuthConfiguration,
   type SuiteAccountsCurrentConsumerId,
   type SuiteAccountsEnvironment,
@@ -159,6 +160,9 @@ export function parseSuiteAccountsPublicConfig(
   consumer: SuiteAccountsPublicConsumerId,
   environment: SuiteAccountsPublicEnvironment,
 ): Exclude<SuiteAccountsPublicConfig, { kind: "invalid" }> {
+  if (!isSuiteAccountsCurrentConsumerId(consumer) && !isSuiteAccountsRegisteredConsumerId(consumer)) {
+    throw new Error("The Suite Accounts consumer is not registered.");
+  }
   const missing = SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS.filter((name) => {
     const value = environment[name];
     return typeof value !== "string" || value.trim() === "";
@@ -191,13 +195,6 @@ export function parseSuiteAccountsPublicConfig(
     LOOPBACK_HOSTS.has(url.hostname)
   );
   if (loopback.every(Boolean)) {
-    // This new registration has no local trust surface. Preserve existing
-    // consumers' released loopback behavior below.
-    if (consumer === "aicharts") {
-      throw new Error(
-        "AI Charts authentication requires its registered production origin.",
-      );
-    }
     if (
       deployment.transport !== "local"
       || site.hostname !== convex.hostname

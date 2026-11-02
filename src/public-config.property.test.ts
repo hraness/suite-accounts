@@ -14,7 +14,7 @@ const accounts = {
 } as const;
 
 describe("suite Accounts public origin laws", () => {
-  test("AI Charts never admits loopback hosts or ports as production trust", () => {
+  test("retired aicharts never admits arbitrary loopback hosts or ports", () => {
     assertProperty(fc.property(
       fc.constantFrom("localhost", "127.0.0.1", "[::1]"),
       fc.tuple(
@@ -28,11 +28,10 @@ describe("suite Accounts public origin laws", () => {
           NEXT_PUBLIC_ACCOUNTS_CONVEX_URL: `http://${host}:${convexPort}`,
           NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL: `http://${host}:${convexSitePort}`,
         };
-        const message = "AI Charts authentication requires its registered production origin.";
-        expect(() => parseSuiteAccountsPublicConfig("aicharts", local))
-          .toThrow(message);
-        expect(suiteAccountsPublicConfigFromEnvironment("aicharts", local))
-          .toEqual({ kind: "invalid", message });
+        expect(() => { Reflect.apply(parseSuiteAccountsPublicConfig, undefined, ["aicharts", local]); })
+          .toThrow();
+        const result: unknown = Reflect.apply(suiteAccountsPublicConfigFromEnvironment, undefined, ["aicharts", local]);
+        expect(result).toMatchObject({ kind: "invalid" });
         expect(parseSuiteAccountsPublicConfig("soundfish", local))
           .toMatchObject({ kind: "ready", environment: "local" });
       },

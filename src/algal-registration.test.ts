@@ -351,7 +351,6 @@ describe("Algal client registration", () => {
       "oh-computer",
       "sponge",
       "peopleblade",
-      "aicharts",
       "hraness",
       "soulscrape",
       "platonik",

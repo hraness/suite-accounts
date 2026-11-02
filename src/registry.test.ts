@@ -91,7 +91,6 @@ describe("suite Accounts auth-mode registry", () => {
       "oh-computer",
       "sponge",
       "peopleblade",
-      "aicharts",
       "hraness",
       "soulscrape",
       "platonik",
@@ -124,7 +123,6 @@ describe("suite Accounts auth-mode registry", () => {
       | "oh-computer"
       | "sponge"
       | "peopleblade"
-      | "aicharts"
       | "hraness"
       | "soulscrape"
       | "platonik"
@@ -184,8 +182,7 @@ describe("suite Accounts auth-mode registry", () => {
         "oh-computer",
           "sponge",
         "peopleblade",
-        "aicharts",
-        "hraness",
+          "hraness",
         "soulscrape",
         "platonik",
         "ghostget",
@@ -363,11 +360,6 @@ describe("suite Accounts auth-mode registry", () => {
       "accounts",
     )).toBe(false);
     expect(Reflect.set(
-      SUITE_ACCOUNTS_CURRENT_CONSUMERS.aicharts.environments.production,
-      "siteUrl",
-      "https://attacker.example",
-    )).toBe(false);
-    expect(Reflect.set(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production,
       "siteUrl",
       "https://attacker.example",
@@ -383,9 +375,6 @@ describe("suite Accounts auth-mode registry", () => {
       .toBe("https://sound.fish");
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMERS.soundfish.environments.production.siteUrl)
       .toBe("https://sound.fish");
-    expect(
-      SUITE_ACCOUNTS_CURRENT_CONSUMERS.aicharts.environments.production.siteUrl,
-    ).toBe("https://aicharts.io");
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production.siteUrl,
     ).toBe("https://peopleblade.com");

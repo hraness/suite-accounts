@@ -35,7 +35,7 @@ Pin the immutable release:
 ```json
 {
   "dependencies": {
-    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.21"
+    "@hraness/suite-accounts": "github:hraness/suite-accounts#v0.9.22"
   }
 }
 ```
@@ -405,6 +405,9 @@ Current authority lives under the distinct
 New registration remains an Accounts service change followed by a package
 release and an exact factory binding. Retired client identifiers and routes are
 rejected by current APIs.
+
+The former aicharts browser client and its device-code grant are retired.
+The site remains a public benchmark reference.
 
 The published v1 browser refresh-lock and session-notification channel strings
 retain their original values. Existing tabs therefore coordinate across a
