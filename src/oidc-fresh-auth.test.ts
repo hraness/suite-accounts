@@ -13,8 +13,8 @@ if (!parsedAccountId.ok) throw new Error("Invalid synthetic Suite account ID.");
 const accountId = parsedAccountId.value;
 const otherAccountId = "acct_018f1f7a7a367ccdbd5d706d4dc5c019";
 const subject = "synthetic-fresh-auth-principal";
-const siteUrl = "https://aicharts.io";
-const clientId = "hraness:aicharts:production:v1";
+const siteUrl = "https://hraness.com";
+const clientId = "hraness:hraness:production:v1";
 const context = "pairing_context_".repeat(4);
 const provider = suiteAccountsOidcProviderConfiguration("production");
 const transactionName = "__Host-hraness-suite-oidc-transaction";
@@ -92,7 +92,7 @@ async function fixture() {
   }
 
   const relyingParty = createSuiteOidcRelyingParty({
-    consumer: "aicharts",
+    consumer: "hraness",
     cookieSecret: "synthetic-fresh-auth-cookie-secret-at-least-32-bytes",
     environment: "production",
     fetch: async (input, init) => {
@@ -408,7 +408,7 @@ describe("fresh OIDC authentication completion", () => {
   });
 
   test.each([
-    { url: "https://preview.aicharts.io/api/suite-auth/start", init: {} },
+    { url: "https://preview.hraness.com/api/suite-auth/start", init: {} },
     { url: "/api/suite-auth/other", init: {} },
     { url: "/api/suite-auth/start", init: { method: "POST" } },
     { url: "/api/suite-auth/start", init: { headers: { "sec-fetch-site": "cross-site" } } },

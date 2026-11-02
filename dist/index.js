@@ -152,7 +152,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "oh-computer",
   "sponge",
   "peopleblade",
-  "aicharts",
   "hraness",
   "soulscrape",
   "platonik",
@@ -178,7 +177,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
-  aicharts: currentOidcSite("aicharts", "AI Charts", "https://aicharts.io"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
@@ -213,7 +211,6 @@ var SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS = deepFreeze([
   "oh-computer",
   "sponge",
   "peopleblade",
-  "aicharts",
   "hraness",
   "soulscrape",
   "platonik",
@@ -987,6 +984,9 @@ function getPublicConsumer(consumer) {
   return isSuiteAccountsCurrentConsumerId(consumer) ? getSuiteAccountsCurrentConsumer(consumer) : getSuiteAccountsConsumer(consumer);
 }
 function parseSuiteAccountsPublicConfig(consumer, environment) {
+  if (!isSuiteAccountsCurrentConsumerId(consumer) && !isSuiteAccountsRegisteredConsumerId(consumer)) {
+    throw new Error("The Suite Accounts consumer is not registered.");
+  }
   const missing = SUITE_ACCOUNTS_PUBLIC_ENVIRONMENT_KEYS.filter((name) => {
     const value = environment[name];
     return typeof value !== "string" || value.trim() === "";
@@ -1002,9 +1002,6 @@ function parseSuiteAccountsPublicConfig(consumer, environment) {
   const convex = parseOrigin(deployment.url, "NEXT_PUBLIC_ACCOUNTS_CONVEX_URL");
   const loopback = [site, convex, convexSite].map((url) => LOOPBACK_HOSTS.has(url.hostname));
   if (loopback.every(Boolean)) {
-    if (consumer === "aicharts") {
-      throw new Error("AI Charts authentication requires its registered production origin.");
-    }
     if (deployment.transport !== "local" || site.hostname !== convex.hostname || site.hostname !== convexSite.hostname) {
       throw new Error("Local consumer and Accounts endpoints must use the same loopback host.");
     }

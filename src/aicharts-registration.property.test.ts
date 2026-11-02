@@ -12,20 +12,20 @@ const binding = {
   origin: "https://aicharts.io",
 } as const;
 
-test("AI Charts accepts no arbitrary mutation of its five binding coordinates", () => {
+test("no mutation of the former aicharts binding can restore current trust", () => {
   assertProperty(fc.property(
     fc.constantFrom(
-      "authMode", "callbackUrl", "clientId", "environment", "origin",
+      "authMode", "callbackUrl", "clientId", "consumer", "environment", "origin",
     ),
     fc.anything(),
     (key, value) => {
       const result = createSuiteAccountsClientConfiguration({ ...binding, [key]: value });
-      expect(result.ok).toBe(value === binding[key]);
+      expect(result.ok).toBe(false);
     },
   ));
 });
 
-test("AI Charts never accepts additional arbitrary trust configuration", () => {
+test("retired aicharts never accepts additional arbitrary trust configuration", () => {
   assertProperty(fc.property(
     fc.string().filter(key => !Object.hasOwn(binding, key)),
     fc.anything(),

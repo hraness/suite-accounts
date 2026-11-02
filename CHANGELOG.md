@@ -2,6 +2,10 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
+## v0.9.22
+
+Retires the aicharts browser client `hraness:aicharts:production:v1`, its origin and callback, and its browser device-code grant. Current configuration factories reject the former binding. The membership list still links to the public benchmark reference. Other registrations and frozen v1 identity parsing remain unchanged.
+
 ## v0.9.21
 
 Registers Textmock at `https://textmock.com` with client `hraness:textmock:production:v1` and the exact callback `https://textmock.com/api/suite-auth/callback`. The production browser client uses the existing email-code and PKCE flow. It has no legacy registration, identity-link privileges, or device grant.

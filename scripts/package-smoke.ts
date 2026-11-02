@@ -114,10 +114,10 @@ async function verifyReactLane(
   await run([
     "node", "--input-type=module", "-e",
     `import {createSuiteOidcRelyingParty} from "${packageName}/oidc-rp";
-const rp=createSuiteOidcRelyingParty({consumer:"aicharts",environment:"production",receiptKeyVersion:"v1",cookieSecret:"synthetic-packed-consumer-secret-at-least-32-bytes",fetch:async()=>{throw new Error("Unexpected provider access")}});
-const started=await rp.startFreshAuthentication(new Request("https://aicharts.io/api/suite-auth/start",{headers:{"sec-fetch-site":"same-origin"}}),{context:"opaque-context-for-packed-consumer-test",expiresAtMs:Date.now()+60000});
+const rp=createSuiteOidcRelyingParty({consumer:"hraness",environment:"production",receiptKeyVersion:"v1",cookieSecret:"synthetic-packed-consumer-secret-at-least-32-bytes",fetch:async()=>{throw new Error("Unexpected provider access")}});
+const started=await rp.startFreshAuthentication(new Request("https://hraness.com/api/suite-auth/start",{headers:{"sec-fetch-site":"same-origin"}}),{context:"opaque-context-for-packed-consumer-test",expiresAtMs:Date.now()+60000});
 if(started.status!==302||started.headers.get("location").includes("opaque-context"))throw new Error("Packed fresh start failed");
-const completed=await rp.completeFreshAuthentication(new Request("https://aicharts.io/api/suite-auth/callback"));
+const completed=await rp.completeFreshAuthentication(new Request("https://hraness.com/api/suite-auth/callback"));
 if(completed.kind!=="rejected"||completed.response.status!==400)throw new Error("Packed fresh completion failed closed contract");`,
   ], consumer);
   await run([
@@ -321,7 +321,7 @@ try {
   await run(["tar", "-xzf", archive, "-C", unpacked], repository);
   await checkPrivateBoundary(join(unpacked, "package"));
   const manifest = await readStylexPackageManifest(join(unpacked, "package/dist/stylex-manifest.json"), join(unpacked, "package"));
-  assert.deepEqual(manifest.package, { name: packageName, version: "0.9.21" });
+  assert.deepEqual(manifest.package, { name: packageName, version: "0.9.22" });
   assert.equal(manifest.compiler.transform.propertyValidationMode, "throw");
   assert.equal(manifest.compilerSha256, "9ac2c8448ec8f198047e824ce27a97657e05025918c01c204aa0399f94641049");
   if (manifest.rules.length === 0 || manifest.runtime.length !== 1) throw new Error("Packed StyleX manifest has an incomplete profile boundary.");
