@@ -60,13 +60,6 @@ export const SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "GHOSTGET",
   },
   {
-    description: "free agent skill that writes dated dossiers on people, sources cited",
-    emoji: "🦾",
-    href: "https://soulscrape.com",
-    id: "soulscrape",
-    name: "SOULSCRAPE",
-  },
-  {
     description: "media studio for agents: images, 3d, animation, and video to revise",
     emoji: "📸",
     href: "https://slopcamera.com",

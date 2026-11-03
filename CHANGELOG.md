@@ -2,6 +2,10 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
+## v0.9.24
+
+Retires Soulscrape's current browser client `hraness:soulscrape:production:v1`, its origin, callback and browser device-code grant. Current configuration factories reject the former binding, and the membership list no longer promotes the retired product. The nine remaining browser device-code grants, shared device protocol, historical identity parsing and other client registrations are unchanged. No dedicated device client is added.
+
 ## v0.9.23
 
 Retires Algal's browser client `hraness:algal:production:v1`, its origin and callback, and the dedicated CLI client `hraness:algal-cli:production:v1`. The dedicated-device registry is empty; no replacement client is registered. The ten existing browser device-code grants and shared device authorization protocol remain available. Historical identity parsing and other client registrations are unchanged.
