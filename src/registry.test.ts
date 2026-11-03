@@ -96,7 +96,6 @@ describe("suite Accounts auth-mode registry", () => {
       "platonik",
       "ghostget",
       "alt",
-      "algal",
       "textmock",
     ]);
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS)
@@ -128,7 +127,6 @@ describe("suite Accounts auth-mode registry", () => {
       | "platonik"
       | "ghostget"
       | "alt"
-      | "algal"
       | "textmock"
     >();
     expectTypeOf<SuiteAccountsCurrentOAuthConsumerId>().toEqualTypeOf<
@@ -187,7 +185,6 @@ describe("suite Accounts auth-mode registry", () => {
         "platonik",
         "ghostget",
         "alt",
-        "algal",
         "textmock",
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([

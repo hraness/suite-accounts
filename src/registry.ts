@@ -225,7 +225,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "platonik",
   "ghostget",
   "alt",
-  "algal",
   "textmock",
 ] as const);
 
@@ -281,7 +280,6 @@ export const SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
-  algal: currentOidcSite("algal", "Algal", "https://algal.cloud"),
   textmock: currentOidcSite("textmock", "Textmock", "https://textmock.com"),
 } as const satisfies Readonly<
   Record<
@@ -400,11 +398,9 @@ export type SuiteAccountsCurrentBrowserDeviceCodeConsumerId =
 /**
  * Dedicated public device-authorization clients. Each one belongs to exactly
  * one current browser product, has no redirect URI, and may use only the
- * device-code grant.
+ * device-code grant. No dedicated clients are currently registered.
  */
-export const SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([
-  "algal-cli",
-] as const);
+export const SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([] as const);
 
 export type SuiteAccountsCurrentDeviceClientId =
   (typeof SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS)[number];
@@ -419,14 +415,7 @@ export type SuiteAccountsCurrentDeviceClient = Readonly<{
   id: SuiteAccountsCurrentDeviceClientId;
 }>;
 
-export const SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({
-  "algal-cli": {
-    consumer: "algal",
-    displayName: "Algal CLI",
-    environments: ["production"],
-    id: "algal-cli",
-  },
-} as const satisfies Readonly<
+export const SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({} as const satisfies Readonly<
   Record<SuiteAccountsCurrentDeviceClientId, SuiteAccountsCurrentDeviceClient>
 >);
 

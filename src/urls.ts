@@ -159,6 +159,13 @@ export type SuiteAccountsCurrentDeviceClientRegistration = Readonly<{
   tokenEndpointAuthMethod: "none";
 }>;
 
+function formatDeviceClientId<Id extends string>(
+  id: Id,
+  environment: SuiteAccountsRemoteEnvironment,
+): `hraness:${Id}:${SuiteAccountsRemoteEnvironment}:v1` {
+  return `hraness:${id}:${environment}:v1`;
+}
+
 /**
  * Registration for a dedicated public device-authorization client. It has no
  * redirect URI, no client secret, and exactly one grant.
@@ -180,7 +187,7 @@ export function suiteAccountsCurrentDeviceClientRegistration(
     return null;
   }
   return deepFreeze({
-    clientId: `hraness:${deviceClient}:${environment}:v1`,
+    clientId: formatDeviceClientId(deviceClient, environment),
     consumer: registration.consumer,
     grantTypes: [DEVICE_CODE_GRANT_TYPE],
     redirectUris: [],

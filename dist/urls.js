@@ -157,7 +157,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "platonik",
   "ghostget",
   "alt",
-  "algal",
   "textmock"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
@@ -182,7 +181,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
-  algal: currentOidcSite("algal", "Algal", "https://algal.cloud"),
   textmock: currentOidcSite("textmock", "Textmock", "https://textmock.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
@@ -217,17 +215,8 @@ var SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS = deepFreeze([
   "ghostget",
   "alt"
 ]);
-var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([
-  "algal-cli"
-]);
-var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({
-  "algal-cli": {
-    consumer: "algal",
-    displayName: "Algal CLI",
-    environments: ["production"],
-    id: "algal-cli"
-  }
-});
+var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([]);
+var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({});
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
 }
@@ -337,6 +326,9 @@ function suiteAccountsCurrentOidcClientRequiresEmailOtp(clientId) {
   return SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS.some((consumer) => suiteAccountsCurrentOidcClientRegistration(consumer, "production")?.clientId === clientId);
 }
 var DEVICE_CODE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code";
+function formatDeviceClientId(id, environment) {
+  return `hraness:${id}:${environment}:v1`;
+}
 function suiteAccountsCurrentDeviceClientRegistration(deviceClient, environment) {
   if (!isSuiteAccountsCurrentDeviceClientId(deviceClient))
     return null;
@@ -345,7 +337,7 @@ function suiteAccountsCurrentDeviceClientRegistration(deviceClient, environment)
     return null;
   }
   return deepFreeze({
-    clientId: `hraness:${deviceClient}:${environment}:v1`,
+    clientId: formatDeviceClientId(deviceClient, environment),
     consumer: registration.consumer,
     grantTypes: [DEVICE_CODE_GRANT_TYPE],
     redirectUris: [],
