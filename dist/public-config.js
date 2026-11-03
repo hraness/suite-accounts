@@ -157,7 +157,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "platonik",
   "ghostget",
   "alt",
-  "algal",
   "textmock"
 ]);
 function currentOidcSite(id, displayName, productionSiteUrl) {
@@ -182,7 +181,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
-  algal: currentOidcSite("algal", "Algal", "https://algal.cloud"),
   textmock: currentOidcSite("textmock", "Textmock", "https://textmock.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
@@ -217,17 +215,8 @@ var SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS = deepFreeze([
   "ghostget",
   "alt"
 ]);
-var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([
-  "algal-cli"
-]);
-var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({
-  "algal-cli": {
-    consumer: "algal",
-    displayName: "Algal CLI",
-    environments: ["production"],
-    id: "algal-cli"
-  }
-});
+var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([]);
+var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENTS = deepFreeze({});
 function isSuiteAccountsConsumerId(value) {
   return typeof value === "string" && SUITE_CONSUMER_IDS.includes(value);
 }

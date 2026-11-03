@@ -21,7 +21,6 @@ const binding = {
 } as const;
 
 const deviceCodeClientIds = new Set<string>([
-  "hraness:algal-cli:production:v1",
   ...SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS.map(consumer => {
     const client = suiteAccountsCurrentOidcClientRegistration(consumer, "production");
     if (client === null) throw new Error(`Missing ${consumer} client.`);
@@ -29,7 +28,7 @@ const deviceCodeClientIds = new Set<string>([
   }),
 ]);
 
-test("Algal accepts no arbitrary mutation of its five binding coordinates", () => {
+test("no mutation of the former Algal binding restores retired trust", () => {
   assertProperty(fc.property(
     fc.constantFrom(
       "authMode", "callbackUrl", "clientId", "environment", "origin",
@@ -37,7 +36,7 @@ test("Algal accepts no arbitrary mutation of its five binding coordinates", () =
     fc.anything(),
     (key, value) => {
       const result = createSuiteAccountsClientConfiguration({ ...binding, [key]: value });
-      expect(result.ok).toBe(value === binding[key]);
+      expect(result).toEqual({ ok: false, error: "invalid-consumer" });
     },
   ));
 });
@@ -57,9 +56,7 @@ test("the device-code grant matches only exact registered client IDs", () => {
       expect(suiteAccountsCurrentDeviceCodeClientAllowed(value))
         .toBe(typeof value === "string" && deviceCodeClientIds.has(value));
       expect(suiteAccountsCurrentDeviceClientRegistration(value, "production"))
-        .toEqual(value === "algal-cli"
-          ? suiteAccountsCurrentDeviceClientRegistration("algal-cli", "production")
-          : null);
+        .toBeNull();
     },
   ));
   expect(suiteAccountsCurrentDeviceCodeClientAllowed("hraness:algal:production:v1"))
