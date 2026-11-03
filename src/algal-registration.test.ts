@@ -187,7 +187,7 @@ describe("Algal authentication retirement", () => {
     expect(isSuiteAccountsCurrentBrowserDeviceCodeConsumerId("algal")).toBe(false);
     expect(SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS).toEqual([
       "act60", "soundfish", "oh-computer", "sponge", "peopleblade", "hraness",
-      "soulscrape", "platonik", "ghostget", "alt",
+      "platonik", "ghostget", "alt",
     ]);
     const allowed = SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.flatMap(consumer => {
       const client = suiteAccountsCurrentOidcClientRegistration(consumer, "production");

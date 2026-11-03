@@ -153,7 +153,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "sponge",
   "peopleblade",
   "hraness",
-  "soulscrape",
   "platonik",
   "ghostget",
   "alt",
@@ -177,7 +176,6 @@ var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
-  soulscrape: currentOidcSite("soulscrape", "Soulscrape", "https://soulscrape.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
   ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
@@ -210,7 +208,6 @@ var SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS = deepFreeze([
   "sponge",
   "peopleblade",
   "hraness",
-  "soulscrape",
   "platonik",
   "ghostget",
   "alt"
@@ -793,13 +790,6 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     href: "https://ghostget.com",
     id: "ghostget",
     name: "GHOSTGET"
-  },
-  {
-    description: "free agent skill that writes dated dossiers on people, sources cited",
-    emoji: "\uD83E\uDDBE",
-    href: "https://soulscrape.com",
-    id: "soulscrape",
-    name: "SOULSCRAPE"
   },
   {
     description: "media studio for agents: images, 3d, animation, and video to revise",

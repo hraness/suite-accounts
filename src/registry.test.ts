@@ -92,7 +92,6 @@ describe("suite Accounts auth-mode registry", () => {
       "sponge",
       "peopleblade",
       "hraness",
-      "soulscrape",
       "platonik",
       "ghostget",
       "alt",
@@ -123,7 +122,6 @@ describe("suite Accounts auth-mode registry", () => {
       | "sponge"
       | "peopleblade"
       | "hraness"
-      | "soulscrape"
       | "platonik"
       | "ghostget"
       | "alt"
@@ -181,7 +179,6 @@ describe("suite Accounts auth-mode registry", () => {
           "sponge",
         "peopleblade",
           "hraness",
-        "soulscrape",
         "platonik",
         "ghostget",
         "alt",
