@@ -90,10 +90,9 @@ describe("aicharts authentication retirement", () => {
     }
   });
 
-  test("keeps existing products and the benchmark reference separate from sign-in trust", () => {
-    const aicharts = SUITE_MEMBERSHIP_PRODUCTS.find(product => product.id === "aicharts");
-    expect(aicharts?.href).toBe(formerBinding.origin);
-    expect(aicharts?.description).toContain("benchmark");
+  test("removes the retired benchmark promotion while retaining other product trust", () => {
+    expect(SUITE_MEMBERSHIP_PRODUCTS.some(product => String(product.id) === "aicharts"))
+      .toBe(false);
     for (const consumer of ["hraness", "soundfish", "peopleblade"] as const) {
       expect(isSuiteAccountsCurrentOidcConsumerId(consumer)).toBe(true);
       expect(suiteAccountsCurrentOidcClientRegistration(consumer, "production"))

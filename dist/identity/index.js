@@ -94,9 +94,7 @@ function oidcSite(id, displayName, productionSiteUrl) {
 }
 var SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS = deepFreeze([
   "accounts",
-  "act60",
   "soundfish",
-  "oh-computer",
   "draw-money",
   "sponge"
 ]);
@@ -116,7 +114,6 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     },
     id: "accounts"
   },
-  act60: oidcSite("act60", "ACT60", "https://act60.me"),
   soundfish: {
     auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
     displayName: "Soundfish",
@@ -125,7 +122,6 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     },
     id: "soundfish"
   },
-  "oh-computer": oidcSite("oh-computer", "Oh", "https://oh.computer"),
   "draw-money": {
     auth: {
       basePath: "/api/auth",
@@ -147,14 +143,11 @@ var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
 });
 var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "accounts",
-  "act60",
   "soundfish",
-  "oh-computer",
   "sponge",
   "peopleblade",
   "hraness",
   "platonik",
-  "ghostget",
   "alt",
   "textmock"
 ]);
@@ -170,22 +163,17 @@ function currentOidcSite(id, displayName, productionSiteUrl) {
 }
 var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
-  act60: SUITE_ACCOUNTS_CONSUMERS.act60,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
-  "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
-  ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
   textmock: currentOidcSite("textmock", "Textmock", "https://textmock.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
-  "act60",
   "soundfish",
-  "oh-computer",
   "sponge"
 ]);
 var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
@@ -198,18 +186,14 @@ var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "peopleblade",
-  "ghostget"
+  "peopleblade"
 ]);
 var SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS = deepFreeze([
-  "act60",
   "soundfish",
-  "oh-computer",
   "sponge",
   "peopleblade",
   "hraness",
   "platonik",
-  "ghostget",
   "alt"
 ]);
 var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([]);
@@ -750,46 +734,11 @@ function validateSuiteEntitlementReceipt(input, now) {
 // src/identity/membership.ts
 var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
   {
-    description: "model benchmark scores plotted against cost and tokens per task",
-    emoji: "\uD83D\uDCC8",
-    href: "https://aicharts.io",
-    id: "aicharts",
-    name: "AI CHARTS"
-  },
-  {
-    description: "markdown knowledge base that gives agents the decisions behind code",
-    emoji: "\uD83D\uDCDD",
-    href: "https://wordcell.io",
-    id: "kb",
-    name: "WORDCELL"
-  },
-  {
-    description: "memory for agents that stores each fact with its sources and history",
-    emoji: "\uD83D\uDCDA",
-    href: "https://oh.computer",
-    id: "oh-computer",
-    name: "OH"
-  },
-  {
-    description: "private library for what you read, with notes your agent can cite",
-    emoji: "\uD83E\uDDFD",
-    href: "https://sponge.computer",
-    id: "sponge",
-    name: "SPONGE"
-  },
-  {
     description: "local personal crm for everyone you know, built for your agent",
     emoji: "\uD83D\uDCC7",
     href: "https://peopleblade.com",
     id: "peopleblade",
     name: "PEOPLEBLADE"
-  },
-  {
-    description: "named web actions for ai agents: read pages, save media, use connected accounts",
-    emoji: "\uD83D\uDC7B",
-    href: "https://ghostget.com",
-    id: "ghostget",
-    name: "GHOSTGET"
   },
   {
     description: "media studio for agents: images, 3d, animation, and video to revise",
@@ -827,20 +776,6 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "STRIPE HISTORY"
   },
   {
-    description: "ehlers-danlos evidence stratified by kind, every record linked to sources",
-    emoji: "\uD83E\uDDEC",
-    href: "https://hraness.com/eds",
-    id: "eds-research",
-    name: "EDS RESEARCH INDEX"
-  },
-  {
-    description: "estimate act 60 savings after real costs, with sourced guides and a day tracker",
-    emoji: "⏱️",
-    href: "https://act60.me",
-    id: "act60",
-    name: "ACT60"
-  },
-  {
     description: "browser experiments for a game of algorithmic organisms",
     emoji: "\uD83E\uDDA0",
     href: "https://platonik.space",
@@ -848,32 +783,11 @@ var SUITE_MEMBERSHIP_PRODUCTS = deepFreeze([
     name: "PLATONIK"
   },
   {
-    description: "repeatable app states for browser agents, opened by url",
-    emoji: "\uD83C\uDFAF",
-    href: "https://hraness.com/direct",
-    id: "direct",
-    name: "DIRECT"
-  },
-  {
     description: "fresh puzzles for ai agents, scored exactly, with a signed receipt",
     emoji: "\uD83D\uDCE1",
     href: "https://clankdar.com",
     id: "clankdar",
     name: "CLANKDAR"
-  },
-  {
-    description: "turn the chapters of your life into one timeline you can share",
-    emoji: "\uD83D\uDCCA",
-    href: "https://lifecharts.io",
-    id: "lifedaysleft",
-    name: "LIFECHARTS"
-  },
-  {
-    description: "free publication about how companies put ai agents to work",
-    emoji: "\uD83C\uDFED",
-    href: "https://swft.io",
-    id: "swft",
-    name: "SWFT"
   }
 ]);
 // src/identity/profiles.ts

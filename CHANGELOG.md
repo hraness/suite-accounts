@@ -2,6 +2,12 @@
 
 Each release is an immutable Git tag. Install a release with `"@hraness/suite-accounts": "github:hraness/suite-accounts#vX.Y.Z"`.
 
+## v0.9.25
+
+Retires the current Act60, Oh and GhostGet browser clients, including their browser device-code grants and GhostGet's linked-product authority. Act60 and Oh are also removed from the deprecated registration APIs, so those APIs cannot restore retired trust. The six remaining browser device-code grants and shared device protocol stay available; the dedicated-device registry remains empty.
+
+Removes AICharts, Wordcell, EDS Research Index, Act60, Direct, SWFT, Oh, Lifecharts and GhostGet from current membership promotion. Sponge is unlisted while its current and deprecated client registrations remain unchanged. Historical consumer, product, link and profile parsers keep their original identities and wire contracts; removal of registration authority does not erase historical evidence.
+
 ## v0.9.24
 
 Retires Soulscrape's current browser client `hraness:soulscrape:production:v1`, its origin, callback and browser device-code grant. Current configuration factories reject the former binding, and the membership list no longer promotes the retired product. The nine remaining browser device-code grants, shared device protocol, historical identity parsing and other client registrations are unchanged. No dedicated device client is added.

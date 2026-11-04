@@ -190,10 +190,10 @@ describe("suite Accounts URLs", () => {
   test("returns immutable RP endpoints and client registrations", () => {
     const provider = suiteAccountsOidcProviderConfiguration("production");
     const registration = suiteAccountsOidcClientRegistration(
-      "act60",
+      "soundfish",
       "production",
     );
-    if (registration === null) throw new Error("Missing ACT60 registration.");
+    if (registration === null) throw new Error("Missing Soundfish registration.");
     expect(Reflect.set(
       provider,
       "authorizationEndpoint",
@@ -206,7 +206,7 @@ describe("suite Accounts URLs", () => {
     )).toBe(false);
     expect(suiteAccountsOidcProviderConfiguration("production").authorizationEndpoint)
       .toBe("https://account.hraness.com/api/auth/oauth2/authorize");
-    expect(suiteAccountsOidcClientRegistration("act60", "production")?.callbackUrl)
-      .toBe("https://act60.me/api/suite-auth/callback");
+    expect(suiteAccountsOidcClientRegistration("soundfish", "production")?.callbackUrl)
+      .toBe("https://sound.fish/api/suite-auth/callback");
   });
 });

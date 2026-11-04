@@ -35,7 +35,7 @@ describe("suite membership product list", () => {
   });
 
   test("keeps only the admitted membership IDs in portfolio priority order", () => {
-    expect(SUITE_MEMBERSHIP_PRODUCTS.map(entry => entry.id)).toEqual(["aicharts", "kb", "oh-computer", "sponge", "peopleblade", "ghostget", "slopcamera", "sloptrade", "hraness", "sleepyland", "stripe-history", "eds-research", "act60", "platonik", "direct", "clankdar", "lifedaysleft", "swft"]);
+    expect(SUITE_MEMBERSHIP_PRODUCTS.map(entry => entry.id)).toEqual(["peopleblade", "slopcamera", "sloptrade", "hraness", "sleepyland", "stripe-history", "platonik", "clankdar"]);
     for (const entry of SUITE_MEMBERSHIP_PRODUCTS) {
       expect(String(entry.name)).toBe(entry.name.toUpperCase());
     }
