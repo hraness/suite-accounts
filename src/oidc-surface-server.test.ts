@@ -36,8 +36,8 @@ describe("shared Suite OIDC surface server", () => {
       "https://subcounter.com.evil.example",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
-      "act60",
-      "https://preview.act60.me",
+      "hraness",
+      "https://preview.hraness.com",
     )).toBeNull();
     expect(suiteEnvironmentForConsumerOrigin(
       "sponge",
@@ -81,16 +81,16 @@ describe("shared Suite OIDC surface server", () => {
       ...configured,
       NEXT_PUBLIC_SITE_URL: "https://sound.fish.evil",
     })).toBeNull();
-    expect(createSurfaceSuiteRelyingParty("act60", {
-      NEXT_PUBLIC_SITE_URL: "https://act60.me",
+    expect(createSurfaceSuiteRelyingParty("hraness", {
+      NEXT_PUBLIC_SITE_URL: "https://hraness.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).not.toBeNull();
     expect(createSurfaceSuiteRelyingParty("soundfish", {
       NEXT_PUBLIC_SITE_URL: "https://example.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
-    expect(createSurfaceSuiteRelyingParty("act60", {
-      NEXT_PUBLIC_SITE_URL: "https://preview.act60.me",
+    expect(createSurfaceSuiteRelyingParty("hraness", {
+      NEXT_PUBLIC_SITE_URL: "https://preview.hraness.com",
       SUITE_OIDC_COOKIE_SECRET: configured.SUITE_OIDC_COOKIE_SECRET,
     })).toBeNull();
   });

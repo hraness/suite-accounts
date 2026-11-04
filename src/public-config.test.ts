@@ -126,12 +126,12 @@ describe("suite Accounts public configuration", () => {
   });
 
   test("rejects the retired staging deployment and origin", () => {
-    expect(() => parseSuiteAccountsPublicConfig("act60", {
+    expect(() => parseSuiteAccountsPublicConfig("hraness", {
       NEXT_PUBLIC_ACCOUNTS_CONVEX_SITE_URL:
         "https://veracious-mink-965.convex.site",
       NEXT_PUBLIC_ACCOUNTS_CONVEX_URL:
         "https://veracious-mink-965.convex.cloud",
-      NEXT_PUBLIC_SITE_URL: "https://preview.act60.me",
+      NEXT_PUBLIC_SITE_URL: "https://preview.hraness.com",
     })).toThrow("owned deployment environment");
   });
 

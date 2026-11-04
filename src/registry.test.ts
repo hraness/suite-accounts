@@ -66,7 +66,7 @@ describe("suite Accounts auth-mode registry", () => {
     const oidcConsumers = SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter(
       isSuiteAccountsOidcConsumerId,
     );
-    expect(oidcConsumers).toHaveLength(4);
+    expect(oidcConsumers).toHaveLength(2);
     for (const consumer of oidcConsumers) {
       expect(SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toEqual({
         basePath: "/api/suite-auth",
@@ -79,21 +79,16 @@ describe("suite Accounts auth-mode registry", () => {
   test("keeps deprecated and current authority surfaces distinct", () => {
     expect(SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS).toEqual([
       "accounts",
-      "act60",
       "soundfish",
-      "oh-computer",
       "sponge",
     ]);
     expect(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS).toEqual([
       "accounts",
-      "act60",
       "soundfish",
-      "oh-computer",
       "sponge",
       "peopleblade",
       "hraness",
       "platonik",
-      "ghostget",
       "alt",
       "textmock",
     ]);
@@ -116,14 +111,11 @@ describe("suite Accounts auth-mode registry", () => {
 
   test("retains the exact current OIDC consumer types", () => {
     expectTypeOf<SuiteAccountsCurrentOidcConsumerId>().toEqualTypeOf<
-      | "act60"
       | "soundfish"
-      | "oh-computer"
       | "sponge"
       | "peopleblade"
       | "hraness"
       | "platonik"
-      | "ghostget"
       | "alt"
       | "textmock"
     >();
@@ -173,21 +165,17 @@ describe("suite Accounts auth-mode registry", () => {
   test("keeps current OTP and linked-product policies explicit", () => {
     expect(SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS)
       .toEqual([
-        "act60",
         "soundfish",
-        "oh-computer",
           "sponge",
         "peopleblade",
           "hraness",
         "platonik",
-        "ghostget",
         "alt",
         "textmock",
       ]);
     expect(SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS).toEqual([
       "soundfish",
       "peopleblade",
-      "ghostget",
     ]);
     expect(suiteAccountsCurrentConsumerRequiresEmailOtp("peopleblade"))
       .toBe(true);
@@ -198,7 +186,7 @@ describe("suite Accounts auth-mode registry", () => {
     const oauthConsumers = SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter(
       isSuiteAccountsOAuthConsumerId,
     );
-    expect(oauthConsumers).toHaveLength(4);
+    expect(oauthConsumers).toHaveLength(2);
     for (const consumer of oauthConsumers) {
       expect("cookies" in SUITE_ACCOUNTS_CONSUMERS[consumer].auth).toBe(false);
       expect(isSuiteAccountsOAuthConsumerId(consumer)).toBe(true);
@@ -207,9 +195,7 @@ describe("suite Accounts auth-mode registry", () => {
     expect(isSuiteAccountsOidcConsumerId("draw-money")).toBe(false);
     expect(isSuiteAccountsOidcConsumerId("accounts")).toBe(false);
     expectTypeOf<SuiteAccountsOidcConsumerId>().toEqualTypeOf<
-      | "act60"
       | "soundfish"
-      | "oh-computer"
       | "sponge"
     >();
     expectTypeOf<SuiteAccountsOAuthConsumerId>().toEqualTypeOf<
@@ -217,9 +203,7 @@ describe("suite Accounts auth-mode registry", () => {
     >();
     expectTypeOf<SuiteAccountsRegisteredConsumerId>().toEqualTypeOf<
       | "accounts"
-      | "act60"
       | "soundfish"
-      | "oh-computer"
       | "draw-money"
       | "sponge"
     >();
@@ -231,19 +215,19 @@ describe("suite Accounts auth-mode registry", () => {
   test("registers every remote consumer only in production", () => {
     expectTypeOf<SuiteAccountsRemoteEnvironment>()
       .toEqualTypeOf<"production">();
-    expect(SUITE_ACCOUNTS_CONSUMERS.act60).toEqual({
+    expect(SUITE_ACCOUNTS_CONSUMERS.soundfish).toEqual({
       auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
-      displayName: "ACT60",
+      displayName: "Soundfish",
       environments: {
         production: {
           billingReturn: { kind: "unsupported" },
-          siteUrl: "https://act60.me",
+          siteUrl: "https://sound.fish",
         },
       },
-      id: "act60",
+      id: "soundfish",
     });
-    expect(getSuiteAccountsConsumerEnvironment("act60", "production"))
-      .toMatchObject({ siteUrl: "https://act60.me" });
+    expect(getSuiteAccountsConsumerEnvironment("soundfish", "production"))
+      .toMatchObject({ siteUrl: "https://sound.fish" });
     for (const consumer of SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS) {
       expect(getSuiteAccountsConsumerEnvironment(consumer, "production"))
         .not.toBeNull();
@@ -372,7 +356,7 @@ describe("suite Accounts auth-mode registry", () => {
     expect(
       SUITE_ACCOUNTS_CURRENT_CONSUMERS.peopleblade.environments.production.siteUrl,
     ).toBe("https://peopleblade.com");
-    expect(suiteAccountsConsumerRequiresEmailOtp("act60")).toBe(true);
+    expect(suiteAccountsConsumerRequiresEmailOtp("soundfish")).toBe(true);
     expect(authority.cookies.names[0]).toBe("account_data");
   });
 });

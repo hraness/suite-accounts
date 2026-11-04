@@ -1,6 +1,6 @@
 {
   "name": "@hraness/suite-accounts",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "description": "Validated client and protocol boundaries for Hraness Accounts.",
   "license": "MIT",
   "type": "module",

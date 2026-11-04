@@ -94,9 +94,7 @@ function oidcSite(id, displayName, productionSiteUrl) {
 }
 var SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS = deepFreeze([
   "accounts",
-  "act60",
   "soundfish",
-  "oh-computer",
   "draw-money",
   "sponge"
 ]);
@@ -116,7 +114,6 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     },
     id: "accounts"
   },
-  act60: oidcSite("act60", "ACT60", "https://act60.me"),
   soundfish: {
     auth: { basePath: "/api/suite-auth", kind: "oidc-rp" },
     displayName: "Soundfish",
@@ -125,7 +122,6 @@ var SUITE_ACCOUNTS_CONSUMERS = deepFreeze({
     },
     id: "soundfish"
   },
-  "oh-computer": oidcSite("oh-computer", "Oh", "https://oh.computer"),
   "draw-money": {
     auth: {
       basePath: "/api/auth",
@@ -147,14 +143,11 @@ var SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES = deepFreeze({
 });
 var SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS = deepFreeze([
   "accounts",
-  "act60",
   "soundfish",
-  "oh-computer",
   "sponge",
   "peopleblade",
   "hraness",
   "platonik",
-  "ghostget",
   "alt",
   "textmock"
 ]);
@@ -170,22 +163,17 @@ function currentOidcSite(id, displayName, productionSiteUrl) {
 }
 var SUITE_ACCOUNTS_CURRENT_CONSUMERS = deepFreeze({
   accounts: SUITE_ACCOUNTS_CONSUMERS.accounts,
-  act60: SUITE_ACCOUNTS_CONSUMERS.act60,
   soundfish: SUITE_ACCOUNTS_CONSUMERS.soundfish,
-  "oh-computer": SUITE_ACCOUNTS_CONSUMERS["oh-computer"],
   sponge: currentOidcSite("sponge", "Sponge", SUITE_ACCOUNTS_CURRENT_ORIGIN_OVERRIDES.sponge.production.siteUrl),
   peopleblade: currentOidcSite("peopleblade", "PeopleBlade", "https://peopleblade.com"),
   hraness: currentOidcSite("hraness", "Hraness", "https://hraness.com"),
   platonik: currentOidcSite("platonik", "Platonik", "https://platonik.space"),
-  ghostget: currentOidcSite("ghostget", "Ghostget", "https://ghostget.com"),
   alt: currentOidcSite("alt", "Alt", "https://alt.dog"),
   textmock: currentOidcSite("textmock", "Textmock", "https://textmock.com")
 });
 var SUITE_ACCOUNTS_ACTIVE_CONSUMER_IDS = deepFreeze([
   "accounts",
-  "act60",
   "soundfish",
-  "oh-computer",
   "sponge"
 ]);
 var SUITE_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_REGISTERED_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CONSUMERS[consumer].auth.kind === "oidc-rp"));
@@ -198,18 +186,14 @@ var SUITE_ACCOUNTS_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
 var SUITE_ACCOUNTS_CURRENT_EMAIL_OTP_REQUIRED_OIDC_CONSUMER_IDS = deepFreeze(SUITE_ACCOUNTS_CURRENT_CONSUMER_IDS.filter((consumer) => SUITE_ACCOUNTS_CURRENT_CONSUMERS[consumer].auth.kind === "oidc-rp"));
 var SUITE_ACCOUNTS_CURRENT_LINKED_OIDC_CONSUMER_IDS = deepFreeze([
   "soundfish",
-  "peopleblade",
-  "ghostget"
+  "peopleblade"
 ]);
 var SUITE_ACCOUNTS_CURRENT_BROWSER_DEVICE_CODE_CONSUMER_IDS = deepFreeze([
-  "act60",
   "soundfish",
-  "oh-computer",
   "sponge",
   "peopleblade",
   "hraness",
   "platonik",
-  "ghostget",
   "alt"
 ]);
 var SUITE_ACCOUNTS_CURRENT_DEVICE_CLIENT_IDS = deepFreeze([]);

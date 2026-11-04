@@ -224,8 +224,8 @@ describe("suite OAuth relying party", () => {
     // The provider still enforces the email-OTP session method; omitting
     // `prompt=login` lets an existing Accounts session authorize without a
     // redundant interactive sign-in.
-    const act60 = createSuiteOidcRelyingParty({
-      consumer: "act60",
+    const hraness = createSuiteOidcRelyingParty({
+      consumer: "hraness",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: () => Promise.reject(
@@ -235,13 +235,13 @@ describe("suite OAuth relying party", () => {
       randomBytes: randomSource(),
       receiptKeyVersion: "v1",
     });
-    const act60Start = await act60.start(new Request(
-      "https://act60.me/api/suite-auth/start",
+    const hranessStart = await hraness.start(new Request(
+      "https://hraness.com/api/suite-auth/start",
       { headers: { "sec-fetch-site": "same-origin" } },
     ));
-    expect(new URL(act60Start.headers.get("location")!).searchParams.get("prompt"))
+    expect(new URL(hranessStart.headers.get("location")!).searchParams.get("prompt"))
       .toBeNull();
-    expect(new URL(act60Start.headers.get("location")!).searchParams.get("scope"))
+    expect(new URL(hranessStart.headers.get("location")!).searchParams.get("scope"))
       .toBe("openid profile email offline_access");
 
     const soundfish = createSuiteOidcRelyingParty({
@@ -267,16 +267,16 @@ describe("suite OAuth relying party", () => {
     ).toBe("openid profile email offline_access");
   });
 
-  test("rechecks Elders's canonical provider session before server authority", async () => {
-    const act60ClientId = "hraness:act60:production:v1";
-    const signing = await signingFixture(act60ClientId);
+  test("rechecks Hraness's canonical provider session before server authority", async () => {
+    const hranessClientId = "hraness:hraness:production:v1";
+    const signing = await signingFixture(hranessClientId);
     let nonce = "";
     let issuedAccessToken = "";
     let sessionActive = true;
     let emailVerified = true;
     let userInfoRequests = 0;
     const relyingParty = createSuiteOidcRelyingParty({
-      consumer: "act60",
+      consumer: "hraness",
       cookieSecret: "test-secret-that-is-at-least-thirty-two-bytes",
       environment: "production",
       fetch: async (input, init) => {
@@ -290,7 +290,7 @@ describe("suite OAuth relying party", () => {
           return Response.json({
             access_token: issuedAccessToken,
             id_token: await signing.idToken(nonce),
-            refresh_token: "act60-refresh-token-value-0001",
+            refresh_token: "hraness-refresh-token-value-0001",
             token_type: "Bearer",
           });
         }
@@ -311,7 +311,7 @@ describe("suite OAuth relying party", () => {
                 profile_revision: "username-v1",
                 sub: "better-auth-user-17",
                 suite_account_id: accountId,
-                suite_client_id: act60ClientId,
+                suite_client_id: hranessClientId,
                 username: "reader",
               })
             : Response.json({ error: "session_revoked" }, { status: 401 });
@@ -323,13 +323,13 @@ describe("suite OAuth relying party", () => {
       receiptKeyVersion: "v1",
     });
     const started = await relyingParty.start(new Request(
-      "https://act60.me/api/suite-auth/start",
+      "https://hraness.com/api/suite-auth/start",
       { headers: { "sec-fetch-site": "same-origin" } },
     ));
     const authorization = new URL(started.headers.get("location")!);
     nonce = authorization.searchParams.get("nonce")!;
     const callback = await relyingParty.callback(new Request(
-      `https://act60.me/api/suite-auth/callback?code=code&state=${
+      `https://hraness.com/api/suite-auth/callback?code=code&state=${
         authorization.searchParams.get("state")!
       }`,
       {
@@ -342,7 +342,7 @@ describe("suite OAuth relying party", () => {
     const sessionCookie = cookiePair(getSetCookies(callback).find(cookie =>
       cookie.startsWith("__Host-hraness-suite-oidc-session=")
     )!);
-    const serverRequest = new Request("https://act60.me/provider", {
+    const serverRequest = new Request("https://hraness.com/provider", {
       headers: {
         cookie: sessionCookie,
         "sec-fetch-site": "same-origin",
@@ -351,7 +351,7 @@ describe("suite OAuth relying party", () => {
     });
 
     const browserSession = await relyingParty.currentSession(new Request(
-      "https://act60.me/api/suite-auth/session",
+      "https://hraness.com/api/suite-auth/session",
       { headers: { cookie: sessionCookie, "sec-fetch-site": "same-origin" } },
     ));
     const browserSessionBody = await browserSession.text();
